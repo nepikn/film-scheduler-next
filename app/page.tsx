@@ -96,10 +96,10 @@ export default function App() {
     // console.log(nextViews);
 
     setValidViews(nextViews);
-    setViewId(nextViews[0]?.id ?? userViews[0].id);
     setFilter(nextFilter);
-
-    // setLocalConfig("filter", nextFilter);
+    if (validViews.find((v) => v.id == viewId)) {
+      setViewId(nextViews[0]?.id ?? userViews[0].id);
+    }
   }
 
   function handleCalendarTableChange(this: Film, input: TableInput) {
