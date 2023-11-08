@@ -3,7 +3,7 @@ import Film from "./Film";
 import View from "./View";
 import { FilterCheckbox } from "../components/Input";
 
-interface FiterProp {
+export interface FiterProp {
   name?: {
     [filmName: string]: boolean;
   };
@@ -30,14 +30,14 @@ export default class Filter {
     } else {
       this.name = { 燃冬: true, 霧中潛行: true };
       this.date = Object.fromEntries(
-        [...new Array(31)].map((_, i) => [i + 1, true])
+        [...new Array(31)].map((_, i) => [i + 1, true]),
       );
     }
   }
 
   get validFilms() {
     return Film.instances.filter(
-      (film) => this.name[film.name] && this.date[film.time.date.getDate()]
+      (film) => this.name[film.name] && this.date[film.time.date.getDate()],
     );
   }
 
@@ -76,9 +76,9 @@ export default class Filter {
         result.push(
           new View(
             Object.fromEntries(
-              indexes.map((i, j) => [groups[j][i].name, groups[j][i].id])
-            )
-          )
+              indexes.map((i, j) => [groups[j][i].name, groups[j][i].id]),
+            ),
+          ),
         );
       }
 

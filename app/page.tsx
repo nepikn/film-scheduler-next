@@ -9,27 +9,30 @@ import NameFilter from "../components/NameFilter";
 import ViewNav from "../components/ViewNav";
 import Table from "../components/Table";
 import { FilterCheckbox, TableInput, ViewRadio } from "../components/Input";
-import { getItem } from "localforage";
+import { getItem, setItem } from "localforage";
+import useLocalStorage from "@/lib/localStorage";
 
 export default function App() {
   // const userData = getItem()
-  const [filter, setFilter] = useState(new Filter());
+  const [filter, setFilter] = useLocalStorage<Filter>("filter");
   const [validViews, setValidViews] = useState(() => filter.validViews);
-  const [userViews, setUserViews] = useState([new View()]);
+  const [userViews, setUserViews] = useLocalStorage<View[]>("userViews");
   const [viewId, setViewId] = useState(userViews[0].id);
   const view = [...userViews, ...validViews].find((v) => v.id == viewId)!;
   if (!view) {
-    throw new Error("no such viewId");
+    console.log("no such viewId");
   }
   const viewGroups: ViewGroup[] = [
     {
       id: "0",
+      name: "userViews",
       title: "自\n訂",
       views: userViews,
       setViews: setUserViews,
     },
     {
       id: "1",
+      name: "validViews",
       title: "生\n成",
       views: validViews,
       setViews: setValidViews,
@@ -37,7 +40,14 @@ export default function App() {
   ];
 
   return (
-    <main className="m-auto grid px-16 gap-8 py-8">
+    <main className="m-auto grid gap-8 px-16 py-8">
+      {/* <button
+        onClick={() => {
+          // localStorage.setItem("scheduler", JSON.stringify({}));
+        }}
+      >
+        F
+      </button> */}
       <div className="grid gap-2">
         <div className="grid gap-4">
           <NameFilter filter={filter} handleChange={handleFilterChange} />
@@ -65,57 +75,20 @@ export default function App() {
 
   function handleViewRemove(this: ViewGroup, targView: View) {
     const targViewId = targView.id;
-    const [prevViewId, nextViewId] = [1, -1].map(
-      (offset) =>
-        [...userViews, ...validViews].find(
-          (_, i, arr) => arr[i + offset]?.id == targViewId
-        )?.id
-    );
 
-    // though there shouldn't exist a remove button
-    if (prevViewId == undefined) {
-      alert("First user view cannot be removed.");
-      return;
-    }
     if (targViewId == viewId) {
-      setViewId(nextViewId ?? prevViewId);
+      const [prevViewId, nextViewId] = [1, -1].map(
+        (offset) =>
+          [...userViews, ...validViews].find(
+            (_, i, arr) => arr[i + offset]?.id == targViewId,
+          )?.id,
+      );
+      // no remove button for the first user view
+      setViewId(nextViewId ?? prevViewId!);
     }
 
     this.setViews(this.views.filter((v) => v.id != targViewId));
   }
-
-  // function handleChange(e: React.FormEvent) {
-  //   const input = e.target;
-  //   if (!(input instanceof HTMLInputElement)) return;
-
-  //   if (input.name == "view") {
-  //     // const view = [...userViews.current, ...validViews.current].find(
-  //     //   (v) => v.id == input.value
-  //     // );
-
-  //     // if (!view) {
-  //     //   console.log();
-
-  //     // }
-  //     // setView();
-  //     return;
-  //   }
-
-  //   const targFilmId = input.dataset.id;
-  //   if (!targFilmId) {
-  //     handleFilterChange(input as FilterCheckbox);
-  //     return;
-  //   }
-
-  //   const film = Film.instances.find((film) => film.id == targFilmId);
-  //   if (!film) {
-  //     console.log("handleChange: cannot find input's datd-id " + targFilmId);
-
-  //     return;
-  //   }
-
-  //   // handleCalendarTableChange(input as TableInput, film);
-  // }
 
   function handleFilterChange(input: FilterCheckbox) {
     const nextFilter = new Filter(filter, input);
@@ -125,6 +98,8 @@ export default function App() {
     setValidViews(nextViews);
     setViewId(nextViews[0]?.id ?? userViews[0].id);
     setFilter(nextFilter);
+
+    // setLocalConfig("filter", nextFilter);
   }
 
   function handleCalendarTableChange(this: Film, input: TableInput) {
@@ -135,7 +110,7 @@ export default function App() {
     setUserViews(
       userViewIndex == -1
         ? [...userViews, nextView]
-        : userViews.toSpliced(userViewIndex, 1, nextView)
+        : userViews.toSpliced(userViewIndex, 1, nextView),
     );
   }
 }

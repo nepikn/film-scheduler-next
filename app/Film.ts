@@ -1,4 +1,4 @@
-import filmData from "../public/film/film-golden-tp-id.json";
+import filmData from "../public/film/film-golden-tp-id";
 import {
   add,
   format,
@@ -32,7 +32,10 @@ export default class Film {
   static nameSet: Set<string> = new Set();
   static _instances: Film[];
   static get instances() {
-    return this._instances ?? filmData.map((row) => new this(...row));
+    return (
+      this._instances ??
+      (this._instances = filmData.map((row) => new this(...row)))
+    );
   }
 
   constructor(
@@ -42,8 +45,8 @@ export default class Film {
     venue = "",
     id = v5(
       [name, start, interval, venue].join("-"),
-      "ec7937a4-718c-4e0a-af6e-d47ab3ed26b1"
-    )
+      "ec7937a4-718c-4e0a-af6e-d47ab3ed26b1",
+    ),
   ) {
     const timeStart = start ? new Date(start) : new Date();
 

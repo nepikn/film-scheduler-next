@@ -1,5 +1,6 @@
 import { Fragment, MouseEventHandler } from "react";
 import View, { ViewGroup } from "../app/View";
+import clsx from "clsx";
 
 interface Nav {
   handleViewRemove: (this: ViewGroup, targView: View) => void;
@@ -57,11 +58,15 @@ function ViewRadio({
   index,
 }: Omit<Nav, "viewGroups"> & ViewRadio) {
   const view = viewGroup.views[index];
+  const isFirstRadio = viewGroup.id == "0" && index == 0;
   return (
     <fieldset className="group relative grid items-stretch">
       <button
         onClick={handleViewRemove.bind(viewGroup, view)}
-        className="absolute right-1 hidden w-4 group-hover:block"
+        className={clsx(
+          "absolute right-1 hidden w-4",
+          !isFirstRadio && "group-hover:block",
+        )}
       >
         <svg
           fill="none"

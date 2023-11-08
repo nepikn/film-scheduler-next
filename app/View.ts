@@ -1,11 +1,13 @@
 import { v4, v5 } from "uuid";
 import Film from "./Film";
 import { TableInput } from "../components/Input";
+import useLocalStorage from "@/lib/localStorage";
 
 // interface FilmName {
 //   [Id: Film["id"]]: Film["name"] | null;
 // }
-interface Join {
+
+export interface Join {
   [Name: Film["name"]]: Film["id"] | null;
 }
 
@@ -54,7 +56,8 @@ export default class View {
 
 export interface ViewGroup {
   id: string;
+  name: string;
   title: string;
   views: View[];
-  setViews: React.Dispatch<React.SetStateAction<View[]>>;
+  setViews: ReturnType<typeof useLocalStorage<View[]>>[1];
 }

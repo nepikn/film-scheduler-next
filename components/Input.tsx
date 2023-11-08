@@ -4,6 +4,7 @@ import View from "../app/View";
 import { TableTitle } from "./Table";
 import Filter from "../app/Filter";
 import { cn } from "@/lib/utils";
+import clsx from "clsx";
 
 type Input = Partial<HTMLInputElement>;
 export interface TableInput extends Input {
@@ -61,7 +62,7 @@ export default function Input({
       name={name}
       checked={name == "join" ? view.getChecked(film) : undefined}
       data-id={film.id}
-      className={cn("cursor-pointer", className)}
+      className={clsx("cursor-pointer", className)}
       onChange={(e) => handleChange(e.target as TableInput)}
     />
   );
