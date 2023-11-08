@@ -1,7 +1,7 @@
 import { areIntervalsOverlapping } from "date-fns";
 import Film from "./Film";
 import View from "./View";
-import { FilterCheckbox } from "../components/Input";
+import { FilterCheckbox } from "../components/ui/Input";
 
 export interface FiterProp {
   name?: {

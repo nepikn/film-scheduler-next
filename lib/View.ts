@@ -1,6 +1,6 @@
 import { v4, v5 } from "uuid";
 import Film from "./Film";
-import { TableInput } from "../components/Input";
+import { TableInput } from "../components/ui/Input";
 import useLocalStorage from "@/lib/localStorage";
 
 // interface FilmName {

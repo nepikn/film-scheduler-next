@@ -1,5 +1,6 @@
-import Film from "../app/Film";
-import Filter from "../app/Filter";
+import clsx from "clsx";
+import Film from "../../lib/Film";
+import Filter from "../../lib/Filter";
 import { FilterCheckbox } from "./Input";
 
 interface NameFilter {
@@ -25,7 +26,14 @@ export default function NameFilter({ filter, handleChange }: NameFilter) {
             className="cursor-pointer"
             onChange={(e) => handleChange(e.target as FilterCheckbox)}
           />
-          <span className={`whitespace-nowrap`}>{name}</span>
+          <span
+            className={clsx(
+              "whitespace-nowrap",
+              Film.isSoldout(name) && "text-gray-400 line-through decoration-4",
+            )}
+          >
+            {name}
+          </span>
         </label>
       ))}
     </fieldset>

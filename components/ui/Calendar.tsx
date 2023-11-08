@@ -9,10 +9,10 @@ import {
   isSunday,
   format,
 } from "date-fns";
-import Film from "../app/Film";
-import View from "../app/View";
+import Film from "../../lib/Film";
+import View from "../../lib/View";
 import Input, { FilterCheckbox, TableInput } from "./Input";
-import Filter from "../app/Filter";
+import Filter from "../../lib/Filter";
 
 interface CalendarProp {
   view: View;
@@ -147,6 +147,7 @@ function Agenda({
             // val={view.getChecked(film)}
             film={film}
             view={view}
+            disabled={film.isSoldout}
             className="row-span-2"
             handleChange={handleJoinChange.bind(film)}
           />

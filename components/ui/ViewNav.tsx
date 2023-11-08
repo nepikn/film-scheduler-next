@@ -1,5 +1,5 @@
 import { Fragment, MouseEventHandler } from "react";
-import View, { ViewGroup } from "../app/View";
+import View, { ViewGroup } from "../../lib/View";
 import clsx from "clsx";
 
 interface Nav {

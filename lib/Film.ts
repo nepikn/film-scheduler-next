@@ -1,3 +1,4 @@
+import soldouts from "@/public/film/golden-tp-soldout";
 import filmData from "../public/film/film-golden-tp-id";
 import {
   add,
@@ -29,12 +30,31 @@ export default class Film {
     [Symbol.toPrimitive]: (hint: string) => string | number;
   };
 
+  get isSoldout() {
+    return !!Film.soldouts.find(
+      (film) => film.name == this.name && film.date == this.date,
+    );
+  }
+
   static nameSet: Set<string> = new Set();
   static _instances: Film[];
   static get instances() {
     return (
       this._instances ??
       (this._instances = filmData.map((row) => new this(...row)))
+    );
+  }
+  static isSoldout(name: string) {
+    return (
+      soldouts.filter((s) => s[0] == name).length >=
+      this.instances.filter((f) => f.name == name).length
+    );
+  }
+  static _soldouts: Film[];
+  static get soldouts() {
+    return (
+      this._soldouts ??
+      (this._soldouts = soldouts.map((row) => new this(...row)))
     );
   }
 

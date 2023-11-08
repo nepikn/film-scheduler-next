@@ -1,5 +1,5 @@
-import Filter, { FiterProp } from "@/app/Filter";
-import View, { Join } from "@/app/View";
+import Filter, { FiterProp } from "@/lib/Filter";
+import View, { Join } from "@/lib/View";
 import { useState } from "react";
 
 export interface Config {
@@ -16,7 +16,7 @@ function setLocalConfig(key: keyof Config, val: Filter | View[]) {
   localStorage.setItem("scheduler", JSON.stringify(nextConfig));
 }
 
-export default function useLocalStorage<T>(
+export default function useLocalStorage<T extends Filter | View[]>(
   key: keyof Config,
 ): [T, (val: T) => void] {
   const localConfig = getLocalConfig();

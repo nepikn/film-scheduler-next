@@ -1,8 +1,8 @@
 import { InputHTMLAttributes, ReactElement, useState } from "react";
-import Film from "../app/Film";
-import View from "../app/View";
+import Film from "../../lib/Film";
+import View from "../../lib/View";
 import { TableTitle } from "./Table";
-import Filter from "../app/Filter";
+import Filter from "../../lib/Filter";
 import { cn } from "@/lib/utils";
 import clsx from "clsx";
 
@@ -32,6 +32,7 @@ interface InputProp {
   // val: string | boolean
   film: Film;
   view: View;
+  disabled?: boolean;
   className?: string;
   handleChange: (input: TableInput) => void;
 }
@@ -40,6 +41,7 @@ export default function Input({
   name,
   film,
   view,
+  disabled,
   className,
   handleChange,
 }: InputProp) {
@@ -61,6 +63,7 @@ export default function Input({
       // value={name != "join" ? film[name] : undefined}
       name={name}
       checked={name == "join" ? view.getChecked(film) : undefined}
+      disabled={disabled}
       data-id={film.id}
       className={clsx("cursor-pointer", className)}
       onChange={(e) => handleChange(e.target as TableInput)}

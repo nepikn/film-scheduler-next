@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import Film from "./Film";
-import Filter from "./Filter";
-import View, { ViewGroup } from "./View";
-import Calendar from "../components/Calendar";
-import NameFilter from "../components/NameFilter";
-import ViewNav from "../components/ViewNav";
-import Table from "../components/Table";
-import { FilterCheckbox, TableInput, ViewRadio } from "../components/Input";
+import Film from "../lib/Film";
+import Filter from "../lib/Filter";
+import View, { ViewGroup } from "../lib/View";
+import Calendar from "../components/ui/Calendar";
+import NameFilter from "../components/ui/NameFilter";
+import ViewNav from "../components/ui/ViewNav";
+import Table from "../components/ui/Table";
+import { FilterCheckbox, TableInput, ViewRadio } from "../components/ui/Input";
 import { getItem, setItem } from "localforage";
 import useLocalStorage from "@/lib/localStorage";
 

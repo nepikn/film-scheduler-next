@@ -1,6 +1,6 @@
-import Film from "../app/Film";
-import Filter from "../app/Filter";
-import View from "../app/View";
+import Film from "../../lib/Film";
+import Filter from "../../lib/Filter";
+import View from "../../lib/View";
 import Input, { TableInput } from "./Input";
 
 export type TableTitle = "name" | "date" | "start" | "end" | "join";
