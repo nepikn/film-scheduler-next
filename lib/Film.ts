@@ -1,5 +1,4 @@
-import soldouts from "@/public/film/golden-tp-soldout";
-import filmData from "../public/film/film-golden-tp-id";
+import soldoutFilms from "@/public/film/golden-tp-soldout";
 import {
   add,
   format,
@@ -9,6 +8,7 @@ import {
   startOfDay,
 } from "date-fns";
 import { v5 } from "uuid";
+import filmData from "../public/film/film-golden-tp-id";
 
 type FormatKey = keyof Film["format"];
 
@@ -16,6 +16,8 @@ export default class Film {
   name;
   venue;
   id;
+  isSoldout;
+
   date!: string;
   start!: string;
   end!: string;
@@ -30,12 +32,6 @@ export default class Film {
     [Symbol.toPrimitive]: (hint: string) => string | number;
   };
 
-  get isSoldout() {
-    return !!Film.soldouts.find(
-      (film) => film.name == this.name && film.date == this.date,
-    );
-  }
-
   static nameSet: Set<string> = new Set();
   static _instances: Film[];
   static get instances() {
@@ -45,17 +41,9 @@ export default class Film {
     );
   }
   static isSoldout(name: string) {
-    return (
-      soldouts.filter((s) => s[0] == name).length >=
-      this.instances.filter((f) => f.name == name).length
-    );
-  }
-  static _soldouts: Film[];
-  static get soldouts() {
-    return (
-      this._soldouts ??
-      (this._soldouts = soldouts.map((row) => new this(...row)))
-    );
+    return this.instances
+      .filter((film) => film.name == name)
+      .every((film) => film.isSoldout);
   }
 
   constructor(
@@ -73,6 +61,7 @@ export default class Film {
     this.name = name;
     this.venue = venue;
     this.id = id;
+
     this.time = {
       start: timeStart,
       end: add(timeStart, { minutes: interval }),
@@ -85,6 +74,12 @@ export default class Film {
 
       [Symbol.toPrimitive]: () => `${this.start}-${this.end}`,
     };
+
+    this.isSoldout = !!soldoutFilms.find(
+      (soldout) =>
+        soldout.name == this.name &&
+        Date.parse(soldout.start) == this.time.start.getTime(),
+    );
 
     for (const key of Object.keys(this.format) as FormatKey[]) {
       const time = this.time[key];

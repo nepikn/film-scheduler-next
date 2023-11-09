@@ -13,6 +13,7 @@ import Film from "../../lib/Film";
 import View from "../../lib/View";
 import Input, { FilterCheckbox, TableInput } from "./Input";
 import Filter from "../../lib/Filter";
+import clsx from "clsx";
 
 interface CalendarProp {
   view: View;
@@ -43,27 +44,27 @@ export default function Calendar({
   }).map((sun) => (
     <fieldset key={sun.getTime()} className="grid grid-cols-7 divide-x">
       {eachDayOfInterval({ start: sun, end: endOfWeek(sun) }).map((date) => (
-        <div
+        <fieldset
           key={date.getTime()}
           className="space-y-3 border-neutral-300 p-4 py-3"
         >
-          {date.getMonth() == monthStart.getMonth() ? (
-            <DateFilter
-              filter={filter}
-              date={date}
-              handleChange={handleFilterChange}
-            />
-          ) : (
-            ""
+          {date.getMonth() == monthStart.getMonth() && (
+            <>
+              <DateFilter
+                filter={filter}
+                date={date}
+                handleChange={handleFilterChange}
+              />
+              <Agenda
+                dayFilms={sortFilms.filter((film) =>
+                  isSameDay(film.time.start, date),
+                )}
+                view={view}
+                handleJoinChange={handleJoinChange}
+              />
+            </>
           )}
-          <Agenda
-            dayFilms={sortFilms.filter((film) =>
-              isSameDay(film.time.start, date),
-            )}
-            view={view}
-            handleJoinChange={handleJoinChange}
-          />
-        </div>
+        </fieldset>
       ))}
     </fieldset>
   ));
@@ -134,26 +135,34 @@ function Agenda({
 }) {
   return (
     <fieldset className="max-h-32 space-y-2 overflow-auto px-2 pb-1 text-right">
-      {films.map((film) => (
-        <label
-          key={film.id}
-          className={`grid cursor-pointer grid-cols-[1fr_auto] gap-x-2 gap-y-1 hover:text-gray-500 dark:hover:text-gray-300 ${
-            view.getSkipped(film) ? "text-gray-400" : "font-semibold"
-          }`}
-        >
-          <p className="leading-none">{film.name}</p>
-          <Input
-            name="join"
-            // val={view.getChecked(film)}
-            film={film}
-            view={view}
-            disabled={film.isSoldout}
-            className="row-span-2"
-            handleChange={handleJoinChange.bind(film)}
-          />
-          <p className="font-normal leading-none">{"" + film.time}</p>
-        </label>
-      ))}
+      {films.map((film) => {
+        const pClass = clsx(
+          "leading-none",
+          film.isSoldout && "text-gray-400 line-through decoration-4",
+        );
+
+        return (
+          <label
+            key={film.id}
+            className={clsx(
+              "grid cursor-pointer grid-cols-[1fr_auto] gap-x-2 gap-y-1 hover:text-gray-500 dark:hover:text-gray-300 [&:has(:disabled)]:cursor-default",
+              view.getSkipped(film) && "text-gray-400",
+            )}
+          >
+            <p className={clsx("font-semibold", pClass)}>{film.name}</p>
+            <Input
+              name="join"
+              // val={view.getChecked(film)}
+              film={film}
+              view={view}
+              // disabled={film.isSoldout}
+              className={"row-span-2"}
+              handleChange={handleJoinChange.bind(film)}
+            />
+            <p className={pClass}>{"" + film.time}</p>
+          </label>
+        );
+      })}
     </fieldset>
   );
 }

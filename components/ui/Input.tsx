@@ -65,7 +65,7 @@ export default function Input({
       checked={name == "join" ? view.getChecked(film) : undefined}
       disabled={disabled}
       data-id={film.id}
-      className={clsx("cursor-pointer", className)}
+      className={clsx("cursor-pointer disabled:cursor-default", className)}
       onChange={(e) => handleChange(e.target as TableInput)}
     />
   );
