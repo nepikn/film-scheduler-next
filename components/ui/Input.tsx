@@ -1,8 +1,8 @@
 import { InputHTMLAttributes, ReactElement, useState } from "react";
-import Film from "../../lib/Film";
-import View from "../../lib/View";
+import Film from "../../lib/film";
+import View from "../../lib/view";
 import { TableTitle } from "./Table";
-import Filter from "../../lib/Filter";
+import Filter from "../../lib/filter";
 import { cn } from "@/lib/utils";
 import clsx from "clsx";
 
@@ -17,7 +17,7 @@ interface Checkbox extends TableInput {
 }
 
 export interface FilterCheckbox extends Checkbox {
-  name: keyof Omit<InstanceType<typeof Filter>, "validFilms" | "validViews">;
+  name: keyof Omit<InstanceType<typeof Filter>, "filteredFilms" | "validViews">;
 }
 
 export interface ViewRadio {

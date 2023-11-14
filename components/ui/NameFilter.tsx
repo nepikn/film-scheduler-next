@@ -1,6 +1,6 @@
 import clsx from "clsx";
-import Film from "../../lib/Film";
-import Filter from "../../lib/Filter";
+import Film from "../../lib/film";
+import Filter from "../../lib/filter";
 import { FilterCheckbox } from "./Input";
 
 interface NameFilter {
@@ -39,60 +39,3 @@ export default function NameFilter({ filter, handleChange }: NameFilter) {
     </fieldset>
   );
 }
-
-// export function getValidViews(filter: Filter) {
-//   const group: { [indexed: string]: Film[] } = {};
-//   const validFilms = filter.validFilms;
-//   if (!validFilms.length) return [];
-
-//   validFilms.forEach((film) => {
-//     if (film.name in group) {
-//       group[film.name].push(film);
-//     } else {
-//       group[film.name] = [film];
-//     }
-//   });
-
-//   const result: View[] = [];
-//   const groups = Object.values(group);
-//   const indexes: number[] = new Array(groups.length).fill(0);
-
-//   let k = 0;
-//   for (let i = 0; ; k++) {
-//     // console.log(indexes);
-//     const curFilm = groups[i][indexes[i]];
-//     const isOverlapping = indexes
-//       .slice(0, i)
-//       .map((index, j) => groups[j][index])
-//       .some((film) => areIntervalsOverlapping(curFilm.time, film.time));
-
-//     if (!isOverlapping) {
-//       if (i < groups.length - 1) {
-//         i++;
-//         continue;
-//       }
-
-//       result.push(
-//         new View(
-//           groups.flat(),
-//           indexes.map((i, j) => groups[j][i].id)
-//         )
-//       );
-//     }
-
-//     if (indexes[i] < groups[i].length - 1) {
-//       indexes[i]++;
-//       continue;
-//     }
-
-//     while (indexes[i] >= groups[i].length - 1) {
-//       if (i == 0 || k++ >= 9999) {
-//         // console.log(k);
-//         return result;
-//       }
-
-//       indexes[i--] = 0;
-//     }
-//     indexes[i]++;
-//   }
-// }

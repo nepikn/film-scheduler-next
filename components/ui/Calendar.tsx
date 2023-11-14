@@ -9,35 +9,35 @@ import {
   isSunday,
   format,
 } from "date-fns";
-import Film from "../../lib/Film";
-import View from "../../lib/View";
+import Film from "../../lib/film";
+import View from "../../lib/view";
 import Input, { FilterCheckbox, TableInput } from "./Input";
-import Filter from "../../lib/Filter";
+import Filter from "../../lib/filter";
 import clsx from "clsx";
 
 interface CalendarProp {
   view: View;
-  filter: Filter;
+  dateFilter: Filter["date"];
+  filteredFilms: Film[];
   handleFilterChange: (input: FilterCheckbox) => void;
   handleJoinChange: (this: Film, input: TableInput) => void;
 }
 
 export default function Calendar({
   view,
-  filter,
+  dateFilter,
+  filteredFilms,
   handleFilterChange,
   handleJoinChange,
 }: CalendarProp) {
   const [monthStart, setMonthStart] = useState(new Date("2023-11"));
-  const sortFilms = filter.validFilms
-    .slice()
-    .sort((a, b) =>
-      view.getSkipped(a) == view.getSkipped(b)
-        ? +a.time.start - +b.time.start
-        : view.getSkipped(a)
-        ? 1
-        : -1,
-    );
+  const sortFilms = filteredFilms.toSorted((a, b) =>
+    view.getSkipped(a) == view.getSkipped(b)
+      ? +a.time.start - +b.time.start
+      : view.getSkipped(a)
+      ? 1
+      : -1,
+  );
   const weeks = eachWeekOfInterval({
     start: isSunday(monthStart) ? monthStart : previousSunday(monthStart),
     end: endOfMonth(monthStart),
@@ -51,7 +51,7 @@ export default function Calendar({
           {date.getMonth() == monthStart.getMonth() && (
             <>
               <DateFilter
-                filter={filter}
+                dateFilter={dateFilter}
                 date={date}
                 handleChange={handleFilterChange}
               />
@@ -95,14 +95,14 @@ export default function Calendar({
 }
 
 interface DateFilter {
-  filter: Filter;
+  dateFilter: CalendarProp["dateFilter"];
   date: Date;
   handleChange: CalendarProp["handleFilterChange"];
 }
 
-function DateFilter({ filter, date, handleChange }: DateFilter) {
+function DateFilter({ dateFilter, date, handleChange }: DateFilter) {
   const time = date.getDate();
-  const isChecked = filter.date[time];
+  const isChecked = dateFilter[time];
   return (
     <label className="cursor-pointer hover:text-gray-400">
       <input

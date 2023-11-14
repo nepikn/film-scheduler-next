@@ -1,5 +1,5 @@
 import { Fragment, MouseEventHandler } from "react";
-import View, { ViewGroup } from "../../lib/View";
+import View, { ViewGroup } from "../../lib/view";
 import clsx from "clsx";
 
 interface Nav {
@@ -16,7 +16,7 @@ export default function ViewNav({
   curViewId,
 }: Nav) {
   return (
-    <nav className="flex w-full overflow-x-auto pb-2">
+    <nav className="flex overflow-x-auto pb-2">
       {viewGroups.map((viewGroup) => (
         <Fragment key={viewGroup.title}>
           <h3 className="whitespace-pre leading-none">{viewGroup.title}</h3>

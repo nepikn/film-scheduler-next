@@ -1,6 +1,6 @@
-import Film from "../../lib/Film";
-import Filter from "../../lib/Filter";
-import View from "../../lib/View";
+import Film from "../../lib/film";
+import Filter from "../../lib/filter";
+import View from "../../lib/view";
 import Input, { TableInput } from "./Input";
 
 export type TableTitle = "name" | "date" | "start" | "end" | "join";
@@ -14,7 +14,7 @@ export default function Table({ view, filter, handleChange }: TableProp) {
   const titles: TableTitle[] = ["name", "date", "start", "end", "join"];
   // console.log("table");
 
-  const rows = filter.validFilms.map((film) => {
+  const rows = filter.filteredFilms.map((film) => {
     return (
       <li key={film.id} data-id={film.id}>
         <ul className="row grid">

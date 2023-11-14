@@ -1,6 +1,6 @@
 import { areIntervalsOverlapping } from "date-fns";
-import Film from "./Film";
-import View from "./View";
+import Film from "./film";
+import View from "./view";
 import { FilterCheckbox } from "../components/ui/Input";
 
 export interface FiterProp {
@@ -35,7 +35,7 @@ export default class Filter {
     }
   }
 
-  get validFilms() {
+  get filteredFilms() {
     return Film.instances.filter(
       (film) => this.name[film.name] && this.date[film.time.date.getDate()],
     );
@@ -43,7 +43,7 @@ export default class Filter {
 
   get validViews() {
     const group: { [indexed: string]: Film[] } = {};
-    const validFilms = this.validFilms;
+    const validFilms = this.filteredFilms;
     if (!validFilms.length) return [];
 
     validFilms.forEach((film) => {

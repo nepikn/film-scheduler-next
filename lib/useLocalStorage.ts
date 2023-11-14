@@ -1,7 +1,7 @@
 "use client";
 
-import Filter, { FiterProp } from "@/lib/Filter";
-import View, { Join } from "@/lib/View";
+import Filter, { FiterProp } from "@/lib/filter";
+import View, { Join } from "@/lib/view";
 import { useState } from "react";
 
 export interface Config {

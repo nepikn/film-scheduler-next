@@ -21,6 +21,7 @@ export default class Film {
   date!: string;
   start!: string;
   end!: string;
+  duration;
   format = {
     date: "yyyy-MM-dd",
     start: "HH:mm",
@@ -49,10 +50,10 @@ export default class Film {
   constructor(
     name = "",
     start = "",
-    interval = 0,
+    duration = 0,
     venue = "",
     id = v5(
-      [name, start, interval, venue].join("-"),
+      [name, start, duration, venue].join("-"),
       "ec7937a4-718c-4e0a-af6e-d47ab3ed26b1",
     ),
   ) {
@@ -61,10 +62,11 @@ export default class Film {
     this.name = name;
     this.venue = venue;
     this.id = id;
+    this.duration = duration
 
     this.time = {
       start: timeStart,
-      end: add(timeStart, { minutes: interval }),
+      end: add(timeStart, { minutes: duration }),
       get date() {
         return startOfDay(this.start);
       },

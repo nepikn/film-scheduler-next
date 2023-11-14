@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import Film from "../lib/Film";
-import Filter from "../lib/Filter";
-import View, { ViewGroup } from "../lib/View";
-import Calendar from "../components/ui/Calendar";
-import NameFilter from "../components/ui/NameFilter";
-import ViewNav from "../components/ui/ViewNav";
-import Table from "../components/ui/Table";
-import { FilterCheckbox, TableInput, ViewRadio } from "../components/ui/Input";
-import { getItem, setItem } from "localforage";
-import useLocalStorage from "@/lib/localStorage";
+import Calendar from "@/components/ui/Calendar";
+import { FilterCheckbox, TableInput } from "@/components/ui/Input";
+import NameFilter from "@/components/ui/NameFilter";
+import Table from "@/components/ui/Table";
+import ViewNav from "@/components/ui/ViewNav";
+import Film from "@/lib/film";
+import Filter from "@/lib/filter";
+import View, { ViewGroup } from "@/lib/view";
+import { getIcsLink } from "@/lib/ics";
+import useLocalStorage from "@/lib/useLocalStorage";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function App() {
   // const userData = getItem()
@@ -22,6 +23,7 @@ export default function App() {
   if (!view) {
     console.log("no such viewId");
   }
+  const filteredFilms = filter.filteredFilms;
   const viewGroups: ViewGroup[] = [
     {
       id: "0",
@@ -51,16 +53,28 @@ export default function App() {
       <div className="grid gap-2">
         <div className="grid gap-4">
           <NameFilter filter={filter} handleChange={handleFilterChange} />
-          <ViewNav
-            handleViewRemove={handleViewRemove}
-            handleViewChange={(id: string) => setViewId(id)}
-            viewGroups={viewGroups}
-            curViewId={viewId}
-          />
+          <div className="grid grid-cols-[1fr_auto] items-center gap-2">
+            <ViewNav
+              handleViewRemove={handleViewRemove}
+              handleViewChange={(id: string) => setViewId(id)}
+              viewGroups={viewGroups}
+              curViewId={viewId}
+            />
+            <a
+              download={"金馬.ics"}
+              href={getIcsLink(
+                filteredFilms.filter((film) => view.getChecked(film)),
+              )}
+              className="flex h-full items-center rounded border border-zinc-200 bg-white px-3 py-2 shadow-sm hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-neutral-600 dark:hover:text-zinc-50"
+            >
+              <span>下載 iCal</span>
+            </a>
+          </div>
         </div>
         <Calendar
           view={view}
-          filter={filter}
+          dateFilter={filter.date}
+          filteredFilms={filteredFilms}
           handleFilterChange={handleFilterChange}
           handleJoinChange={handleCalendarTableChange}
         />
