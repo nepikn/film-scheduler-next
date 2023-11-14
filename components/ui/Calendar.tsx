@@ -7,20 +7,21 @@ import {
   endOfWeek,
   isSameDay,
   isSunday,
-  format,
 } from "date-fns";
 import Film from "../../lib/film";
 import View from "../../lib/view";
-import Input, { FilterCheckbox, TableInput } from "./Input";
+import FilmInput from "./Input";
+import { FilmConfig } from "@/lib/definitions";
 import Filter from "../../lib/filter";
 import clsx from "clsx";
+import { FilterConfig } from "@/lib/definitions";
 
 interface CalendarProp {
   view: View;
   dateFilter: Filter["date"];
   filteredFilms: Film[];
-  handleFilterChange: (input: FilterCheckbox) => void;
-  handleJoinChange: (this: Film, input: TableInput) => void;
+  handleFilterChange: (k: FilterConfig) => void;
+  handleJoinChange: (this: Film, input: FilmConfig) => void;
 }
 
 export default function Calendar({
@@ -32,9 +33,9 @@ export default function Calendar({
 }: CalendarProp) {
   const [monthStart, setMonthStart] = useState(new Date("2023-11"));
   const sortFilms = filteredFilms.toSorted((a, b) =>
-    view.getSkipped(a) == view.getSkipped(b)
+    view.getSkipStatus(a) == view.getSkipStatus(b)
       ? +a.time.start - +b.time.start
-      : view.getSkipped(a)
+      : view.getSkipStatus(a)
       ? 1
       : -1,
   );
@@ -51,8 +52,8 @@ export default function Calendar({
           {date.getMonth() == monthStart.getMonth() && (
             <>
               <DateFilter
-                dateFilter={dateFilter}
-                date={date}
+                isChecked={dateFilter[date.getDate()]}
+                date={date.getDate()}
                 handleChange={handleFilterChange}
               />
               <Agenda
@@ -95,30 +96,34 @@ export default function Calendar({
 }
 
 interface DateFilter {
-  dateFilter: CalendarProp["dateFilter"];
-  date: Date;
+  isChecked: boolean;
+  date: number;
   handleChange: CalendarProp["handleFilterChange"];
 }
 
-function DateFilter({ dateFilter, date, handleChange }: DateFilter) {
-  const time = date.getDate();
-  const isChecked = dateFilter[time];
+function DateFilter({ isChecked, date, handleChange }: DateFilter) {
   return (
     <label className="cursor-pointer hover:text-gray-400">
       <input
         type="checkbox"
         name={"date"}
-        value={time}
+        value={date}
         checked={isChecked}
         className="hidden"
-        onChange={(e) => handleChange(e.target as FilterCheckbox)}
+        onChange={(e) =>
+          handleChange({
+            type: "date",
+            key: date,
+            isCheck: e.target.checked,
+          })
+        }
       />
       <p
         className={`whitespace-nowrap text-right leading-none ${
           isChecked ? "no-underline" : "text-gray-400 line-through decoration-4"
         }`}
       >
-        {date.getDate()}
+        {date}
       </p>
     </label>
   );
@@ -146,12 +151,12 @@ function Agenda({
             key={film.id}
             className={clsx(
               "grid cursor-pointer grid-cols-[1fr_auto] gap-x-2 gap-y-1 hover:text-gray-500 dark:hover:text-gray-300 [&:has(:disabled)]:cursor-default",
-              view.getSkipped(film) && "text-gray-400",
+              view.getSkipStatus(film) && "text-gray-400",
             )}
           >
             <p className={clsx("font-semibold", pClass)}>{film.name}</p>
-            <Input
-              name="join"
+            <FilmInput
+              prop="join"
               // val={view.getChecked(film)}
               film={film}
               view={view}

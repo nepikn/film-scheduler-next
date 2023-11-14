@@ -1,16 +1,8 @@
 import { areIntervalsOverlapping } from "date-fns";
 import Film from "./film";
 import View from "./view";
-import { FilterCheckbox } from "../components/ui/Input";
-
-export interface FiterProp {
-  name?: {
-    [filmName: string]: boolean;
-  };
-  date?: {
-    [filmDate: string]: boolean;
-  };
-}
+import { FilterConfig } from "./definitions";
+import { FiterProp } from "./definitions";
 
 export default class Filter {
   name: {
@@ -20,17 +12,19 @@ export default class Filter {
     [filmDate: string]: boolean;
   };
 
-  constructor(filter?: FiterProp, input?: FilterCheckbox) {
-    if (filter) {
-      this.name = { ...filter.name };
-      this.date = { ...filter.date };
-      if (input) {
-        this[input.name][input.value] = input.checked;
+  constructor(prevFilters?: FiterProp, config?: FilterConfig) {
+    if (prevFilters) {
+      this.name = { ...prevFilters.name };
+      this.date = { ...prevFilters.date };
+      if (config) {
+        this[config.type][config.key] = config.isCheck;
       }
     } else {
       this.name = { 燃冬: true, 霧中潛行: true };
       this.date = Object.fromEntries(
         [...new Array(31)].map((_, i) => [i + 1, true]),
+        // todo: init date filter according to initial film data
+        // adjust <DateFilter /> argument
       );
     }
   }

@@ -41,7 +41,7 @@ export default class Film {
       (this._instances = filmData.map((row) => new this(...row)))
     );
   }
-  static isSoldout(name: string) {
+  static getSoldoutStatus(name: string) {
     return this.instances
       .filter((film) => film.name == name)
       .every((film) => film.isSoldout);
@@ -62,7 +62,7 @@ export default class Film {
     this.name = name;
     this.venue = venue;
     this.id = id;
-    this.duration = duration
+    this.duration = duration;
 
     this.time = {
       start: timeStart,

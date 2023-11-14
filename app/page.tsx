@@ -1,20 +1,19 @@
 "use client";
 
 import Calendar from "@/components/ui/Calendar";
-import { FilterCheckbox, TableInput } from "@/components/ui/Input";
+import { FilmConfig } from "@/lib/definitions";
 import NameFilter from "@/components/ui/NameFilter";
 import Table from "@/components/ui/Table";
 import ViewNav from "@/components/ui/ViewNav";
 import Film from "@/lib/film";
 import Filter from "@/lib/filter";
-import View, { ViewGroup } from "@/lib/view";
+import View from "@/lib/view";
+import { FilterConfig, ViewGroup } from "@/lib/definitions";
 import { getIcsLink } from "@/lib/ics";
 import useLocalStorage from "@/lib/useLocalStorage";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 
 export default function App() {
-  // const userData = getItem()
   const [filter, setFilter] = useLocalStorage<Filter>("filter");
   const [validViews, setValidViews] = useState(() => filter.validViews);
   const [userViews, setUserViews] = useLocalStorage<View[]>("userViews");
@@ -63,7 +62,7 @@ export default function App() {
             <a
               download={"金馬.ics"}
               href={getIcsLink(
-                filteredFilms.filter((film) => view.getChecked(film)),
+                filteredFilms.filter((film) => view.getJoinStatus(film)),
               )}
               className="flex h-full items-center rounded border border-zinc-200 bg-white px-3 py-2 shadow-sm hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-neutral-600 dark:hover:text-zinc-50"
             >
@@ -81,15 +80,13 @@ export default function App() {
       </div>
       <Table
         view={view}
-        filter={filter}
+        filteredFilms={filteredFilms}
         handleChange={handleCalendarTableChange}
       />
     </main>
   );
 
-  function handleViewRemove(this: ViewGroup, targView: View) {
-    const targViewId = targView.id;
-
+  function handleViewRemove(this: ViewGroup, targViewId: string) {
     if (targViewId == viewId) {
       const [prevViewId, nextViewId] = [1, -1].map(
         (offset) =>
@@ -104,21 +101,24 @@ export default function App() {
     this.setViews(this.views.filter((v) => v.id != targViewId));
   }
 
-  function handleFilterChange(input: FilterCheckbox) {
-    const nextFilter = new Filter(filter, input);
-    const nextViews = nextFilter.validViews;
+  function handleFilterChange(filterConfig: FilterConfig) {
+    const nextFilters = new Filter(filter, filterConfig);
+    const nextViews = nextFilters.validViews;
     // console.log(nextViews);
 
     setValidViews(nextViews);
-    setFilter(nextFilter);
+    setFilter(nextFilters);
     if (validViews.find((v) => v.id == viewId)) {
       setViewId(nextViews[0]?.id ?? userViews[0].id);
     }
   }
 
-  function handleCalendarTableChange(this: Film, input: TableInput) {
+  function handleCalendarTableChange(this: Film, filmConfig: FilmConfig) {
     const userViewIndex = userViews.findIndex((v) => v.id == viewId);
-    const nextView = new View(view.join, input, this);
+    const nextView = new View(view.join, {
+      film: this,
+      filmConfig: filmConfig,
+    });
 
     setViewId(nextView.id);
     setUserViews(

@@ -1,40 +1,41 @@
 "use client";
 
-import Filter, { FiterProp } from "@/lib/filter";
-import View, { Join } from "@/lib/view";
+import Filter from "@/lib/filter";
+import { FiterProp } from "./definitions";
+import View from "@/lib/view";
+import { ViewProp } from "./definitions";
 import { useState } from "react";
 
-export interface Config {
-  filter?: FiterProp;
-  userViews?: { id: string; join: Join }[];
-}
+type Config = typeof initialState;
+const initialState = {
+  filter: new Filter(getLocalConfig()?.filter),
+  userViews: getLocalConfig().userViews?.map((view) => new View(view.join)) ?? [
+    new View(),
+  ],
+};
 
-function getLocalConfig() {
-  return JSON.parse(localStorage.getItem("scheduler") || "{}") as Config;
-}
-
-function setLocalConfig(key: keyof Config, val: Filter | View[]) {
-  const nextConfig = { ...getLocalConfig(), [key]: val };
-  localStorage.setItem("scheduler", JSON.stringify(nextConfig));
-}
-
-export default function useLocalStorage<T extends Filter | View[]>(
-  key: keyof Config,
-): [T, (val: T) => void] {
-  const localConfig = getLocalConfig();
-  const initial = {
-    filter: new Filter(localConfig?.filter),
-    userViews: (localConfig.userViews ?? [{ join: undefined }]).map(
-      (view) => new View(view.join),
-    ),
-  };
-  const [state, setState] = useState(initial[key]);
+export default function useLocalStorage<T>(key: keyof Config) {
+  const [state, setState] = useState(initialState[key]);
 
   return [
     state,
-    (val: typeof state) => {
+    (val: T) => {
       setLocalConfig(key, val);
       setState(val);
     },
-  ];
+  ] as [T, (k: T) => void];
+}
+
+function getLocalConfig(): {
+  filter?: FiterProp;
+  userViews?: ViewProp[];
+} {
+  return JSON.parse(localStorage.getItem("scheduler") || "{}");
+}
+
+function setLocalConfig(key: keyof Config, val: Config[typeof key]) {
+  localStorage.setItem(
+    "scheduler",
+    JSON.stringify({ ...getLocalConfig(), [key]: val }),
+  );
 }

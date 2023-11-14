@@ -1,63 +1,51 @@
-import { v4, v5 } from "uuid";
+import { v4 } from "uuid";
 import Film from "./film";
-import { TableInput } from "../components/ui/Input";
-import useLocalStorage from "@/lib/useLocalStorage";
+import { FilmConfig } from "./definitions";
+import { ViewJoin } from "./definitions";
 
-// interface FilmName {
-//   [Id: Film["id"]]: Film["name"] | null;
-// }
-
-export interface Join {
-  [Name: Film["name"]]: Film["id"] | null;
+interface ViewConfig {
+  film: Film;
+  filmConfig: FilmConfig;
 }
 
 export default class View {
   id;
-  join: Join = {};
+  join;
 
-  constructor(join: Join = {}, input?: TableInput, film?: Film) {
+  constructor(prevJoin?: ViewJoin, viewConfig?: ViewConfig) {
     this.id = v4();
-    this.join = { ...join };
-    // v5(Object.values(join).join("-"), "f3f50456-bb04-4abf-935c-c90de999cf4a");
-    // this.films = films;
-    if (input && film) {
-      this.handleChange(input, film);
+    this.join = { ...prevJoin };
+    if (viewConfig) {
+      this.handleChange(viewConfig);
     }
   }
 
-  handleChange(input: TableInput, film: Film) {
+  handleChange({ film, filmConfig }: ViewConfig) {
+    const { propChange, nextValue } = filmConfig;
+
+    if (propChange == "join") {
+      this.join[film.name] = nextValue ? film.id : null;
+      return;
+    }
+
     if (
-      input.name == "name" &&
-      input.value != film.name &&
-      this.join[film.name] == film.id
+      propChange == "name" &&
+      nextValue != film.name &&
+      this.getJoinStatus(film)
     ) {
       this.join[film.name] = null;
     }
 
-    if (input.name == "join") {
-      this.join[film.name] = input.checked ? film.id : null;
-    } else {
-      film[input.name] = input.value;
-    }
+    // set next value after film name comparison
+    film[propChange] = nextValue;
   }
 
-  getSkipped(film: Film): boolean {
-    const sameNameCheckedId = this.join[film.name];
-    return !!sameNameCheckedId && film.id != sameNameCheckedId;
+  getSkipStatus(film: Film): boolean {
+    const joinFilmId = this.join[film.name];
+    return joinFilmId != null && film.id != joinFilmId;
   }
 
-  getJoin(film: Film) {
-    return "" + this.getChecked(film);
-  }
-  getChecked(film: Film) {
+  getJoinStatus(film: Film) {
     return film.id == this.join[film.name];
   }
-}
-
-export interface ViewGroup {
-  id: string;
-  name: string;
-  title: string;
-  views: View[];
-  setViews: ReturnType<typeof useLocalStorage<View[]>>[1];
 }

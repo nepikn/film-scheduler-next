@@ -1,18 +1,31 @@
 import Film from "./film";
 import View from "./view";
 import useLocalStorage from "./useLocalStorage";
+import Filter from "./filter";
 
-export type SoldoutFilm = {
+export type FilmPropKey = "name" | "date" | "start" | "end" | "join";
+export type FilmConfig =
+  | { propChange: "join"; nextValue: boolean }
+  | {
+      propChange: Exclude<FilmPropKey, "join">;
+      nextValue: string;
+    };
+export interface SoldoutFilm {
   name: string;
   start: string;
   venue: string;
-};
-// interface FilmName {
-//   [Id: Film["id"]]: Film["name"] | null;
-// }
+}
 
-export interface Join {
-  [Name: Film["name"]]: Film["id"] | null;
+export type FiterProp = ConstructorType<Filter>;
+export interface FilterConfig {
+  type: "name" | "date";
+  key: string | number;
+  isCheck: boolean;
+}
+
+export type ViewProp = ConstructorType<View>;
+export interface ViewJoin {
+  [k: Film["name"]]: Film["id"] | null;
 }
 export interface ViewGroup {
   id: string;
@@ -21,8 +34,9 @@ export interface ViewGroup {
   views: View[];
   setViews: ReturnType<typeof useLocalStorage<View[]>>[1];
 }
-export interface FilterConfig {
-  type: "name" | "date";
-  key: string | number;
-  isCheck: boolean;
-}
+
+type FlagExcludedType<Base, Type> = {
+  [Key in keyof Base]: Base[Key] extends Type ? never : Key;
+};
+type AllowedNames<Base, Type> = FlagExcludedType<Base, Type>[keyof Base];
+type ConstructorType<T> = Pick<T, AllowedNames<T, Function>>;

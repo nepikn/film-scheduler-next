@@ -1,72 +1,60 @@
-import { InputHTMLAttributes, ReactElement, useState } from "react";
+import React from "react";
 import Film from "../../lib/film";
 import View from "../../lib/view";
-import { TableTitle } from "./Table";
-import Filter from "../../lib/filter";
-import { cn } from "@/lib/utils";
+import { FilmPropKey } from "@/lib/definitions";
 import clsx from "clsx";
+import { FilmConfig } from "@/lib/definitions";
 
-type Input = Partial<HTMLInputElement>;
-export interface TableInput extends Input {
-  name: TableTitle;
-  value: string;
-}
-
-interface Checkbox extends TableInput {
-  checked: boolean;
-}
-
-export interface FilterCheckbox extends Checkbox {
-  name: keyof Omit<InstanceType<typeof Filter>, "filteredFilms" | "validViews">;
-}
-
-export interface ViewRadio {
-  name: "view";
-  value: View["id"];
-}
-
-export interface RemoveButton {}
-
-interface InputProp {
-  name: TableTitle;
-  // val: string | boolean
+interface FilmInputProp {
+  prop: FilmPropKey;
   film: Film;
   view: View;
   disabled?: boolean;
   className?: string;
-  handleChange: (input: TableInput) => void;
+  handleChange: (k: FilmConfig) => void;
 }
 
-export default function Input({
-  name,
+const type: { [k in FilmPropKey]: string } = {
+  name: "string",
+  date: "date",
+  start: "time",
+  end: "time",
+  join: "checkbox",
+};
+
+export default function FilmInput({
+  prop,
   film,
   view,
   disabled,
   className,
   handleChange,
-}: InputProp) {
+}: FilmInputProp) {
   // const [val, setVal] = useState(
   //   name == "join" ? view.getChecked(film) : film[name]
   // );
-  const type: { [Key in TableTitle]: string } = {
-    name: "string",
-    date: "date",
-    start: "time",
-    end: "time",
-    join: "checkbox",
-  };
   return (
     <input
-      type={type[name]}
-      value={name == "name" ? film[name] : undefined}
-      defaultValue={name != "join" && name != "name" ? film[name] : undefined}
+      type={type[prop]}
+      value={prop == "name" ? film[prop] : undefined}
+      defaultValue={prop != "join" && prop != "name" ? film[prop] : undefined}
       // value={name != "join" ? film[name] : undefined}
-      name={name}
-      checked={name == "join" ? view.getChecked(film) : undefined}
-      disabled={disabled}
-      data-id={film.id}
+      name={prop}
+      checked={prop == "join" ? view.getJoinStatus(film) : undefined}
       className={clsx("cursor-pointer disabled:cursor-default", className)}
-      onChange={(e) => handleChange(e.target as TableInput)}
+      onChange={(e) =>
+        handleChange(
+          prop == "join"
+            ? {
+                propChange: "join",
+                nextValue: e.target.checked,
+              }
+            : {
+                propChange: prop,
+                nextValue: e.target.value,
+              },
+        )
+      }
     />
   );
 }

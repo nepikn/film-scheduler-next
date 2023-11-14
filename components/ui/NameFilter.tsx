@@ -1,11 +1,11 @@
 import clsx from "clsx";
 import Film from "../../lib/film";
 import Filter from "../../lib/filter";
-import { FilterCheckbox } from "./Input";
+import { FilterConfig } from "@/lib/definitions";
 
 interface NameFilter {
   filter: Filter;
-  handleChange: (input: FilterCheckbox) => void;
+  handleChange: (k: FilterConfig) => void;
 }
 
 export default function NameFilter({ filter, handleChange }: NameFilter) {
@@ -24,12 +24,19 @@ export default function NameFilter({ filter, handleChange }: NameFilter) {
             defaultValue={name}
             defaultChecked={filter.name[name]}
             className="cursor-pointer"
-            onChange={(e) => handleChange(e.target as FilterCheckbox)}
+            onChange={(e) =>
+              handleChange({
+                type: "name",
+                key: name,
+                isCheck: e.target.checked,
+              })
+            }
           />
           <span
             className={clsx(
               "whitespace-nowrap",
-              Film.isSoldout(name) && "text-gray-400 line-through decoration-4",
+              Film.getSoldoutStatus(name) &&
+                "text-gray-400 line-through decoration-4",
             )}
           >
             {name}

@@ -1,28 +1,32 @@
+import { FilmPropKey } from "@/lib/definitions";
 import Film from "../../lib/film";
-import Filter from "../../lib/filter";
 import View from "../../lib/view";
-import Input, { TableInput } from "./Input";
+import FilmInput from "./Input";
+import { FilmConfig } from "@/lib/definitions";
 
-export type TableTitle = "name" | "date" | "start" | "end" | "join";
 interface TableProp {
   view: View;
-  filter: Filter;
-  handleChange: (this: Film, input: TableInput) => void;
+  filteredFilms: Film[];
+  handleChange: (this: Film, k: FilmConfig) => void;
 }
 
-export default function Table({ view, filter, handleChange }: TableProp) {
-  const titles: TableTitle[] = ["name", "date", "start", "end", "join"];
+export default function Table({
+  view,
+  filteredFilms,
+  handleChange,
+}: TableProp) {
+  const titles: FilmPropKey[] = ["name", "date", "start", "end", "join"];
   // console.log("table");
 
-  const rows = filter.filteredFilms.map((film) => {
+  const rows = filteredFilms.map((film) => {
     return (
       <li key={film.id} data-id={film.id}>
         <ul className="row grid">
           {titles.map((title) => (
             <li key={title} className="cell">
               <label>
-                <Input
-                  name={title}
+                <FilmInput
+                  prop={title}
                   // val={title == "join" ? view.getChecked(film) : film[title]}
                   film={film}
                   view={view}

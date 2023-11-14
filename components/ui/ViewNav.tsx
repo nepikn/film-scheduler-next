@@ -1,10 +1,11 @@
-import { Fragment, MouseEventHandler } from "react";
-import View, { ViewGroup } from "../../lib/view";
+import { Fragment } from "react";
+import View from "../../lib/view";
+import { ViewGroup } from "@/lib/definitions";
 import clsx from "clsx";
 
 interface Nav {
-  handleViewRemove: (this: ViewGroup, targView: View) => void;
-  handleViewChange: (id: string) => void;
+  handleViewRemove: (this: ViewGroup, k: string) => void;
+  handleViewChange: (k: string) => void;
   viewGroups: ViewGroup[];
   curViewId: View["id"];
 }
@@ -62,7 +63,7 @@ function ViewRadio({
   return (
     <fieldset className="group relative grid items-stretch">
       <button
-        onClick={handleViewRemove.bind(viewGroup, view)}
+        onClick={handleViewRemove.bind(viewGroup, view.id)}
         className={clsx(
           "absolute right-1 hidden w-4",
           !isFirstRadio && "group-hover:block",
