@@ -12,21 +12,21 @@ import Film from "../../lib/film";
 import View from "../../lib/view";
 import FilmInput from "./Input";
 import { FilmConfig } from "@/lib/definitions";
-import Filter from "../../lib/filter";
+import Check from "../../lib/check";
 import clsx from "clsx";
-import { FilterConfig } from "@/lib/definitions";
+import { CheckConfig } from "@/lib/definitions";
 
 interface CalendarProp {
   view: View;
-  dateFilter: Filter["date"];
+  dateCheck: Check["date"];
   filteredFilms: Film[];
-  handleFilterChange: (k: FilterConfig) => void;
+  handleFilterChange: (k: CheckConfig) => void;
   handleJoinChange: (this: Film, input: FilmConfig) => void;
 }
 
 export default function Calendar({
   view,
-  dateFilter,
+  dateCheck,
   filteredFilms,
   handleFilterChange,
   handleJoinChange,
@@ -52,7 +52,7 @@ export default function Calendar({
           {date.getMonth() == monthStart.getMonth() && (
             <>
               <DateFilter
-                isChecked={dateFilter[date.getDate()]}
+                isChecked={dateCheck[date.getDate()]}
                 date={date.getDate()}
                 handleChange={handleFilterChange}
               />

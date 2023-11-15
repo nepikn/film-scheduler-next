@@ -1,7 +1,11 @@
 import Film from "./film";
 import View from "./view";
 import useLocalStorage from "./useLocalStorage";
-import Filter from "./filter";
+import Check from "./check";
+
+export interface Action {
+  type: "clear";
+}
 
 export type FilmPropKey = "name" | "date" | "start" | "end" | "join";
 export type FilmConfig =
@@ -16,8 +20,8 @@ export interface SoldoutFilm {
   venue: string;
 }
 
-export type FiterProp = ConstructorType<Filter>;
-export interface FilterConfig {
+export type CheckProp = ConstructorType<Check>;
+export interface CheckConfig {
   type: "name" | "date";
   key: string | number;
   isCheck: boolean;

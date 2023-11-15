@@ -9,7 +9,10 @@ const ADDRESS = {
     "Vieshow Cinemas Xinyi, No. 20號, Songshou Rd, Xinyi District, Taipei City, Taiwan 110",
 };
 
-export function getIcsLink(films: Film[], format = { summary: "電影：%s" }) {
+export default function getIcsLink(
+  films: Film[],
+  format = { summary: "電影：%s" },
+) {
   const { error, value } = ics.createEvents(
     films.map((film) => {
       const [theater, screen] = film.venue.split(" ") as [

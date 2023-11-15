@@ -1,21 +1,21 @@
 import { areIntervalsOverlapping } from "date-fns";
 import Film from "./film";
 import View from "./view";
-import { FilterConfig } from "./definitions";
-import { FiterProp } from "./definitions";
+import { CheckConfig } from "./definitions";
+import { CheckProp } from "./definitions";
 
-export default class Filter {
+export default class Check {
   name: {
-    [filmName: string]: boolean;
+    [k: Film["name"]]: boolean | undefined;
   };
   date: {
-    [filmDate: string]: boolean;
+    [k: Film["date"]]: boolean;
   };
 
-  constructor(prevFilters?: FiterProp, config?: FilterConfig) {
-    if (prevFilters) {
-      this.name = { ...prevFilters.name };
-      this.date = { ...prevFilters.date };
+  constructor(prevCheck?: CheckProp, config?: CheckConfig) {
+    if (prevCheck) {
+      this.name = { ...prevCheck.name };
+      this.date = { ...prevCheck.date };
       if (config) {
         this[config.type][config.key] = config.isCheck;
       }
@@ -29,15 +29,15 @@ export default class Filter {
     }
   }
 
-  get filteredFilms() {
+  getFilteredFilms() {
     return Film.instances.filter(
       (film) => this.name[film.name] && this.date[film.time.date.getDate()],
     );
   }
 
-  get validViews() {
+  getValidViews() {
     const group: { [indexed: string]: Film[] } = {};
-    const validFilms = this.filteredFilms;
+    const validFilms = this.getFilteredFilms();
     if (!validFilms.length) return [];
 
     validFilms.forEach((film) => {

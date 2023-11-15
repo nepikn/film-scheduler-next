@@ -1,28 +1,33 @@
 "use client";
 
 import Calendar from "@/components/ui/Calendar";
-import { FilmConfig } from "@/lib/definitions";
 import NameFilter from "@/components/ui/NameFilter";
 import Table from "@/components/ui/Table";
 import ViewNav from "@/components/ui/ViewNav";
+import Aside from "@/components/ui/aside";
+import type {
+  Action,
+  FilmConfig,
+  CheckConfig,
+  ViewGroup,
+} from "@/lib/definitions";
 import Film from "@/lib/film";
-import Filter from "@/lib/filter";
-import View from "@/lib/view";
-import { FilterConfig, ViewGroup } from "@/lib/definitions";
-import { getIcsLink } from "@/lib/ics";
+import Check from "@/lib/check";
+import getIcsLink from "@/lib/ics";
 import useLocalStorage from "@/lib/useLocalStorage";
+import View from "@/lib/view";
 import { useState } from "react";
 
 export default function App() {
-  const [filter, setFilter] = useLocalStorage<Filter>("filter");
-  const [validViews, setValidViews] = useState(() => filter.validViews);
+  const [check, setCheck] = useLocalStorage<Check>("check");
+  const [validViews, setValidViews] = useState(() => check.getValidViews());
   const [userViews, setUserViews] = useLocalStorage<View[]>("userViews");
   const [viewId, setViewId] = useState(userViews[0].id);
   const view = [...userViews, ...validViews].find((v) => v.id == viewId)!;
   if (!view) {
     console.log("no such viewId");
   }
-  const filteredFilms = filter.filteredFilms;
+  const filteredFilms = check.getFilteredFilms();
   const viewGroups: ViewGroup[] = [
     {
       id: "0",
@@ -50,8 +55,8 @@ export default function App() {
         F
       </button> */}
       <div className="grid gap-2">
-        <div className="grid gap-4">
-          <NameFilter filter={filter} handleChange={handleFilterChange} />
+        <div className="grid gap-2">
+          <NameFilter check={check} handleChange={handleFilterChange} />
           <div className="grid grid-cols-[1fr_auto] items-center gap-2">
             <ViewNav
               handleViewRemove={handleViewRemove}
@@ -64,7 +69,7 @@ export default function App() {
               href={getIcsLink(
                 filteredFilms.filter((film) => view.getJoinStatus(film)),
               )}
-              className="flex h-full items-center rounded border border-zinc-200 bg-white px-3 py-2 shadow-sm hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-neutral-600 dark:hover:text-zinc-50"
+              className="flex h-full items-center rounded border border-zinc-200 bg-white px-3 py-3 leading-none shadow-sm hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-neutral-600 dark:hover:text-zinc-50"
             >
               <span>下載 iCal</span>
             </a>
@@ -72,7 +77,7 @@ export default function App() {
         </div>
         <Calendar
           view={view}
-          dateFilter={filter.date}
+          dateCheck={check.date}
           filteredFilms={filteredFilms}
           handleFilterChange={handleFilterChange}
           handleJoinChange={handleCalendarTableChange}
@@ -83,8 +88,20 @@ export default function App() {
         filteredFilms={filteredFilms}
         handleChange={handleCalendarTableChange}
       />
+      <Aside handleClick={handleAsideClick} />
     </main>
   );
+
+  function handleAsideClick(this: Action) {
+    switch (this.type) {
+      case "clear":
+        setCheck(new Check({ ...check, name: {} }));
+        break;
+
+      default:
+        break;
+    }
+  }
 
   function handleViewRemove(this: ViewGroup, targViewId: string) {
     if (targViewId == viewId) {
@@ -101,13 +118,12 @@ export default function App() {
     this.setViews(this.views.filter((v) => v.id != targViewId));
   }
 
-  function handleFilterChange(filterConfig: FilterConfig) {
-    const nextFilters = new Filter(filter, filterConfig);
-    const nextViews = nextFilters.validViews;
-    // console.log(nextViews);
+  function handleFilterChange(checkConfig: CheckConfig) {
+    const nextCheck = new Check(check, checkConfig);
+    const nextViews = nextCheck.getValidViews();
 
     setValidViews(nextViews);
-    setFilter(nextFilters);
+    setCheck(nextCheck);
     if (validViews.find((v) => v.id == viewId)) {
       setViewId(nextViews[0]?.id ?? userViews[0].id);
     }

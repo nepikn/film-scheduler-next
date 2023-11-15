@@ -17,7 +17,7 @@ export default function ViewNav({
   curViewId,
 }: Nav) {
   return (
-    <nav className="flex overflow-x-auto pb-2">
+    <nav className="flex overflow-x-auto py-2">
       {viewGroups.map((viewGroup) => (
         <Fragment key={viewGroup.title}>
           <h3 className="whitespace-pre leading-none">{viewGroup.title}</h3>
