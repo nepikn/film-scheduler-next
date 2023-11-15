@@ -1,17 +1,15 @@
 import { Fragment } from "react";
 import View from "../../lib/view";
-import { ViewGroup } from "@/lib/definitions";
 import clsx from "clsx";
+import ViewGroup from "@/lib/viewGroup";
 
 interface Nav {
-  handleViewRemove: (this: ViewGroup, k: string) => void;
   handleViewChange: (k: string) => void;
   viewGroups: ViewGroup[];
   curViewId: View["id"];
 }
 
 export default function ViewNav({
-  handleViewRemove,
   handleViewChange,
   viewGroups,
   curViewId,
@@ -22,14 +20,13 @@ export default function ViewNav({
         <Fragment key={viewGroup.title}>
           <h3 className="whitespace-pre leading-none">{viewGroup.title}</h3>
           <fieldset
-            name={viewGroup.id}
+            name={viewGroup.title}
             className="flex items-stretch divide-x py-1"
           >
             {viewGroup.views.length ? (
               viewGroup.views.map((view, j) => (
                 <ViewRadio
                   key={view.id}
-                  handleViewRemove={handleViewRemove}
                   handleViewChange={handleViewChange}
                   curViewId={curViewId}
                   viewGroup={viewGroup}
@@ -52,18 +49,17 @@ interface ViewRadio {
 }
 
 function ViewRadio({
-  handleViewRemove,
   handleViewChange,
   curViewId,
   viewGroup,
   index,
 }: Omit<Nav, "viewGroups"> & ViewRadio) {
   const view = viewGroup.views[index];
-  const isFirstRadio = viewGroup.id == "0" && index == 0;
+  const isFirstRadio = viewGroup.isFirst && index == 0;
   return (
     <fieldset className="group relative grid items-stretch">
       <button
-        onClick={handleViewRemove.bind(viewGroup, view.id)}
+        onClick={() => viewGroup.handleViewRemove(view.id)}
         className={clsx(
           "absolute right-1 hidden w-4",
           !isFirstRadio && "group-hover:block",
