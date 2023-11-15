@@ -5,18 +5,14 @@ import NameFilter from "@/components/ui/NameFilter";
 import Table from "@/components/ui/Table";
 import ViewNav from "@/components/ui/ViewNav";
 import Aside from "@/components/ui/aside";
-import type {
-  Action,
-  FilmConfig,
-  CheckConfig,
-  ViewGroup,
-} from "@/lib/definitions";
+import type { Action, FilmConfig, CheckConfig } from "@/lib/definitions";
 import Film from "@/lib/film";
 import Check from "@/lib/check";
 import getIcsLink from "@/lib/ics";
 import useLocalStorage from "@/lib/useLocalStorage";
 import View from "@/lib/view";
 import { useState } from "react";
+import ViewGroup from "@/lib/viewGroup";
 
 export default function App() {
   const [check, setCheck] = useLocalStorage<Check>("check");
@@ -30,20 +26,23 @@ export default function App() {
   const filteredFilms = check.getFilteredFilms();
   const viewGroups: ViewGroup[] = [
     {
-      id: "0",
-      name: "userViews",
+      // id: "0",
+      // name: "userViews",
       title: "自\n訂",
       views: userViews,
       setViews: setUserViews,
+      handleViewRemove: handleViewRemove,
+      isFirst: true,
     },
     {
-      id: "1",
-      name: "validViews",
+      // id: "1",
+      // name: "validViews",
       title: "生\n成",
       views: validViews,
       setViews: setValidViews,
+      handleViewRemove: handleViewRemove,
     },
-  ];
+  ].map((prop) => new ViewGroup(prop));
 
   return (
     <main className="m-auto grid gap-8 px-16 py-8">
@@ -59,7 +58,6 @@ export default function App() {
           <NameFilter check={check} handleChange={handleFilterChange} />
           <div className="grid grid-cols-[1fr_auto] items-center gap-2">
             <ViewNav
-              handleViewRemove={handleViewRemove}
               handleViewChange={(id: string) => setViewId(id)}
               viewGroups={viewGroups}
               curViewId={viewId}

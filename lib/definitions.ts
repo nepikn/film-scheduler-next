@@ -1,6 +1,5 @@
 import Film from "./film";
 import View from "./view";
-import useLocalStorage from "./useLocalStorage";
 import Check from "./check";
 
 export interface Action {
@@ -31,14 +30,6 @@ export type ViewProp = ConstructorType<View>;
 export interface ViewJoin {
   [k: Film["name"]]: Film["id"] | null;
 }
-export interface ViewGroup {
-  id: string;
-  name: string;
-  title: string;
-  views: View[];
-  setViews: ReturnType<typeof useLocalStorage<View[]>>[1];
-}
-
 type FlagExcludedType<Base, Type> = {
   [Key in keyof Base]: Base[Key] extends Type ? never : Key;
 };
