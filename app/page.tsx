@@ -96,6 +96,7 @@ export default function App() {
     switch (this.type) {
       case "clear":
         setCheck(new Check({ ...check, name: {} }));
+        setValidViews([]);
         break;
 
       default:
