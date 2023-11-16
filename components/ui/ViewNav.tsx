@@ -2,9 +2,10 @@ import { Fragment } from "react";
 import View from "../../lib/view";
 import clsx from "clsx";
 import ViewGroup from "@/lib/viewGroup";
+import { ViewInfo } from "@/lib/definitions";
 
 interface Nav {
-  handleViewChange: (k: string) => void;
+  handleViewChange: (k: ViewInfo) => void;
   viewGroups: ViewGroup[];
   curViewId: View["id"];
 }
@@ -16,7 +17,7 @@ export default function ViewNav({
 }: Nav) {
   return (
     <nav className="flex overflow-x-auto py-2">
-      {viewGroups.map((viewGroup) => (
+      {viewGroups.map((viewGroup, i) => (
         <Fragment key={viewGroup.title}>
           <h3 className="whitespace-pre leading-none">{viewGroup.title}</h3>
           <fieldset
@@ -27,7 +28,10 @@ export default function ViewNav({
               viewGroup.views.map((view, j) => (
                 <ViewRadio
                   key={view.id}
-                  handleViewChange={handleViewChange}
+                  handleViewChange={handleViewChange.bind(null, {
+                    groupId: i,
+                    index: j,
+                  })}
                   curViewId={curViewId}
                   viewGroup={viewGroup}
                   index={j}
@@ -87,7 +91,7 @@ function ViewRadio({
           name="view"
           checked={view.id == curViewId}
           className="hidden"
-          onChange={() => handleViewChange(view.id)}
+          onChange={() => handleViewChange}
         />
       </label>
     </fieldset>
