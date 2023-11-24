@@ -36,24 +36,24 @@ export default class Check {
   }
 
   getValidViews() {
-    const group: { [indexed: string]: Film[] } = {};
-    const validFilms = this.getFilteredFilms();
-    if (!validFilms.length) return [];
+    const filteredFilms = this.getFilteredFilms();
+    if (!filteredFilms.length) return [];
 
-    validFilms.forEach((film) => {
-      if (film.name in group) {
-        group[film.name].push(film);
+    const groupByName: { [k: Film["name"]]: Film[] } = {};
+    filteredFilms.forEach((film) => {
+      if (film.name in groupByName) {
+        groupByName[film.name].push(film);
       } else {
-        group[film.name] = [film];
+        groupByName[film.name] = [film];
       }
     });
 
+    const groups = Object.values(groupByName);
     const result = [];
-    const groups = Object.values(group);
     const indexes: number[] = new Array(groups.length).fill(0);
-
-    let k = 0;
-    for (let i = 0; ; k++) {
+    let loop = 1;
+    let i = 0;
+    while (true) {
       // console.log(indexes);
       const curFilm = groups[i][indexes[i]];
       const isOverlapping = indexes
@@ -62,6 +62,8 @@ export default class Check {
         .some((film) => areIntervalsOverlapping(curFilm.time, film.time));
 
       if (!isOverlapping) {
+        loop++;
+
         if (i < groups.length - 1) {
           i++;
           continue;
@@ -72,23 +74,26 @@ export default class Check {
             Object.fromEntries(
               indexes.map((i, j) => [groups[j][i].name, groups[j][i].id]),
             ),
+            undefined,
+            false,
           ),
         );
       }
 
-      if (indexes[i] < groups[i].length - 1) {
-        indexes[i]++;
-        continue;
-      }
+      // if (indexes[i] < groups[i].length - 1) {
+      //   indexes[i]++;
+      //   continue;
+      // }
 
       while (indexes[i] >= groups[i].length - 1) {
-        if (i == 0 || k++ >= 9999) {
+        if (i == 0 || loop++ >= 4999) {
           // console.log(k);
           return result;
         }
 
         indexes[i--] = 0;
       }
+
       indexes[i]++;
     }
   }

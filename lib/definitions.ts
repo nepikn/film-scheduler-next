@@ -2,13 +2,13 @@ import Film from "./film";
 import View from "./view";
 import Check from "./check";
 
-export interface Action {
-  type: "clear";
+export interface AsideAction {
+  type: "clearNameFilter";
 }
 
 export type FilmPropKey = "name" | "date" | "start" | "end" | "join";
 export type FilmConfig =
-  | { propChange: "join"; nextValue: boolean }
+  | { propChange: "join"; isCheck: boolean }
   | {
       propChange: Exclude<FilmPropKey, "join">;
       nextValue: string;
@@ -27,9 +27,14 @@ export interface CheckConfig {
 }
 
 export type ViewProp = ConstructorType<View>;
-export interface ViewJoin {
-  [k: Film["name"]]: Film["id"] | null;
+export interface ViewJoinFilmIds {
+  [k: Film["name"]]: Film["id"] | undefined;
 }
+export interface ViewInfo {
+  groupId: number;
+  index: number;
+}
+
 type FlagExcludedType<Base, Type> = {
   [Key in keyof Base]: Base[Key] extends Type ? never : Key;
 };

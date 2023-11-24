@@ -1,14 +1,16 @@
-import { Action } from "@/lib/definitions";
+import { AsideAction } from "@/lib/definitions";
 
 interface AsideProp {
-  handleClick: (this: Action) => void;
+  handleNameFilterClear: () => void;
 }
 
-export default function Aside({ handleClick }: AsideProp) {
+export default function Aside({
+  handleNameFilterClear: handleClick,
+}: AsideProp) {
   return (
     <aside className="fixed right-0 top-0">
       <fieldset>
-        <button onClick={handleClick.bind({ type: "clear" })}>
+        <button onClick={handleClick}>
           <div className="whitespace-pre leading-tight">
             {"清空名稱篩選".split("").join("\n")}
           </div>

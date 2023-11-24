@@ -47,7 +47,7 @@ export default function FilmInput({
           prop == "join"
             ? {
                 propChange: "join",
-                nextValue: e.target.checked,
+                isCheck: e.target.checked,
               }
             : {
                 propChange: prop,

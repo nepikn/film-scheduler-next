@@ -5,7 +5,7 @@ import ViewGroup from "@/lib/viewGroup";
 import { ViewInfo } from "@/lib/definitions";
 
 interface Nav {
-  handleViewChange: (k: ViewInfo) => void;
+  handleViewChange: (k: View["id"]) => void;
   viewGroups: ViewGroup[];
   curViewId: View["id"];
 }
@@ -17,7 +17,7 @@ export default function ViewNav({
 }: Nav) {
   return (
     <nav className="flex overflow-x-auto py-2">
-      {viewGroups.map((viewGroup, i) => (
+      {viewGroups.map((viewGroup) => (
         <Fragment key={viewGroup.title}>
           <h3 className="whitespace-pre leading-none">{viewGroup.title}</h3>
           <fieldset
@@ -25,16 +25,14 @@ export default function ViewNav({
             className="flex items-stretch divide-x py-1"
           >
             {viewGroup.views.length ? (
-              viewGroup.views.map((view, j) => (
-                <ViewRadio
-                  key={view.id}
-                  handleViewChange={handleViewChange.bind(null, {
-                    groupId: i,
-                    index: j,
-                  })}
-                  curViewId={curViewId}
-                  viewGroup={viewGroup}
-                  index={j}
+              viewGroup.views.map(({ id }, j) => (
+                <ViewSwitch
+                  key={id}
+                  handleViewChange={() => handleViewChange(id)}
+                  handleViewRemove={() => viewGroup.handleViewRemove(id)}
+                  isChecked={id == curViewId}
+                  isFirst={viewGroup.isFirst && j == 0}
+                  label={j}
                 />
               ))
             ) : (
@@ -47,26 +45,28 @@ export default function ViewNav({
   );
 }
 
-interface ViewRadio {
-  viewGroup: ViewGroup;
-  index: number;
+interface ViewSwitch {
+  isFirst: boolean;
+  label: number;
+  handleViewChange: () => void;
+  handleViewRemove: () => void;
+  isChecked: boolean;
 }
 
-function ViewRadio({
+function ViewSwitch({
+  isFirst,
+  label,
   handleViewChange,
-  curViewId,
-  viewGroup,
-  index,
-}: Omit<Nav, "viewGroups"> & ViewRadio) {
-  const view = viewGroup.views[index];
-  const isFirstRadio = viewGroup.isFirst && index == 0;
+  handleViewRemove,
+  isChecked,
+}: ViewSwitch) {
   return (
     <fieldset className="group relative grid items-stretch">
       <button
-        onClick={() => viewGroup.handleViewRemove(view.id)}
+        onClick={handleViewRemove}
         className={clsx(
           "absolute right-1 hidden w-4",
-          !isFirstRadio && "group-hover:block",
+          !isFirst && "group-hover:block",
         )}
       >
         <svg
@@ -85,13 +85,13 @@ function ViewRadio({
         </svg>
       </button>
       <label className="grid w-14 cursor-pointer place-items-center text-center leading-none hover:text-gray-400 [&:has(:checked)]:cursor-default [&:has(:checked)]:font-bold [&:has(:checked)]:text-blue-300">
-        <span>{index}</span>
+        <span>{label}</span>
         <input
           type="radio"
           name="view"
-          checked={view.id == curViewId}
+          checked={isChecked}
           className="hidden"
-          onChange={() => handleViewChange}
+          onChange={handleViewChange}
         />
       </label>
     </fieldset>

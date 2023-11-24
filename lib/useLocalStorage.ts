@@ -9,12 +9,14 @@ import { useState } from "react";
 type Config = typeof initialState;
 const initialState = {
   check: new Check(getLocalConfig()?.check),
-  userViews: getLocalConfig().userViews?.map((view) => new View(view.join)) ?? [
-    new View(),
-  ],
+  userViews: getLocalConfig().userViews?.map(
+    (view) => new View(view.joinIds),
+  ) ?? [new View()],
 };
 
-export default function useLocalStorage<T>(key: keyof Config) {
+export default function useLocalStorage<T extends Check | View[]>(
+  key: keyof Config,
+) {
   const [state, setState] = useState(initialState[key]);
 
   return [
@@ -26,14 +28,14 @@ export default function useLocalStorage<T>(key: keyof Config) {
   ] as [T, (k: T) => void];
 }
 
-function getLocalConfig(): {
+export function getLocalConfig(): {
   check?: CheckProp;
   userViews?: ViewProp[];
 } {
   return JSON.parse(localStorage.getItem("scheduler") || "{}");
 }
 
-function setLocalConfig(key: keyof Config, val: any) {
+export function setLocalConfig(key: keyof Config, val: any) {
   localStorage.setItem(
     "scheduler",
     JSON.stringify({ ...getLocalConfig(), [key]: val }),
