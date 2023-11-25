@@ -9,7 +9,6 @@ import type { FilmConfig, CheckConfig } from "@/lib/definitions";
 import Film from "@/lib/film";
 import useLocalStorage from "@/lib/useLocalStorage";
 import View from "@/lib/view";
-import ViewGroup from "@/lib/viewGroup";
 import useViewGroupReducer from "@/lib/viewReducer";
 import IcsDownloadLink from "../components/ui/IcsDownloadLink";
 
@@ -18,30 +17,11 @@ export default function App() {
   const [state, dispatch] = useViewGroupReducer(userViews[0].id);
   console.log(state);
 
-  const { check, viewId, viewRemoved } = state;
-  const validViews = check.getValidViews().filter((v) => !viewRemoved[1][v.id]);
+  const { check, viewId } = state;
+  const validViews = check.getValidViews().filter((v) => !v.isRemoved);
   const filteredFilms = check.getFilteredFilms();
   const view = [...userViews, ...validViews].find((v) => v.id == viewId)!;
-  const viewGroupId = userViews.find((v) => v.id == view.id) ? 0 : 1;
-  const viewGroups: ViewGroup[] = [
-    {
-      id: 0,
-      // name: "user",
-      title: "自\n訂",
-      views: userViews,
-      // setViews: setUserViews,
-      handleViewRemove: handleViewRemove,
-      isFirst: true,
-    },
-    {
-      id: 1,
-      // name: "valid",
-      title: "生\n成",
-      views: validViews,
-      // setViews: setValidViews,
-      handleViewRemove: handleViewRemove,
-    },
-  ].map((prop) => new ViewGroup(prop));
+  const isUserViewGroup = view.groupId == View.userViewGroupId;
 
   if (!view) {
     console.log("no view");
@@ -64,7 +44,8 @@ export default function App() {
               handleViewChange={(viewId: string) =>
                 dispatch({ type: "changeView", viewId: viewId })
               }
-              viewGroups={viewGroups}
+              handleViewRemove={handleViewRemove}
+              viewGroups={[userViews, validViews]}
               curViewId={view.id}
             />
             <IcsDownloadLink {...{ filteredFilms, view }} />
@@ -87,35 +68,30 @@ export default function App() {
         handleNameFilterClear={() =>
           dispatch({
             type: "clearNameFilter",
-            viewGroupId: viewGroupId,
-            fallbackViewId: userViews[0].id,
+            nextViewId: isUserViewGroup ? viewId : userViews[0].id,
           })
         }
       />
     </main>
   );
 
-  function handleViewRemove(this: ViewGroup, targViewId: string) {
-    // const nextViewInfo = { ...viewInfo };
-    let nextViewId = viewId;
-    if (targViewId == view.id) {
-      const [leftViewId, rightViewId] = [1, -1].map(
-        (offset) =>
-          [...userViews, ...validViews].find(
-            (_, i, arr) => arr[i + offset]?.id == targViewId,
-          )?.id,
-      );
-      
-      nextViewId = rightViewId ?? leftViewId!;
-    }
+  function handleViewRemove(removedView: View) {
+    const removedViewId = removedView.id;
+    const getSiblingViewId = (offset: number) =>
+      [...userViews, ...validViews].find(
+        (_, i, views) => views[i + offset]?.id == removedViewId,
+      )?.id;
 
+    removedView.remove();
     dispatch({
-      type: "removeView",
-      targViewGroupId: this.id,
-      targViewId: targViewId,
-      nextViewId: nextViewId,
+      type: "changeView",
+      // targViewGroupId: targView.groupId,
+      // targViewId: targViewId,
+      viewId:
+        removedViewId == viewId
+          ? getSiblingViewId(-1) ?? getSiblingViewId(1)!
+          : viewId,
     });
-    // this.setViews(this.views.filter((v) => v.id != targViewId));
   }
 
   function handleFilterChange(checkConfig: CheckConfig) {
@@ -130,13 +106,13 @@ export default function App() {
     dispatch({
       type: "updateCheck",
       checkConfig: checkConfig,
-      viewGroupId: viewGroupId,
-      fallbackViewId: userViews[0].id,
+      isUserViewGroup: isUserViewGroup,
+      nextViewId: userViews[0].id,
     });
   }
 
   function handleCalendarTableChange(this: Film, filmConfig: FilmConfig) {
-    const userViewIndex = userViews.findIndex((v) => v.id == viewId);
+    // const userViewIndex = userViews.findIndex((v) => v.id == viewId);
     const nextView = new View(view.joinIds, {
       film: this,
       filmConfig: filmConfig,
@@ -146,14 +122,13 @@ export default function App() {
     dispatch({ type: "changeView", viewId: nextView.id });
     setUserViews(
       // userViewIndex == -1
-      viewGroupId == 1
-        ? [...userViews, nextView]
-        : userViews.toSpliced(
-            userViewIndex,
-            // view.id,
-            1,
-            nextView,
-          ),
+      userViews.toSpliced(
+        isUserViewGroup
+          ? userViews.findIndex((v) => v.id == viewId)
+          : userViews.length,
+        1,
+        nextView,
+      ),
     );
   }
 }

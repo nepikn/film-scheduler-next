@@ -10,13 +10,29 @@ interface ViewConfig {
 }
 
 export default class View {
-  id;
+  static userViewGroupId = "0";
+  static removed = new Set();
   // group;
   // index;
   joinIds;
+  groupId;
+  id;
+  get isRemoved() {
+    return View.removed.has(this.id);
+  }
 
-  constructor(joinIds?: ViewJoinFilmIds, config?: ViewConfig, randomId = true) {
+  remove() {
+    View.removed.add(this.id);
+  }
+
+  constructor(
+    joinIds?: ViewJoinFilmIds,
+    config?: ViewConfig,
+    groupId = View.userViewGroupId,
+    randomId = true,
+  ) {
     this.joinIds = { ...joinIds };
+    this.groupId = groupId;
     this.id = randomId
       ? v4()
       : v5(

@@ -6,41 +6,47 @@ import { ViewInfo } from "@/lib/definitions";
 
 interface Nav {
   handleViewChange: (k: View["id"]) => void;
-  viewGroups: ViewGroup[];
+  handleViewRemove: (k: View) => void;
+  viewGroups: View[][];
   curViewId: View["id"];
 }
 
 export default function ViewNav({
   handleViewChange,
+  handleViewRemove,
   viewGroups,
   curViewId,
 }: Nav) {
+  const titles = ["自\n訂", "生\n成"];
   return (
     <nav className="flex overflow-x-auto py-2">
-      {viewGroups.map((viewGroup) => (
-        <Fragment key={viewGroup.title}>
-          <h3 className="whitespace-pre leading-none">{viewGroup.title}</h3>
-          <fieldset
-            name={viewGroup.title}
-            className="flex items-stretch divide-x py-1"
-          >
-            {viewGroup.views.length ? (
-              viewGroup.views.map(({ id }, j) => (
-                <ViewSwitch
-                  key={id}
-                  handleViewChange={() => handleViewChange(id)}
-                  handleViewRemove={() => viewGroup.handleViewRemove(id)}
-                  isChecked={id == curViewId}
-                  isFirst={viewGroup.isFirst && j == 0}
-                  label={j}
-                />
-              ))
-            ) : (
-              <span className="ml-2">（無）</span>
-            )}
-          </fieldset>
-        </Fragment>
-      ))}
+      {viewGroups.map((viewGroup, i) => {
+        const title = titles[i];
+        return (
+          <Fragment key={title}>
+            <h3 className="whitespace-pre leading-none">{title}</h3>
+            <fieldset
+              // name={title}
+              className="flex items-stretch divide-x py-1"
+            >
+              {viewGroup.length ? (
+                viewGroup.map((view, j) => (
+                  <ViewSwitch
+                    key={view.id}
+                    handleViewChange={() => handleViewChange(view.id)}
+                    handleViewRemove={() => handleViewRemove(view)}
+                    isChecked={view.id == curViewId}
+                    isFirst={i == 0 && j == 0}
+                    label={j}
+                  />
+                ))
+              ) : (
+                <span className="ml-2">（無）</span>
+              )}
+            </fieldset>
+          </Fragment>
+        );
+      })}
     </nav>
   );
 }

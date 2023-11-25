@@ -9,7 +9,7 @@ export default function useViewGroupReducer(initialViewId: string) {
   const [validViewGroup, dispatch] = useReducer(validViewGroupReducer, {
     check: new Check(getLocalConfig().check),
     viewId: initialViewId,
-    viewRemoved: { 0: {}, 1: {} },
+    // removedIdSets: { [View.userViewId]: new Set() },
   });
 
   return [
@@ -26,39 +26,35 @@ export default function useViewGroupReducer(initialViewId: string) {
 
 interface ValidViewGroup {
   check: Check;
-  viewRemoved: {
-    [k: ViewGroup["id"]]: {
-      [k: View["id"]]: boolean;
-    };
-  };
   viewId: string;
+  // removedIdSets: {
+  //   [k: ViewGroup["id"]]: Set<View["id"]>;
+  // };
 }
 
 type Action =
   | {
       type: "clearNameFilter";
-      viewGroupId: ViewGroup["id"];
-      fallbackViewId: View["id"];
+      nextViewId: View["id"];
     }
   | {
       type: "updateCheck";
       checkConfig: CheckConfig;
-      viewGroupId: ViewGroup["id"];
-      fallbackViewId: View["id"];
+      isUserViewGroup: boolean;
+      nextViewId: View["id"];
     }
-  | {
-      type: "removeView";
-      targViewGroupId: ViewGroup["id"];
-      targViewId: string;
-      nextViewId: string;
-    }
+  // | {
+  //     type: "removeView";
+  //     // targView: View;
+  //     nextViewId: string;
+  //   }
   | { type: "changeView"; viewId: string };
 
 function validViewGroupReducer(
   state: ValidViewGroup,
   action: Action,
 ): ValidViewGroup {
-  const { viewId, check, viewRemoved } = state;
+  const { viewId, check } = state;
   console.info(state, action);
   switch (action.type) {
     case "changeView": {
@@ -68,37 +64,39 @@ function validViewGroupReducer(
       };
     }
 
-    case "removeView": {
-      const nextViewRemoved = structuredClone(viewRemoved);
-      nextViewRemoved[action.targViewGroupId][action.targViewId] = true;
+    // case "removeView": {
+    //   // const nextViewRemoved = structuredClone(viewRemoved);
+    //   // const { groupId, id } = action.targView;
+
+    //   // nextViewRemoved[groupId][id] = true;
+
+    //   return {
+    //     ...state,
+    //     // viewRemoved: nextViewRemoved,
+    //     viewId: action.nextViewId,
+    //   };
+    // }
+
+    case "updateCheck": {
+      const nextCheck = new Check(check, action.checkConfig);
+      // const nextViewRemoved = structuredClone(viewRemoved);
+      // nextViewRemoved[1] = {};
 
       return {
-        check: check,
-        viewRemoved: nextViewRemoved,
+        // removedIdSets: removedIdSets,
+        check: nextCheck,
         viewId: action.nextViewId,
       };
     }
 
-    case "updateCheck": {
-      const nextCheck = new Check(check, action.checkConfig);
-      const nextViewRemoved = structuredClone(viewRemoved);
-      nextViewRemoved[1] = {};
-
-      return {
-        check: nextCheck,
-        viewRemoved: nextViewRemoved,
-        viewId:
-          action.viewGroupId == 0
-            ? viewId
-            : nextCheck.getValidViews()[0].id ?? action.fallbackViewId,
-      };
-    }
-
     case "clearNameFilter": {
+      // const nextSets = { ...removedIdSets };
+      // delete nextSets[action.viewGroupId];
+
       return {
+        // removedIdSets: removedIdSets,
         check: new Check({ ...check, name: {} }),
-        viewRemoved: { ...viewRemoved, 1: {} },
-        viewId: action.viewGroupId == 1 ? action.fallbackViewId : viewId,
+        viewId: action.nextViewId,
       };
     }
   }

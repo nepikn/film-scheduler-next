@@ -15,21 +15,20 @@ export default class ViewGroup {
     title,
     views,
     // setViews,
-    isFirst,
     handleViewRemove,
   }: ViewGroupConstructor) {
     this.id = id;
     this.title = title;
     this.views = views;
     // this.setViews = setViews;
-    this.isFirst = isFirst ?? false;
+    this.isFirst = id == View.userViewGroupId;
     this.handleViewRemove = (targViewId: string) =>
       handleViewRemove.call(this, targViewId);
   }
 }
 
 interface ViewGroupConstructor {
-  id: number;
+  id: string;
   // name: "user" | "valid";
   isFirst?: boolean;
   title: string;

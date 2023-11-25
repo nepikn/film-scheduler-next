@@ -75,6 +75,7 @@ export default class Check {
               indexes.map((i, j) => [groups[j][i].name, groups[j][i].id]),
             ),
             undefined,
+            '1',
             false,
           ),
         );
