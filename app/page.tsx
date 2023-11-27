@@ -7,21 +7,19 @@ import ViewNav from "@/components/ui/ViewNav";
 import Aside from "@/components/ui/aside";
 import type { FilmConfig, CheckConfig } from "@/lib/definitions";
 import Film from "@/lib/film";
-import useLocalStorage from "@/lib/useLocalStorage";
 import View from "@/lib/view";
-import useViewGroupReducer from "@/lib/viewReducer";
+import useViewReducer from "@/lib/viewReducer";
 import IcsDownloadLink from "../components/ui/IcsDownloadLink";
+import localforage from "localforage";
 
 export default function App() {
-  const [userViews, setUserViews] = useLocalStorage<View[]>("userViews");
-  const [state, dispatch] = useViewGroupReducer(userViews[0].id);
+  const [state, dispatch] = useViewReducer();
   console.log(state);
 
-  const { check, viewId } = state;
+  const { check, viewId, userViews } = state;
   const validViews = check.getValidViews().filter((v) => !v.isRemoved);
   const filteredFilms = check.getFilteredFilms();
   const view = [...userViews, ...validViews].find((v) => v.id == viewId)!;
-  const isUserViewGroup = view.groupId == View.userViewGroupId;
 
   if (!view) {
     console.log("no view");
@@ -29,20 +27,14 @@ export default function App() {
 
   return (
     <main className="m-auto grid gap-8 px-16 py-8">
-      {/* <button
-        onClick={() => {
-          // localStorage.setItem("scheduler", JSON.stringify({}));
-        }}
-      >
-        F
-      </button> */}
+      <button onClick={() => localforage.clear()}>Clear</button>
       <div className="grid gap-2">
         <div className="grid gap-2">
           <NameFilter check={check} handleChange={handleFilterChange} />
           <div className="grid grid-cols-[1fr_auto] items-center gap-2">
             <ViewNav
-              handleViewChange={(viewId: string) =>
-                dispatch({ type: "changeView", viewId: viewId })
+              handleViewChange={(view: View) =>
+                dispatch({ type: "changeView", nextView: view })
               }
               handleViewRemove={handleViewRemove}
               viewGroups={[userViews, validViews]}
@@ -65,70 +57,42 @@ export default function App() {
         handleChange={handleCalendarTableChange}
       />
       <Aside
-        handleNameFilterClear={() =>
-          dispatch({
-            type: "clearNameFilter",
-            nextViewId: isUserViewGroup ? viewId : userViews[0].id,
-          })
-        }
+        handleNameFilterClear={() => dispatch({ type: "clearNameFilter" })}
       />
     </main>
   );
 
   function handleViewRemove(removedView: View) {
     const removedViewId = removedView.id;
-    const getSiblingViewId = (offset: number) =>
+    const getSiblingView = (offset: number) =>
       [...userViews, ...validViews].find(
-        (_, i, views) => views[i + offset]?.id == removedViewId,
-      )?.id;
+        (_, i, views) => views[i - offset]?.id == removedViewId,
+      );
 
     removedView.remove();
     dispatch({
       type: "changeView",
-      // targViewGroupId: targView.groupId,
-      // targViewId: targViewId,
-      viewId:
+      nextView:
         removedViewId == viewId
-          ? getSiblingViewId(-1) ?? getSiblingViewId(1)!
-          : viewId,
+          ? getSiblingView(1) ?? getSiblingView(-1)!
+          : view,
     });
   }
 
   function handleFilterChange(checkConfig: CheckConfig) {
-    // const nextCheck = new Check(check, checkConfig);
-    // const nextViews = nextCheck.getValidViews();
-
-    // setValidViews(nextViews);
-    // setCheck(nextCheck);
-    // if (validViews.find((v) => v.id == view.id)) {
-    //   setViewInfo(nextViews[0]?.id ?? userViews[0].id);
-    // }
     dispatch({
       type: "updateCheck",
       checkConfig: checkConfig,
-      isUserViewGroup: isUserViewGroup,
-      nextViewId: userViews[0].id,
     });
   }
 
   function handleCalendarTableChange(this: Film, filmConfig: FilmConfig) {
-    // const userViewIndex = userViews.findIndex((v) => v.id == viewId);
-    const nextView = new View(view.joinIds, {
+    const newView = new View(view.joinIds, {
       film: this,
       filmConfig: filmConfig,
     });
 
-    // setViewInfo(nextView.id);
-    dispatch({ type: "changeView", viewId: nextView.id });
-    setUserViews(
-      // userViewIndex == -1
-      userViews.toSpliced(
-        isUserViewGroup
-          ? userViews.findIndex((v) => v.id == viewId)
-          : userViews.length,
-        1,
-        nextView,
-      ),
-    );
+    dispatch({ type: "updateUserViews", newView: newView });
+    dispatch({ type: "changeView", nextView: newView });
   }
 }

@@ -1,16 +1,16 @@
 "use client";
 
 import Check from "@/lib/check";
-import { CheckProp } from "./definitions";
+import { CheckConstructor } from "./definitions";
 import View from "@/lib/view";
-import { ViewProp } from "./definitions";
+import { ViewConstructor } from "./definitions";
 import { useState } from "react";
 
 type Config = typeof initialState;
 const initialState = {
-  check: new Check(getLocalConfig()?.check),
-  userViews: getLocalConfig().userViews?.map(
-    (view) => new View(view.joinIds),
+  check: new Check(getLocalConfig()?.checkConstructor),
+  userViews: getLocalConfig().userViewConstructors?.map(
+    (construtor) => new View(construtor.joinIds),
   ) ?? [new View()],
 };
 
@@ -29,8 +29,8 @@ export default function useLocalStorage<T extends Check | View[]>(
 }
 
 export function getLocalConfig(): {
-  check?: CheckProp;
-  userViews?: ViewProp[];
+  checkConstructor?: CheckConstructor;
+  userViewConstructors?: ViewConstructor[];
 } {
   return JSON.parse(localStorage.getItem("scheduler") || "{}");
 }

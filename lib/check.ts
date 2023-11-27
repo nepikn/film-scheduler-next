@@ -2,7 +2,7 @@ import { areIntervalsOverlapping } from "date-fns";
 import Film from "./film";
 import View from "./view";
 import { CheckConfig } from "./definitions";
-import { CheckProp } from "./definitions";
+import { CheckConstructor } from "./definitions";
 
 export default class Check {
   name: {
@@ -12,7 +12,7 @@ export default class Check {
     [k: Film["date"]]: boolean;
   };
 
-  constructor(prevCheck?: CheckProp, config?: CheckConfig) {
+  constructor(prevCheck?: CheckConstructor, config?: CheckConfig) {
     if (prevCheck) {
       this.name = { ...prevCheck.name };
       this.date = { ...prevCheck.date };
@@ -75,7 +75,7 @@ export default class Check {
               indexes.map((i, j) => [groups[j][i].name, groups[j][i].id]),
             ),
             undefined,
-            '1',
+            "1",
             false,
           ),
         );

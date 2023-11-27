@@ -19,14 +19,14 @@ export interface SoldoutFilm {
   venue: string;
 }
 
-export type CheckProp = ConstructorType<Check>;
+export type CheckConstructor = ConstructorType<Check>;
 export interface CheckConfig {
   type: "name" | "date";
   key: string | number;
   isCheck: boolean;
 }
 
-export type ViewProp = ConstructorType<View>;
+export type ViewConstructor = ConstructorType<View>;
 export interface ViewJoinFilmIds {
   [k: Film["name"]]: Film["id"] | undefined;
 }

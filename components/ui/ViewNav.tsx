@@ -5,7 +5,7 @@ import ViewGroup from "@/lib/viewGroup";
 import { ViewInfo } from "@/lib/definitions";
 
 interface Nav {
-  handleViewChange: (k: View["id"]) => void;
+  handleViewChange: (k: View) => void;
   handleViewRemove: (k: View) => void;
   viewGroups: View[][];
   curViewId: View["id"];
@@ -33,7 +33,7 @@ export default function ViewNav({
                 viewGroup.map((view, j) => (
                   <ViewSwitch
                     key={view.id}
-                    handleViewChange={() => handleViewChange(view.id)}
+                    handleViewChange={() => handleViewChange(view)}
                     handleViewRemove={() => handleViewRemove(view)}
                     isChecked={view.id == curViewId}
                     isFirst={i == 0 && j == 0}
