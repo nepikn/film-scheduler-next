@@ -12,7 +12,7 @@ export default class Check {
     [k: Film["date"]]: boolean;
   };
 
-  constructor(prevCheck?: CheckConstructor, config?: CheckConfig) {
+  constructor(prevCheck?: CheckConstructor | null, config?: CheckConfig) {
     if (prevCheck) {
       this.name = { ...prevCheck.name };
       this.date = { ...prevCheck.date };

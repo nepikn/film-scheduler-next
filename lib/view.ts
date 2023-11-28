@@ -22,6 +22,8 @@ export default class View {
   }
 
   remove() {
+    console.log([this.id, View.removed]);
+
     View.removed.add(this.id);
   }
 

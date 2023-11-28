@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   eachWeekOfInterval,
@@ -32,7 +34,7 @@ export default function Calendar({
   handleJoinChange,
 }: CalendarProp) {
   const [monthStart, setMonthStart] = useState(new Date("2023-11"));
-  const sortFilms = filteredFilms.toSorted((a, b) =>
+  const sortFilms = [...filteredFilms].sort((a, b) =>
     view.getSkipStatus(a) == view.getSkipStatus(b)
       ? +a.time.start - +b.time.start
       : view.getSkipStatus(a)

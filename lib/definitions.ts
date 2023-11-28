@@ -1,6 +1,12 @@
 import Film from "./film";
-import View from "./view";
 import Check from "./check";
+import View from "./view";
+
+type FlagExcludedType<Base, Type> = {
+  [Key in keyof Base]: Base[Key] extends Type ? never : Key;
+};
+type AllowedNames<Base, Type> = FlagExcludedType<Base, Type>[keyof Base];
+type ConstructorType<T> = Pick<T, AllowedNames<T, Function>>;
 
 export interface AsideAction {
   type: "clearNameFilter";
@@ -35,8 +41,12 @@ export interface ViewInfo {
   index: number;
 }
 
-type FlagExcludedType<Base, Type> = {
-  [Key in keyof Base]: Base[Key] extends Type ? never : Key;
-};
-type AllowedNames<Base, Type> = FlagExcludedType<Base, Type>[keyof Base];
-type ConstructorType<T> = Pick<T, AllowedNames<T, Function>>;
+export interface ViewState {
+  check: Check;
+  viewId: string;
+  userViews: View[];
+}
+export interface LocalConfig {
+  checkConstructor: CheckConstructor;
+  userViewConstructors: ViewConstructor[];
+}

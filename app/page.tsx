@@ -1,29 +1,41 @@
 "use client";
 
 import Calendar from "@/components/ui/Calendar";
+import IcsDownloadLink from "@/components/ui/IcsDownloadLink";
 import NameFilter from "@/components/ui/NameFilter";
 import Table from "@/components/ui/Table";
 import ViewNav from "@/components/ui/ViewNav";
 import Aside from "@/components/ui/aside";
-import type { FilmConfig, CheckConfig } from "@/lib/definitions";
-import Film from "@/lib/film";
-import View from "@/lib/view";
+import type { CheckConfig, FilmConfig } from "@/lib/definitions";
+import type Film from "@/lib/film";
+import { getLocalConfig } from "@/lib/localforage";
 import useViewReducer from "@/lib/viewReducer";
-import IcsDownloadLink from "../components/ui/IcsDownloadLink";
+import View from "@/lib/view";
 import localforage from "localforage";
+import { useEffect } from "react";
 
 export default function App() {
   const [state, dispatch] = useViewReducer();
-  console.log(state);
 
   const { check, viewId, userViews } = state;
   const validViews = check.getValidViews().filter((v) => !v.isRemoved);
   const filteredFilms = check.getFilteredFilms();
   const view = [...userViews, ...validViews].find((v) => v.id == viewId)!;
+  console.log(userViews[0].id, viewId);
 
   if (!view) {
     console.log("no view");
   }
+
+  useEffect(() => {
+    getLocalConfig().then((val) => {
+      console.log(val);
+
+      if (!val) return;
+
+      dispatch({ type: "localize", localConfig: val });
+    });
+  }, []);
 
   return (
     <main className="m-auto grid gap-8 px-16 py-8">
@@ -40,7 +52,7 @@ export default function App() {
               viewGroups={[userViews, validViews]}
               curViewId={view.id}
             />
-            <IcsDownloadLink {...{ filteredFilms, view }} />
+            {/* <IcsDownloadLink {...{ filteredFilms, view }} /> */}
           </div>
         </div>
         <Calendar

@@ -1,69 +1,48 @@
 "use client";
 
-import Check from "./check";
-import View from "./view";
-import { CheckConfig } from "./definitions";
-import ViewGroup from "./viewGroup";
 import { useReducer } from "react";
-import { getLocalConfig, setLocalConfig } from "./useLocalStorage";
-import localforage from "localforage";
+import Check from "./check";
+import { CheckConfig, LocalConfig, ViewState } from "./definitions";
+import { setLocalConfig } from "./localforage";
+import View from "./view";
 
 export default function useViewReducer() {
-  localforage
-    .getItem("key")
-    .then(function (value) {
-      console.log(value);
-    })
-    .catch(function (err) {
-      console.error(err);
-    });
   const [state, dispatch] = useReducer(reducer, null, () => {
-    const localUserViews = getLocalConfig().userViewConstructors?.map(
-      (construtor) => new View(construtor.joinIds),
-    ) ?? [new View()];
-
+    const userViews = [new View()];
     return {
-      check: new Check(getLocalConfig().checkConstructor),
-      viewId: localUserViews[0].id,
-      userViews: localUserViews,
+      check: new Check(),
+      viewId: userViews[0].id,
+      userViews: userViews,
       // removedIdSets: { [View.userViewId]: new Set() },
-    } satisfies ReturnType<typeof reducer>;
+    };
   });
+
+  // return [state, dispatch] as const;
 
   return [
     state,
     (action: Action) => {
       const nextState = reducer(state, action);
 
-      setLocalConfig("check", nextState.check);
-      setLocalConfig("userViews", nextState.userViews);
-      console.log(nextState.userViews);
+      setLocalConfig({
+        checkConstructor: nextState.check,
+        userViewConstructors: nextState.userViews,
+      });
 
       dispatch(action);
     },
   ] as const;
 }
 
-interface ViewState {
-  check: Check;
-  viewId: string;
-  userViews: View[];
-  // removedIdSets: {
-  //   [k: ViewGroup["id"]]: Set<View["id"]>;
-  // };
-}
-
 type Action =
+  | { type: "localize"; localConfig: LocalConfig }
   | { type: "updateUserViews"; newView: View }
   | {
       type: "clearNameFilter";
-      // nextViewId: View["id"];
     }
   | {
       type: "updateCheck";
       checkConfig: CheckConfig;
-      // isUserViewGroup: boolean;
-      // nextViewId: View["id"];
     }
   // | {
   //     type: "removeView";
@@ -76,9 +55,20 @@ function reducer(state: ViewState, action: Action): ViewState {
   const { viewId, check, userViews } = state;
   const isUserViewGroup = !!userViews.find((v) => v.id == viewId);
 
-  // console.info(state, action);
-
+  console.log([state, action]);
   switch (action.type) {
+    case "localize": {
+      const userViews = action.localConfig.userViewConstructors.map(
+        (construtor) => new View(construtor.joinIds),
+      ) ?? [new View()];
+
+      return {
+        check: new Check(action.localConfig.checkConstructor),
+        viewId: userViews[0].id,
+        userViews: userViews,
+      };
+    }
+
     case "updateUserViews": {
       return {
         ...state,
@@ -104,7 +94,6 @@ function reducer(state: ViewState, action: Action): ViewState {
       const firstValidView = nextCheck.getValidViews()[0];
       // const nextViewRemoved = structuredClone(viewRemoved);
       // nextViewRemoved[1] = {};
-
       return {
         // removedIdSets: removedIdSets,
         check: nextCheck,
@@ -116,7 +105,6 @@ function reducer(state: ViewState, action: Action): ViewState {
     case "clearNameFilter": {
       // const nextSets = { ...removedIdSets };
       // delete nextSets[action.viewGroupId];
-
       return {
         // removedIdSets: removedIdSets,
         check: new Check({ ...check, name: {} }),
@@ -128,9 +116,7 @@ function reducer(state: ViewState, action: Action): ViewState {
     // case "removeView": {
     //   // const nextViewRemoved = structuredClone(viewRemoved);
     //   // const { groupId, id } = action.targView;
-
     //   // nextViewRemoved[groupId][id] = true;
-
     //   return {
     //     ...state,
     //     // viewRemoved: nextViewRemoved,
