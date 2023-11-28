@@ -1,20 +1,66 @@
 import Film from "@/lib/film";
-import getIcsLink from "@/lib/ics";
 import View from "@/lib/view";
+import clsx from "clsx";
+import { formatISO } from "date-fns";
+import * as ics from "ics";
 
-export default function IcsDownloadLink(prop: {
+export default function IcsDownloadLink({
+  filteredFilms,
+  view,
+}: {
   filteredFilms: Film[];
   view: View;
 }) {
+  const joinedFilms = filteredFilms.filter((film) => view.getJoinStatus(film));
   return (
     <a
       download={"金馬.ics"}
-      href={getIcsLink(
-        prop.filteredFilms.filter((film) => prop.view.getJoinStatus(film)),
+      href={joinedFilms.length ? getIcsLink(joinedFilms) : undefined}
+      className={clsx(
+        joinedFilms.length || "hidden",
+        "flex h-full items-center rounded border border-zinc-200 bg-white px-3 py-3 leading-none shadow-sm hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-neutral-600 dark:hover:text-zinc-50",
       )}
-      className="flex h-full items-center rounded border border-zinc-200 bg-white px-3 py-3 leading-none shadow-sm hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-neutral-600 dark:hover:text-zinc-50"
     >
       <span>下載 ics</span>
     </a>
   );
+}
+
+const ADDRESS = {
+  MUVIE:
+    "台北松仁威秀影城 MUVIE CINEMAS, 110, Taiwan, Taipei City, Xinyi District, Songren Rd, 58號10 樓",
+  信義威秀:
+    "Vieshow Cinemas Xinyi, No. 20號, Songshou Rd, Xinyi District, Taipei City, Taiwan 110",
+};
+
+function getIcsLink(films: Film[], format = { summary: "電影：%s" }) {
+  const { error, value } = ics.createEvents(
+    films.map((film) => {
+      const [theater, screen] = film.venue.split(" ") as [
+        keyof typeof ADDRESS,
+        string?,
+      ];
+
+      return {
+        start: formatISO(film.time.start)
+          .split(/-|T|:|\+/)
+          .map((s) => +s)
+          .slice(0, 5) as [number, number, number, number, number],
+        duration: {
+          hours: Math.floor(film.duration / 60),
+          minutes: film.duration % 60,
+        },
+        title: format.summary.replace("%s", film.name),
+        description: screen ?? "",
+        location: ADDRESS[theater],
+      };
+    }),
+  );
+
+  if (error || !value) {
+    console.error(error);
+    return;
+  }
+
+  return URL.createObjectURL(new Blob([value]));
 }

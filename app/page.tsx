@@ -8,20 +8,18 @@ import ViewNav from "@/components/ui/ViewNav";
 import Aside from "@/components/ui/aside";
 import type { CheckConfig, FilmConfig } from "@/lib/definitions";
 import type Film from "@/lib/film";
-import { getLocalConfig } from "@/lib/localforage";
+import { getLocalConfig, setLocalConfig } from "@/lib/localforage";
+import type View from "@/lib/view";
 import useViewReducer from "@/lib/viewReducer";
-import View from "@/lib/view";
 import localforage from "localforage";
 import { useEffect } from "react";
 
 export default function App() {
-  const [state, dispatch] = useViewReducer();
-
-  const { check, viewId, userViews } = state;
-  const validViews = check.getValidViews().filter((v) => !v.isRemoved);
+  const [{ check, viewId, userViews }, dispatch] = useViewReducer();
+  const validViews = check.getShownValidViews();
   const filteredFilms = check.getFilteredFilms();
   const view = [...userViews, ...validViews].find((v) => v.id == viewId)!;
-  console.log(userViews[0].id, viewId);
+  // console.log(userViews[0].id, viewId);
 
   if (!view) {
     console.log("no view");
@@ -29,20 +27,25 @@ export default function App() {
 
   useEffect(() => {
     getLocalConfig().then((val) => {
-      console.log(val);
-
       if (!val) return;
 
       dispatch({ type: "localize", localConfig: val });
     });
   }, []);
 
+  useEffect(() => {
+    setLocalConfig({
+      checkConstructor: check,
+      userViewConstructors: userViews,
+    });
+  }, [check, userViews]);
+
   return (
     <main className="m-auto grid gap-8 px-16 py-8">
-      <button onClick={() => localforage.clear()}>Clear</button>
       <div className="grid gap-2">
         <div className="grid gap-2">
           <NameFilter check={check} handleChange={handleFilterChange} />
+          <button onClick={() => localforage.clear()}>Clear</button>
           <div className="grid grid-cols-[1fr_auto] items-center gap-2">
             <ViewNav
               handleViewChange={(view: View) =>
@@ -52,7 +55,7 @@ export default function App() {
               viewGroups={[userViews, validViews]}
               curViewId={view.id}
             />
-            {/* <IcsDownloadLink {...{ filteredFilms, view }} /> */}
+            <IcsDownloadLink {...{ filteredFilms, view }} />
           </div>
         </div>
         <Calendar
@@ -81,7 +84,7 @@ export default function App() {
         (_, i, views) => views[i - offset]?.id == removedViewId,
       );
 
-    removedView.remove();
+    dispatch({ type: "removeView", removedView: removedView });
     dispatch({
       type: "changeView",
       nextView:
@@ -99,7 +102,7 @@ export default function App() {
   }
 
   function handleCalendarTableChange(this: Film, filmConfig: FilmConfig) {
-    const newView = new View(view.joinIds, {
+    const newView = view.generateByConfig({
       film: this,
       filmConfig: filmConfig,
     });

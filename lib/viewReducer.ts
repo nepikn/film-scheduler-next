@@ -13,21 +13,13 @@ export default function useViewReducer() {
       check: new Check(),
       viewId: userViews[0].id,
       userViews: userViews,
-      // removedIdSets: { [View.userViewId]: new Set() },
-    };
+    } satisfies ReturnType<typeof reducer>;
   });
-
-  // return [state, dispatch] as const;
 
   return [
     state,
     (action: Action) => {
-      const nextState = reducer(state, action);
-
-      setLocalConfig({
-        checkConstructor: nextState.check,
-        userViewConstructors: nextState.userViews,
-      });
+      const { check, userViews } = reducer(state, action);
 
       dispatch(action);
     },
@@ -44,18 +36,16 @@ type Action =
       type: "updateCheck";
       checkConfig: CheckConfig;
     }
-  // | {
-  //     type: "removeView";
-  //     // targView: View;
-  //     nextViewId: string;
-  //   }
+  | {
+      type: "removeView";
+      removedView: View;
+    }
   | { type: "changeView"; nextView: View };
 
 function reducer(state: ViewState, action: Action): ViewState {
   const { viewId, check, userViews } = state;
   const isUserViewGroup = !!userViews.find((v) => v.id == viewId);
 
-  console.log([state, action]);
   switch (action.type) {
     case "localize": {
       const userViews = action.localConfig.userViewConstructors.map(
@@ -72,13 +62,23 @@ function reducer(state: ViewState, action: Action): ViewState {
     case "updateUserViews": {
       return {
         ...state,
-        userViews: isUserViewGroup
-          ? userViews.toSpliced(
-              userViews.findIndex((v) => v.id == viewId),
-              1,
-              action.newView,
-            )
-          : [...userViews, action.newView],
+        userViews: userViews.toSpliced(
+          isUserViewGroup
+            ? userViews.findIndex((v) => v.id == viewId)
+            : userViews.length,
+          1,
+          action.newView,
+        ),
+      };
+    }
+
+    case "removeView": {
+      const removedView = action.removedView;
+
+      View.remove(removedView);
+      return {
+        ...state,
+        userViews: userViews.filter((v) => !v.removed),
       };
     }
 
@@ -91,14 +91,14 @@ function reducer(state: ViewState, action: Action): ViewState {
 
     case "updateCheck": {
       const nextCheck = new Check(check, action.checkConfig);
-      const firstValidView = nextCheck.getValidViews()[0];
+      const firstValidView = nextCheck.getShownValidViews()[0];
       // const nextViewRemoved = structuredClone(viewRemoved);
       // nextViewRemoved[1] = {};
       return {
         // removedIdSets: removedIdSets,
+        ...state,
         check: nextCheck,
         viewId: isUserViewGroup || !firstValidView ? viewId : firstValidView.id,
-        userViews: userViews,
       };
     }
 
@@ -107,9 +107,9 @@ function reducer(state: ViewState, action: Action): ViewState {
       // delete nextSets[action.viewGroupId];
       return {
         // removedIdSets: removedIdSets,
+        ...state,
         check: new Check({ ...check, name: {} }),
         viewId: isUserViewGroup ? viewId : userViews[0].id,
-        userViews: userViews,
       };
     }
 

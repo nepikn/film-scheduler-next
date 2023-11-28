@@ -35,7 +35,7 @@ export default class Check {
     );
   }
 
-  getValidViews() {
+  getShownValidViews() {
     const filteredFilms = this.getFilteredFilms();
     if (!filteredFilms.length) return [];
 
@@ -54,14 +54,13 @@ export default class Check {
     let loop = 1;
     let i = 0;
     while (true) {
-      // console.log(indexes);
       const curFilm = groups[i][indexes[i]];
-      const isOverlapping = indexes
+      const overlapping = indexes
         .slice(0, i)
         .map((index, j) => groups[j][index])
         .some((film) => areIntervalsOverlapping(curFilm.time, film.time));
 
-      if (!isOverlapping) {
+      if (!overlapping) {
         loop++;
 
         if (i < groups.length - 1) {
@@ -69,26 +68,22 @@ export default class Check {
           continue;
         }
 
-        result.push(
-          new View(
-            Object.fromEntries(
-              indexes.map((i, j) => [groups[j][i].name, groups[j][i].id]),
-            ),
-            undefined,
-            "1",
-            false,
+        const view = new View(
+          Object.fromEntries(
+            indexes.map((i, j) => [groups[j][i].name, groups[j][i].id]),
           ),
+          undefined,
+          "1",
+          false,
         );
-      }
 
-      // if (indexes[i] < groups[i].length - 1) {
-      //   indexes[i]++;
-      //   continue;
-      // }
+        if (!view.removed) {
+          result.push(view);
+        }
+      }
 
       while (indexes[i] >= groups[i].length - 1) {
         if (i == 0 || loop++ >= 4999) {
-          // console.log(k);
           return result;
         }
 

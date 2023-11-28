@@ -66,8 +66,6 @@ function ViewSwitch({
   handleViewRemove,
   isChecked,
 }: ViewSwitch) {
-  console.log(isChecked);
-
   return (
     <fieldset className="group relative grid items-stretch">
       <button

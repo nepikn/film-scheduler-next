@@ -16,8 +16,6 @@ export default function Table({
   handleChange,
 }: TableProp) {
   const titles: FilmPropKey[] = ["name", "date", "start", "end", "join"];
-  // console.log("table");
-
   const rows = filteredFilms.map((film) => {
     return (
       <li key={film.id} data-id={film.id}>

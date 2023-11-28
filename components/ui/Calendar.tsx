@@ -47,7 +47,7 @@ export default function Calendar({
   }).map((sun) => (
     <fieldset key={sun.getTime()} className="grid grid-cols-7 divide-x">
       {eachDayOfInterval({ start: sun, end: endOfWeek(sun) }).map((date) => (
-        <fieldset
+        <div
           key={date.getTime()}
           className="space-y-3 border-neutral-300 p-4 py-3"
         >
@@ -67,7 +67,7 @@ export default function Calendar({
               />
             </>
           )}
-        </fieldset>
+        </div>
       ))}
     </fieldset>
   ));
@@ -141,7 +141,7 @@ function Agenda({
   handleJoinChange: CalendarProp["handleJoinChange"];
 }) {
   return (
-    <fieldset className="max-h-32 space-y-2 overflow-auto px-2 pb-1 text-right">
+    <div className="max-h-32 space-y-2 overflow-auto px-2 pb-1 text-right">
       {films.map((film) => {
         const pClass = clsx(
           "leading-none",
@@ -170,6 +170,6 @@ function Agenda({
           </label>
         );
       })}
-    </fieldset>
+    </div>
   );
 }

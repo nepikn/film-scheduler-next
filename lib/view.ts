@@ -12,20 +12,16 @@ interface ViewConfig {
 export default class View {
   static userViewGroupId = "0";
   static removed = new Set();
-  // group;
-  // index;
-  joinIds;
-  groupId;
-  id;
-  get isRemoved() {
+  static remove(view: View) {
+    this.removed.add(view.id);
+  }
+  get removed() {
     return View.removed.has(this.id);
   }
 
-  remove() {
-    console.log([this.id, View.removed]);
-
-    View.removed.add(this.id);
-  }
+  joinIds;
+  groupId;
+  id;
 
   constructor(
     joinIds?: ViewJoinFilmIds,
@@ -44,6 +40,10 @@ export default class View {
     if (config) {
       this.handleChange(config);
     }
+  }
+
+  generateByConfig(config: ViewConfig) {
+    return new View(this.joinIds, config);
   }
 
   handleChange({ film, filmConfig }: ViewConfig) {
@@ -76,7 +76,6 @@ export default class View {
     const joinFilmId = this.joinIds[film.name];
     return !!joinFilmId && film.id != joinFilmId;
   }
-
   getJoinStatus(film: Film) {
     return film.id == this.joinIds[film.name];
   }
