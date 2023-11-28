@@ -1,6 +1,6 @@
 import { SoldoutFilm } from "@/lib/definitions";
 
-const keys = ["name", "start", "venue"];
+const keys = ["name", "start", "venue"] satisfies (keyof SoldoutFilm)[];
 const soldoutFilms = [
   ["五月雪", "2023/11/09 18:00", "MUVIE"],
   ["獻給火山戀人的安魂曲", "2023/11/09 19:10", "信義威秀 11"],
@@ -124,7 +124,9 @@ const soldoutFilms = [
   ["莊園魅影", "2023/11/26 21:50", "信義威秀 9"],
 ].map(
   (infos) =>
-    Object.fromEntries(infos.map((info, i) => [keys[i], info])) as SoldoutFilm,
+    Object.fromEntries(
+      infos.map((info, i) => [keys[i], info]),
+    ) as unknown as SoldoutFilm,
 );
 
 export default soldoutFilms;

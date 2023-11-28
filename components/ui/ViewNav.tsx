@@ -1,8 +1,6 @@
 import { Fragment } from "react";
 import View from "../../lib/view";
 import clsx from "clsx";
-import ViewGroup from "@/lib/viewGroup";
-import { ViewInfo } from "@/lib/definitions";
 
 interface Nav {
   handleViewChange: (k: View) => void;

@@ -16,14 +16,7 @@ export default function useViewReducer() {
     } satisfies ReturnType<typeof reducer>;
   });
 
-  return [
-    state,
-    (action: Action) => {
-      const { check, userViews } = reducer(state, action);
-
-      dispatch(action);
-    },
-  ] as const;
+  return [state, dispatch] as const;
 }
 
 type Action =

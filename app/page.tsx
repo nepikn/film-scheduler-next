@@ -6,19 +6,22 @@ import NameFilter from "@/components/ui/NameFilter";
 import Table from "@/components/ui/Table";
 import ViewNav from "@/components/ui/ViewNav";
 import Aside from "@/components/ui/aside";
-import type { CheckConfig, FilmConfig } from "@/lib/definitions";
+import type { CheckConfig, FilmConfig, LocalConfig } from "@/lib/definitions";
 import type Film from "@/lib/film";
 import { getLocalConfig, setLocalConfig } from "@/lib/localforage";
 import type View from "@/lib/view";
 import useViewReducer from "@/lib/viewReducer";
 import localforage from "localforage";
-import { useEffect } from "react";
+import { experimental_useEffectEvent, useEffect } from "react";
 
 export default function App() {
   const [{ check, viewId, userViews }, dispatch] = useViewReducer();
   const validViews = check.getShownValidViews();
   const filteredFilms = check.getFilteredFilms();
   const view = [...userViews, ...validViews].find((v) => v.id == viewId)!;
+  // const onLocalConfig = useEffectEvent((val: LocalConfig) =>
+  //   dispatch({ type: "localize", localConfig: val }),
+  // );
   // console.log(userViews[0].id, viewId);
 
   if (!view) {
@@ -31,7 +34,7 @@ export default function App() {
 
       dispatch({ type: "localize", localConfig: val });
     });
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     setLocalConfig({

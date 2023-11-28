@@ -1,8 +1,6 @@
 import { v4, v5 } from "uuid";
 import Film from "./film";
-import { FilmConfig } from "./definitions";
-import { ViewJoinFilmIds } from "./definitions";
-import ViewGroup from "./viewGroup";
+import { FilmConfig,ViewJoinFilmIds } from "./definitions";
 
 interface ViewConfig {
   film: Film;
