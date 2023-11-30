@@ -1,6 +1,7 @@
-import soldoutFilms from "@/public/film/golden-tp-soldout";
+import { getSoldoutByFilm } from "@/public/film/golden-tp-soldout";
 import {
   add,
+  areIntervalsOverlapping,
   format,
   getDayOfYear,
   parse,
@@ -11,12 +12,33 @@ import { v5 } from "uuid";
 import filmData from "../public/film/film-golden-tp-id";
 
 type FormatKey = keyof Film["format"];
+interface Time extends Interval {
+  start: Date;
+  end: Date;
+  date: Date;
+  [Symbol.toPrimitive]: (hint: string) => string | number;
+}
 
 export default class Film {
+  static _instances: Film[];
+  static get instances() {
+    return (
+      this._instances ??
+      (this._instances = filmData.map((row) => new this(...row)))
+    );
+  }
+  static names = new Set(this.instances.map((film) => film.name));
+
+  static getSoldoutStatus(name: string) {
+    return this.instances
+      .filter((film) => film.name == name)
+      .every((film) => film.soldout);
+  }
+
+  id;
   name;
   venue;
-  id;
-  isSoldout;
+  soldout;
 
   date!: string;
   start!: string;
@@ -27,24 +49,12 @@ export default class Film {
     start: "HH:mm",
     end: "HH:mm",
   };
-  time: {
-    [Key in FormatKey]: Date;
-  } & {
-    [Symbol.toPrimitive]: (hint: string) => string | number;
-  };
+  time: Time;
 
-  static nameSet: Set<string> = new Set();
-  static _instances: Film[];
-  static get instances() {
-    return (
-      this._instances ??
-      (this._instances = filmData.map((row) => new this(...row)))
+  isOverlapping(...films: (Film | undefined)[]) {
+    return films.some(
+      (film) => film && areIntervalsOverlapping(film.time, this.time),
     );
-  }
-  static getSoldoutStatus(name: string) {
-    return this.instances
-      .filter((film) => film.name == name)
-      .every((film) => film.isSoldout);
   }
 
   constructor(
@@ -59,10 +69,10 @@ export default class Film {
   ) {
     const timeStart = start ? new Date(start) : new Date();
 
-    this.name = name;
-    this.venue = venue;
     this.id = id;
+    this.name = name;
     this.duration = duration;
+    this.venue = venue;
 
     this.time = {
       start: timeStart,
@@ -77,12 +87,6 @@ export default class Film {
       [Symbol.toPrimitive]: () => `${this.start}-${this.end}`,
     };
 
-    this.isSoldout = !!soldoutFilms.find(
-      (soldout) =>
-        soldout.name == this.name &&
-        Date.parse(soldout.start) == this.time.start.getTime(),
-    );
-
     for (const key of Object.keys(this.format) as FormatKey[]) {
       const time = this.time[key];
       const timeFormat = this.format[key];
@@ -96,10 +100,8 @@ export default class Film {
       });
     }
 
-    Film.nameSet.add(this.name);
-    // if (!Film.instances.find((film) => film.id == this.id)) {
-    //   Film.instances.push(this);
-    // }
+    // after film.time.start initialize
+    this.soldout = getSoldoutByFilm(this);
   }
 
   // get date() {

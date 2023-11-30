@@ -8,7 +8,8 @@ import { FilmConfig } from "@/lib/definitions";
 interface FilmInputProp {
   prop: FilmPropKey;
   film: Film;
-  view: View;
+  // view: View;
+  checked?: boolean;
   disabled?: boolean;
   className?: string;
   handleChange: (k: FilmConfig) => void;
@@ -25,36 +26,37 @@ const type: { [k in FilmPropKey]: string } = {
 export default function FilmInput({
   prop,
   film,
-  view,
-  disabled,
+  // view,
+  checked,
   className,
   handleChange,
 }: FilmInputProp) {
   // const [val, setVal] = useState(
   //   name == "join" ? view.getChecked(film) : film[name]
   // );
-  return (
-    <input
-      type={type[prop]}
-      value={prop == "name" ? film[prop] : undefined}
-      defaultValue={prop != "join" && prop != "name" ? film[prop] : undefined}
-      // value={name != "join" ? film[name] : undefined}
-      name={prop}
-      checked={prop == "join" ? view.getJoinStatus(film) : undefined}
-      className={clsx("cursor-pointer disabled:cursor-default", className)}
-      onChange={(e) =>
-        handleChange(
-          prop == "join"
-            ? {
-                propChange: "join",
-                isCheck: e.target.checked,
-              }
-            : {
-                propChange: prop,
-                nextValue: e.target.value,
-              },
-        )
-      }
-    />
-  );
+  const inputProps: React.InputHTMLAttributes<HTMLInputElement> = {
+    type: type[prop],
+    value: prop == "name" ? film[prop] : undefined,
+    defaultValue: prop != "join" && prop != "name" ? film[prop] : undefined,
+    // value=name != "join" ? film[name] : undefined,
+    name: prop,
+    className: clsx("cursor-pointer disabled:cursor-default", className),
+  };
+
+  if (prop == "join") {
+    inputProps.checked = checked;
+    inputProps.onChange = (e) =>
+      handleChange({
+        propChange: prop,
+        checked: e.target.checked,
+      });
+  } else {
+    inputProps.onChange = (e) =>
+      handleChange({
+        propChange: prop,
+        nextValue: e.target.value,
+      });
+  }
+
+  return <input {...inputProps} />;
 }

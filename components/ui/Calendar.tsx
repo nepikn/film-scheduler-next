@@ -140,20 +140,32 @@ function Agenda({
   view: View;
   handleJoinChange: CalendarProp["handleJoinChange"];
 }) {
+  const checkStatus = films.map((film) => view.getJoinStatus(film));
   return (
-    <div className="max-h-32 space-y-2 overflow-auto px-2 pb-1 text-right">
-      {films.map((film) => {
-        const pClass = clsx(
-          "leading-none",
-          film.isSoldout && "text-gray-400 line-through decoration-4",
-        );
+    <div className="max-h-48 space-y-2 overflow-auto px-2 pb-1 text-right">
+      {films.map((film, i) => {
+        const pClass = clsx("leading-none");
+        const checked = checkStatus[i];
+        const overlapSiblingAndBothChecked = () =>
+          checked &&
+          [-1, 1].some((offset) => {
+            const targFilm = films[i + offset];
+            return (
+              targFilm &&
+              checkStatus[i + offset] &&
+              film.isOverlapping(targFilm)
+            );
+          });
 
         return (
           <label
             key={film.id}
             className={clsx(
               "grid cursor-pointer grid-cols-[1fr_auto] gap-x-2 gap-y-1 hover:text-gray-500 dark:hover:text-gray-300 [&:has(:disabled)]:cursor-default",
-              view.getSkipStatus(film) && "text-gray-400",
+              film.soldout && "line-through decoration-4",
+              (film.soldout || view.getSkipStatus(film)) && "text-gray-400",
+              overlapSiblingAndBothChecked() &&
+                "text-rose-400 dark:hover:text-rose-200",
             )}
           >
             <p className={clsx("font-semibold", pClass)}>{film.name}</p>
@@ -161,8 +173,8 @@ function Agenda({
               prop="join"
               // val={view.getChecked(film)}
               film={film}
-              view={view}
-              // disabled={film.isSoldout}
+              // view={view}
+              checked={checked}
               className={"row-span-2"}
               handleChange={handleJoinChange.bind(film)}
             />

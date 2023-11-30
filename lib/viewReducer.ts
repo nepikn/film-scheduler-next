@@ -42,7 +42,7 @@ function reducer(state: ViewState, action: Action): ViewState {
   switch (action.type) {
     case "localize": {
       const userViews = action.localConfig.userViewConstructors.map(
-        (construtor) => new View(construtor.joinIds),
+        (construtor) => new View(construtor.joiningIds),
       ) ?? [new View()];
 
       return {

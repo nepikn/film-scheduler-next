@@ -14,7 +14,7 @@ export interface AsideAction {
 
 export type FilmPropKey = "name" | "date" | "start" | "end" | "join";
 export type FilmConfig =
-  | { propChange: "join"; isCheck: boolean }
+  | { propChange: "join"; checked: boolean }
   | {
       propChange: Exclude<FilmPropKey, "join">;
       nextValue: string;
@@ -33,7 +33,7 @@ export interface CheckConfig {
 }
 
 export type ViewConstructor = ConstructorType<View>;
-export interface ViewJoinFilmIds {
+export interface ViewJoiningIds {
   [k: Film["name"]]: Film["id"] | undefined;
 }
 export interface ViewInfo {

@@ -11,7 +11,7 @@ interface NameFilter {
 export default function NameFilter({ check, handleChange }: NameFilter) {
   return (
     <fieldset className="flex flex-wrap gap-x-2">
-      {Array.from(Film.nameSet).map((name) => {
+      {Array.from(Film.names).map((name) => {
         const isCheck = !!check.name[name];
         return (
           <label

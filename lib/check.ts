@@ -1,8 +1,6 @@
-import { areIntervalsOverlapping } from "date-fns";
 import Film from "./film";
 import View from "./view";
-import { CheckConfig } from "./definitions";
-import { CheckConstructor } from "./definitions";
+import { CheckConfig, CheckConstructor } from "./definitions";
 
 export default class Check {
   name: {
@@ -58,7 +56,7 @@ export default class Check {
       const overlapping = indexes
         .slice(0, i)
         .map((index, j) => groups[j][index])
-        .some((film) => areIntervalsOverlapping(curFilm.time, film.time));
+        .some((film) => curFilm.isOverlapping(film));
 
       if (!overlapping) {
         loop++;

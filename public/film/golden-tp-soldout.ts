@@ -1,4 +1,13 @@
 import { SoldoutFilm } from "@/lib/definitions";
+import Film from "@/lib/film";
+
+export function getSoldoutByFilm(film: Film) {
+  return !!soldoutFilms.find(
+    (soldout) =>
+      soldout.name == film.name &&
+      Date.parse(soldout.start) == film.time.start.getTime(),
+  );
+}
 
 const keys = ["name", "start", "venue"] satisfies (keyof SoldoutFilm)[];
 const soldoutFilms = [
@@ -128,5 +137,3 @@ const soldoutFilms = [
       infos.map((info, i) => [keys[i], info]),
     ) as unknown as SoldoutFilm,
 );
-
-export default soldoutFilms;

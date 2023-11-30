@@ -27,7 +27,8 @@ export default function Table({
                   prop={title}
                   // val={title == "join" ? view.getChecked(film) : film[title]}
                   film={film}
-                  view={view}
+                  checked={view.getJoinStatus(film)}
+                  // view={view}
                   handleChange={handleChange.bind(film)}
                 />
               </label>

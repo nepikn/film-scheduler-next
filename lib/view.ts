@@ -1,6 +1,6 @@
 import { v4, v5 } from "uuid";
 import Film from "./film";
-import { FilmConfig,ViewJoinFilmIds } from "./definitions";
+import { FilmConfig, ViewJoiningIds } from "./definitions";
 
 interface ViewConfig {
   film: Film;
@@ -17,22 +17,22 @@ export default class View {
     return View.removed.has(this.id);
   }
 
-  joinIds;
+  joiningIds;
   groupId;
   id;
 
   constructor(
-    joinIds?: ViewJoinFilmIds,
+    joinIds?: ViewJoiningIds,
     config?: ViewConfig,
     groupId = View.userViewGroupId,
     randomId = true,
   ) {
-    this.joinIds = { ...joinIds };
+    this.joiningIds = { ...joinIds };
     this.groupId = groupId;
     this.id = randomId
       ? v4()
       : v5(
-          Object.values(this.joinIds).join(""),
+          Object.values(this.joiningIds).join(""),
           "72d85d0e-f574-41d3-abee-1028cf9dd3c1",
         );
     if (config) {
@@ -41,19 +41,18 @@ export default class View {
   }
 
   generateByConfig(config: ViewConfig) {
-    return new View(this.joinIds, config);
+    return new View(this.joiningIds, config);
   }
 
   handleChange({ film, filmConfig }: ViewConfig) {
     const { propChange } = filmConfig;
 
     if (propChange == "join") {
-      if (filmConfig.isCheck) {
-        this.joinIds[film.name] = film.id;
+      if (filmConfig.checked) {
+        this.joiningIds[film.name] = film.id;
       } else {
-        delete this.joinIds[film.name];
+        delete this.joiningIds[film.name];
       }
-
       return;
     }
 
@@ -63,18 +62,20 @@ export default class View {
       nextValue != film.name &&
       this.getJoinStatus(film)
     ) {
-      delete this.joinIds[film.name];
+      delete this.joiningIds[film.name];
     }
 
-    // update value after film name comparison
+    // after film name comparison
     film[propChange] = nextValue;
   }
 
   getSkipStatus(film: Film): boolean {
-    const joinFilmId = this.joinIds[film.name];
-    return !!joinFilmId && film.id != joinFilmId;
+    return !!this.getJoiningIdByFilm(film) && !this.getJoinStatus(film);
   }
   getJoinStatus(film: Film) {
-    return film.id == this.joinIds[film.name];
+    return film.id == this.getJoiningIdByFilm(film);
+  }
+  getJoiningIdByFilm(film: Film) {
+    return this.joiningIds[film.name];
   }
 }
