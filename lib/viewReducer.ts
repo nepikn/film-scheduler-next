@@ -117,19 +117,8 @@ function reducer(state: ViewState, action: Action): ViewState {
         // removedIdSets: removedIdSets,
         ...state,
         check: new Check({ ...check, name: {} }),
-        viewId: isUserViewGroup ? viewId : userViews[0].id,
+        // viewId: isUserViewGroup ? viewId : userViews[0].id,
       };
     }
-
-    // case "removeView": {
-    //   // const nextViewRemoved = structuredClone(viewRemoved);
-    //   // const { groupId, id } = action.targView;
-    //   // nextViewRemoved[groupId][id] = true;
-    //   return {
-    //     ...state,
-    //     // viewRemoved: nextViewRemoved,
-    //     viewId: action.nextViewId,
-    //   };
-    // }
   }
 }
