@@ -2,19 +2,36 @@ import { AsideAction } from "@/lib/definitions";
 
 interface AsideProp {
   handleNameFilterClear: () => void;
+  handleNameFilterReverse: () => void;
+}
+
+interface Button {
+  name: string;
+  handleClick: () => void;
 }
 
 export default function Aside({
-  handleNameFilterClear: handleClick,
+  handleNameFilterClear,
+  handleNameFilterReverse,
 }: AsideProp) {
+  const buttons: Button[] = [
+    { name: "清空名稱篩選", handleClick: handleNameFilterClear },
+    { name: "反向篩選名稱", handleClick: handleNameFilterReverse },
+  ];
   return (
-    <aside className="fixed right-0 top-0">
-      <fieldset>
-        <button onClick={handleClick}>
-          <div className="whitespace-pre leading-tight">
-            {"清空名稱篩選".split("").join("\n")}
-          </div>
-        </button>
+    <aside className="fixed right-0 top-0 py-2">
+      <fieldset className="grid gap-1">
+        {buttons.map(({ name, handleClick }) => (
+          <button
+            key={name}
+            onClick={handleClick}
+            className="border border-r-0 p-2"
+          >
+            <div className="whitespace-pre leading-tight">
+              {name.split("").join("\n")}
+            </div>
+          </button>
+        ))}
       </fieldset>
     </aside>
   );

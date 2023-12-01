@@ -15,6 +15,7 @@ import localforage from "localforage";
 import { experimental_useEffectEvent, useEffect } from "react";
 
 export default function App() {
+  console.group("app");
   const [{ check, viewId, userViews }, dispatch] = useViewReducer();
   const validViews = check.getShownValidViews();
   const filteredFilms = check.getFilteredFilms();
@@ -25,7 +26,7 @@ export default function App() {
   // console.log(userViews[0].id, viewId);
 
   if (!view) {
-    console.log("no view");
+    console.error("no view");
   }
 
   useEffect(() => {
@@ -43,12 +44,12 @@ export default function App() {
     });
   }, [check, userViews]);
 
+  console.groupEnd();
   return (
     <main className="m-auto grid gap-8 px-16 py-8">
       <div className="grid gap-2">
         <div className="grid gap-2">
           <NameFilter check={check} handleChange={handleFilterChange} />
-          <button onClick={() => localforage.clear()}>Clear</button>
           <div className="grid grid-cols-[1fr_auto] items-center gap-2">
             <ViewNav
               handleViewChange={(view: View) =>
@@ -69,13 +70,14 @@ export default function App() {
           handleJoinChange={handleCalendarTableChange}
         />
       </div>
-      <Table
+      {/* <Table
         view={view}
         filteredFilms={filteredFilms}
         handleChange={handleCalendarTableChange}
-      />
+      /> */}
       <Aside
-        handleNameFilterClear={() => dispatch({ type: "clearNameFilter" })}
+        handleNameFilterReverse={() => dispatch({ type: "reverseNameCheck" })}
+        handleNameFilterClear={() => dispatch({ type: "clearNameCheck" })}
       />
     </main>
   );

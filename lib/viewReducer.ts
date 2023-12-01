@@ -5,6 +5,7 @@ import Check from "./check";
 import { CheckConfig, LocalConfig, ViewState } from "./definitions";
 import { setLocalConfig } from "./localforage";
 import View from "./view";
+import Film from "./film";
 
 export default function useViewReducer() {
   const [state, dispatch] = useReducer(reducer, null, () => {
@@ -20,10 +21,11 @@ export default function useViewReducer() {
 }
 
 type Action =
+  | { type: "reverseNameCheck" }
   | { type: "localize"; localConfig: LocalConfig }
   | { type: "updateUserViews"; newView: View }
   | {
-      type: "clearNameFilter";
+      type: "clearNameCheck";
     }
   | {
       type: "updateCheck";
@@ -38,8 +40,21 @@ type Action =
 function reducer(state: ViewState, action: Action): ViewState {
   const { viewId, check, userViews } = state;
   const isUserViewGroup = !!userViews.find((v) => v.id == viewId);
+  // console.time('reducer')
 
   switch (action.type) {
+    case "reverseNameCheck": {
+      return {
+        ...state,
+        check: new Check({
+          ...check,
+          name: Object.fromEntries(
+            Array.from(Film.names).map((name) => [name, !check.name[name]]),
+          ),
+        }),
+      };
+    }
+
     case "localize": {
       const userViews = action.localConfig.userViewConstructors.map(
         (construtor) => new View(construtor.joiningIds),
@@ -95,7 +110,7 @@ function reducer(state: ViewState, action: Action): ViewState {
       };
     }
 
-    case "clearNameFilter": {
+    case "clearNameCheck": {
       // const nextSets = { ...removedIdSets };
       // delete nextSets[action.viewGroupId];
       return {

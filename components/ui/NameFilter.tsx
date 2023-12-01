@@ -29,8 +29,8 @@ export default function NameFilter({ check, handleChange }: NameFilter) {
               onChange={(e) =>
                 handleChange({
                   type: "name",
-                  key: name,
-                  isCheck: e.target.checked,
+                  filmNameOrMonthDate: name,
+                  checked: e.target.checked,
                 })
               }
             />

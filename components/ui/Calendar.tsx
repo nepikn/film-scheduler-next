@@ -33,6 +33,7 @@ export default function Calendar({
   handleFilterChange,
   handleJoinChange,
 }: CalendarProp) {
+  console.group("cal");
   const [monthStart, setMonthStart] = useState(new Date("2023-11"));
   const sortFilms = [...filteredFilms].sort((a, b) =>
     view.getSkipStatus(a) == view.getSkipStatus(b)
@@ -72,6 +73,7 @@ export default function Calendar({
     </fieldset>
   ));
 
+  console.groupEnd();
   return (
     <div className="flex flex-col items-center gap-4">
       {/* <label>
@@ -115,8 +117,8 @@ function DateFilter({ isChecked, date, handleChange }: DateFilter) {
         onChange={(e) =>
           handleChange({
             type: "date",
-            key: date,
-            isCheck: e.target.checked,
+            filmNameOrMonthDate: date,
+            checked: e.target.checked,
           })
         }
       />

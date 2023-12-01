@@ -15,7 +15,7 @@ export default class Check {
       this.name = { ...prevCheck.name };
       this.date = { ...prevCheck.date };
       if (config) {
-        this[config.type][config.key] = config.isCheck;
+        this[config.type][config.filmNameOrMonthDate] = config.checked;
       }
     } else {
       this.name = { 燃冬: true, 霧中潛行: true };
@@ -33,7 +33,7 @@ export default class Check {
     );
   }
 
-  getShownValidViews() {
+  getShownValidViews(loopLimit = 5000) {
     const filteredFilms = this.getFilteredFilms();
     if (!filteredFilms.length) return [];
 
@@ -81,7 +81,7 @@ export default class Check {
       }
 
       while (indexes[i] >= groups[i].length - 1) {
-        if (i == 0 || loop++ >= 4999) {
+        if (i == 0 || loop++ >= loopLimit) {
           return result;
         }
 

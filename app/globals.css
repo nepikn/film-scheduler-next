@@ -3,6 +3,22 @@
 @tailwind utilities;
 
 @layer base {
+  ::-webkit-scrollbar-thumb {
+    background: hsla(0, 0%, 100%, 0.25);
+  }
+
+  ::-webkit-scrollbar {
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: black;
+  }
+
+  @media (prefers-color-scheme: light) {
+    ::-webkit-scrollbar {
+      background-color: silver;
+    }
+  }
+
   ::-moz-selection {
     color: #000;
     background: #99f6e4;

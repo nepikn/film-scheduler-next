@@ -9,7 +9,7 @@ type AllowedNames<Base, Type> = FlagExcludedType<Base, Type>[keyof Base];
 type ConstructorType<T> = Pick<T, AllowedNames<T, Function>>;
 
 export interface AsideAction {
-  type: "clearNameFilter";
+  type: "clearNameCheck";
 }
 
 export type FilmPropKey = "name" | "date" | "start" | "end" | "join";
@@ -28,8 +28,8 @@ export interface SoldoutFilm {
 export type CheckConstructor = ConstructorType<Check>;
 export interface CheckConfig {
   type: "name" | "date";
-  key: string | number;
-  isCheck: boolean;
+  filmNameOrMonthDate: string | number;
+  checked: boolean;
 }
 
 export type ViewConstructor = ConstructorType<View>;
