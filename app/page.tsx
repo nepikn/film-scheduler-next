@@ -26,7 +26,7 @@ export default function App() {
   // console.log(userViews[0].id, viewId);
 
   if (!view) {
-    console.error("no view");
+    dispatch({ type: "changeView", nextView: userViews[0] });
   }
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export default function App() {
               }
               handleViewRemove={handleViewRemove}
               viewGroups={[userViews, validViews]}
-              curViewId={view.id}
+              curViewId={viewId}
             />
             <IcsDownloadLink {...{ filteredFilms, view }} />
           </div>
@@ -107,7 +107,7 @@ export default function App() {
   }
 
   function handleCalendarTableChange(this: Film, filmConfig: FilmConfig) {
-    const newView = view.generateByConfig({
+    const newView = view.generateUserView({
       film: this,
       filmConfig: filmConfig,
     });
