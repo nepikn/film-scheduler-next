@@ -40,7 +40,7 @@ export default class View {
     }
   }
 
-  generateByConfig(config: ViewConfig) {
+  generateUserView(config: ViewConfig) {
     return new View(this.joiningIds, config);
   }
 

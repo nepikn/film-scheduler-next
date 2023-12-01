@@ -22,7 +22,7 @@ export default function App() {
   const view = [...userViews, ...validViews].find((v) => v.id == viewId)!;
 
   if (!view) {
-    console.error("no view");
+    dispatch({ type: "changeView", nextView: userViews[0] });
   }
 
   useEffect(() => {
@@ -103,7 +103,7 @@ export default function App() {
   }
 
   function handleCalendarTableChange(this: Film, filmConfig: FilmConfig) {
-    const newUserView = view.generateByConfig({
+    const newUserView = view.generateUserView({
       film: this,
       filmConfig: filmConfig,
     });
