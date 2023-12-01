@@ -6,24 +6,20 @@ import NameFilter from "@/components/ui/NameFilter";
 import Table from "@/components/ui/Table";
 import ViewNav from "@/components/ui/ViewNav";
 import Aside from "@/components/ui/aside";
-import type { CheckConfig, FilmConfig, LocalConfig } from "@/lib/definitions";
+import type { CheckConfig, FilmConfig } from "@/lib/definitions";
 import type Film from "@/lib/film";
 import { getLocalConfig, setLocalConfig } from "@/lib/localforage";
 import type View from "@/lib/view";
 import useViewReducer from "@/lib/viewReducer";
-import localforage from "localforage";
-import { experimental_useEffectEvent, useEffect } from "react";
+import { useEffect } from "react";
 
 export default function App() {
   console.group("app");
+
   const [{ check, viewId, userViews }, dispatch] = useViewReducer();
   const validViews = check.getShownValidViews();
   const filteredFilms = check.getFilteredFilms();
   const view = [...userViews, ...validViews].find((v) => v.id == viewId)!;
-  // const onLocalConfig = useEffectEvent((val: LocalConfig) =>
-  //   dispatch({ type: "localize", localConfig: val }),
-  // );
-  // console.log(userViews[0].id, viewId);
 
   if (!view) {
     console.error("no view");
@@ -57,7 +53,7 @@ export default function App() {
               }
               handleViewRemove={handleViewRemove}
               viewGroups={[userViews, validViews]}
-              curViewId={view.id}
+              curViewId={viewId}
             />
             <IcsDownloadLink {...{ filteredFilms, view }} />
           </div>
@@ -107,12 +103,12 @@ export default function App() {
   }
 
   function handleCalendarTableChange(this: Film, filmConfig: FilmConfig) {
-    const newView = view.generateByConfig({
+    const newUserView = view.generateByConfig({
       film: this,
       filmConfig: filmConfig,
     });
 
-    dispatch({ type: "updateUserViews", newView: newView });
-    dispatch({ type: "changeView", nextView: newView });
+    dispatch({ type: "updateUserViews", newView: newUserView });
+    dispatch({ type: "changeView", nextView: newUserView });
   }
 }
