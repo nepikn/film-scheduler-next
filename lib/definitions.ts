@@ -1,5 +1,5 @@
 import Film from "./film";
-import CheckStatus from "./check";
+import FilterStatus from "./check";
 import View from "./view";
 
 type FlagExcludedType<Base, Type> = {
@@ -9,7 +9,7 @@ type AllowedNames<Base, Type> = FlagExcludedType<Base, Type>[keyof Base];
 type ConstructorType<T> = Pick<T, AllowedNames<T, Function>>;
 
 export interface AsideAction {
-  type: "clearNameCheck";
+  type: "clearNameFilter";
 }
 
 export type FilmPropKey = "name" | "date" | "start" | "end" | "join";
@@ -25,7 +25,7 @@ export interface SoldoutFilm {
   venue: string;
 }
 
-export type CheckStatusConstructor = ConstructorType<CheckStatus>;
+export type FilterStatusConstructor = ConstructorType<FilterStatus>;
 export type CheckConfig =
   | {
       type: "name" | "date";
@@ -34,24 +34,21 @@ export type CheckConfig =
     }
   | {
       type: "name" | "date";
-      status: CheckStatusConstructor["name"];
+      status: FilterStatusConstructor["name"];
     };
 
-export type ViewConstructor = ConstructorType<View>;
-export interface ViewJoiningIds {
-  [k: Film["name"]]: Film["id"] | undefined;
-}
-export interface ViewInfo {
-  groupId: number;
-  index: number;
+export interface ViewConfig {
+  film: Film;
+  filmConfig: FilmConfig;
 }
 
+export type ViewConstructor = ConstructorType<View>;
 export interface ViewState {
-  check: CheckStatus;
+  check: FilterStatus;
   viewId: string;
   userViews: View[];
 }
 export interface LocalConstructor {
-  checkStatusGroup: { [id: View["id"]]: CheckStatusConstructor };
+  filterStatusGroup: { [id: View["id"]]: FilterStatusConstructor };
   userViews: ViewConstructor[];
 }

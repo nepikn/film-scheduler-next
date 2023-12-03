@@ -1,8 +1,8 @@
 import Film from "./film";
 import View from "./view";
-import { CheckConfig, CheckStatusConstructor } from "./definitions";
+import { CheckConfig, FilterStatusConstructor } from "./definitions";
 
-export default class CheckStatus {
+export default class FilterStatus {
   name: {
     [k: Film["name"]]: boolean | undefined;
   };
@@ -11,7 +11,7 @@ export default class CheckStatus {
   };
 
   constructor(
-    prevStatus?: CheckStatusConstructor | null,
+    prevStatus?: FilterStatusConstructor | null,
     config?: CheckConfig,
   ) {
     if (prevStatus) {
@@ -41,7 +41,7 @@ export default class CheckStatus {
     );
   }
 
-  getShownsuggestViews(/* removedIds: Set<View["id"]>,  */ loopLimit = 5000) {
+  getSuggestViews(removedIds: Set<View["id"]>, loopLimit = 5000) {
     const filteredFilms = this.getFilteredFilms();
     if (!filteredFilms.length) return [];
 
@@ -83,7 +83,7 @@ export default class CheckStatus {
           false,
         );
 
-        if (/* !removedIds.has(view.id) */ !view.removed) {
+        if (!removedIds.has(view.id) /* !view.removed */) {
           result.push(view);
         }
       }

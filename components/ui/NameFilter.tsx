@@ -1,10 +1,10 @@
 import clsx from "clsx";
 import Film from "../../lib/film";
-import CheckStatus from "../../lib/check";
+import FilterStatus from "../../lib/check";
 import { CheckConfig } from "@/lib/definitions";
 
 interface NameFilter {
-  check: CheckStatus;
+  check: FilterStatus;
   handleChange: (k: CheckConfig) => void;
 }
 

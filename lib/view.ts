@@ -1,10 +1,9 @@
 import { v4, v5 } from "uuid";
 import Film from "./film";
-import { FilmConfig, ViewJoiningIds } from "./definitions";
+import { ViewConfig } from "./definitions";
 
-interface ViewConfig {
-  film: Film;
-  filmConfig: FilmConfig;
+interface ViewJoiningIds {
+  [k: Film["name"]]: Film["id"] | undefined;
 }
 
 export default class View {

@@ -17,23 +17,23 @@ import { useEffect, useState } from "react";
 export default function App() {
   console.group("app");
   // localforage.clear();
-  const [{ checkStatusGroup, viewId, userViews }, dispatch] = useViewReducer();
+  const [{ filterStatusGroup, viewHint, userViews }, dispatch] =
+    useViewReducer();
   const [removedSuggestViews, setRemovedSuggestViews] = useState(
     new Set<View["id"]>(),
   );
 
-  console.log([viewId, checkStatusGroup]);
-  const checkStatus =
-    checkStatusGroup[
-      userViews.find((view) => view.id == viewId) ? viewId : "suggestViews"
+  // console.log([viewHint, filterStatusGroup]);
+  const filterStatus =
+    filterStatusGroup[
+      userViews.find((view) => view.id == viewHint) ? viewHint : "suggestViews"
     ];
-  const suggestViews =
-    checkStatus.getShownsuggestViews(/* removedSuggestViews */);
-  const filteredFilms = checkStatus.getFilteredFilms();
+  const suggestViews = filterStatus.getSuggestViews(removedSuggestViews);
+  const filteredFilms = filterStatus.getFilteredFilms();
   const view =
-    (viewId == "firstSuggestView"
+    (viewHint == "firstSuggestView"
       ? suggestViews[0]
-      : [...userViews, ...suggestViews].find((v) => v.id == viewId)) ??
+      : [...userViews, ...suggestViews].find((v) => v.id == viewHint)) ??
     new View();
 
   useEffect(() => {
@@ -50,17 +50,17 @@ export default function App() {
     // console.log("set");
 
     setLocalConstructor({
-      checkStatusGroup: checkStatusGroup,
+      filterStatusGroup: filterStatusGroup,
       userViews: userViews,
     });
-  }, [checkStatusGroup, userViews]);
+  }, [filterStatusGroup, userViews]);
 
   console.groupEnd();
   return (
     <main className="m-auto grid gap-8 px-16 py-8">
       <div className="grid gap-2">
         <div className="grid gap-2">
-          <NameFilter check={checkStatus} handleChange={handleFilterChange} />
+          <NameFilter check={filterStatus} handleChange={handleFilterChange} />
           <div className="grid grid-cols-[1fr_auto] items-center gap-2">
             <ViewNav
               handleViewChange={(view: View) =>
@@ -75,10 +75,10 @@ export default function App() {
         </div>
         <Calendar
           view={view}
-          dateCheck={checkStatus.date}
+          dateCheck={filterStatus.date}
           filteredFilms={filteredFilms}
           handleFilterChange={handleFilterChange}
-          handleJoinChange={handleCalendarTableChange}
+          handleJoinChange={handleFilmInputChange}
         />
       </div>
       {/* <Table
@@ -87,44 +87,37 @@ export default function App() {
         handleChange={handleCalendarTableChange}
       /> */}
       <Aside
-        handleNameFilterReverse={() => dispatch({ type: "reverseNameCheck" })}
-        handleNameFilterClear={() => dispatch({ type: "clearNameCheck" })}
+        handleNameFilterReverse={() => dispatch({ type: "reverseNameFilter" })}
+        handleNameFilterClear={() => dispatch({ type: "clearNameFilter" })}
       />
     </main>
   );
 
   function handleViewRemove(removedView: View) {
-    const removedViewId = removedView.id;
-    const getSiblingView = (offset: number) =>
-      [...userViews, ...suggestViews].find(
-        (_, i, views) => views[i - offset]?.id == removedViewId,
-      );
-
     setRemovedSuggestViews(new Set([...removedSuggestViews, removedView.id]));
-    dispatch({ type: "removeUserView", removedView: removedView });
     dispatch({
-      type: "changeView",
-      nextView:
-        removedViewId == view.id
-          ? getSiblingView(1) ?? getSiblingView(-1)!
-          : view,
+      type: "removeView",
+      removedView: removedView,
+      currentView: view,
+      views: [...userViews, ...suggestViews],
     });
   }
 
   function handleFilterChange(checkConfig: CheckConfig) {
     dispatch({
-      type: "updateCheck",
+      type: "changeFilter",
       checkConfig: checkConfig,
     });
   }
 
-  function handleCalendarTableChange(this: Film, filmConfig: FilmConfig) {
-    const newUserView = view.generateUserView({
-      film: this,
-      filmConfig: filmConfig,
+  function handleFilmInputChange(this: Film, filmConfig: FilmConfig) {
+    dispatch({
+      type: "changeFilmInput",
+      view: view,
+      viewConfig: {
+        film: this,
+        filmConfig: filmConfig,
+      },
     });
-
-    dispatch({ type: "updateUserViews", newView: newUserView });
-    dispatch({ type: "changeView", nextView: newUserView });
   }
 }
