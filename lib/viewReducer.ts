@@ -19,12 +19,16 @@ type ViewState = {
   userViews: View[];
 };
 export function getInitialState(): ViewState {
-  const userViews = [new View()];
+  const userViews = [new View(), new View()];
   const id = userViews[0].id;
   const status = new CheckStatus();
 
   return {
-    checkStatusGroup: { [id]: status, suggestViews: status },
+    checkStatusGroup: {
+      [id]: status,
+      [userViews[1].id]: status,
+      suggestViews: status,
+    },
     viewId: id,
     userViews: userViews,
   };
@@ -51,11 +55,13 @@ function reducer(state: ViewState, action: Action): ViewState {
   const { viewId, checkStatusGroup, userViews } = state;
   const isUserViewGroup = !!userViews.find((v) => v.id == viewId);
   const checkStatus =
-    checkStatusGroup[viewId] ?? checkStatusGroup["suggestViews"];
+    checkStatusGroup[
+      userViews.find((view) => view.id == viewId) ? viewId : "suggestViews"
+    ];
 
   switch (action.type) {
     case "reverseNameCheck": {
-      const id = isUserViewGroup ? viewId : "fallback";
+      const id = isUserViewGroup ? viewId : "firstSuggestView";
       return {
         ...state,
         viewId: id,
@@ -74,13 +80,24 @@ function reducer(state: ViewState, action: Action): ViewState {
       };
     }
 
+    case "changeView": {
+      const nextId = action.nextView.id;
+      return {
+        ...state,
+        viewId: nextId,
+        checkStatusGroup: action.nextView.belongUserViewGroup
+          ? generateCheckStatusGroup(nextId, checkStatusGroup[nextId])
+          : checkStatusGroup,
+      };
+    }
+
     case "localize": {
       const userViews = action.localConstructor.userViews?.map(
         (construtor) =>
           new View(construtor.joiningIds, undefined, undefined, construtor.id),
       );
       const localStatus = action.localConstructor.checkStatusGroup;
-      const nextStatus = Object.fromEntries(
+      const statusGroup = Object.fromEntries(
         Object.entries(localStatus).map(([id, constructor]) => [
           id,
           new CheckStatus(constructor),
@@ -88,10 +105,8 @@ function reducer(state: ViewState, action: Action): ViewState {
       );
       const id = userViews[0].id;
 
-      nextStatus.suggestViews = nextStatus[id];
-
       return {
-        checkStatusGroup: nextStatus as ViewState["checkStatusGroup"],
+        checkStatusGroup: generateCheckStatusGroup(id, statusGroup[id]),
         viewId: id,
         userViews: userViews,
       };
@@ -121,24 +136,15 @@ function reducer(state: ViewState, action: Action): ViewState {
       };
     }
 
-    case "changeView": {
-      return {
-        ...state,
-        viewId: action.nextView.id,
-      };
-    }
-
     case "updateCheck": {
       const nextCheckStatus = new CheckStatus(checkStatus, action.checkConfig);
-      const firstsuggestView = nextCheckStatus.getShownsuggestViews()[0];
-      const id = isUserViewGroup ? viewId : firstsuggestView?.id ?? "fallback";
-      // const nextViewRemoved = structuredClone(viewRemoved);
-      // nextViewRemoved[1] = {};
+      const id = isUserViewGroup ? viewId : "firstSuggestView";
+
       return {
         // removedIdSets: removedIdSets,
         ...state,
         checkStatusGroup: generateCheckStatusGroup(id, nextCheckStatus),
-        viewId: /* isUserViewGroup ? viewId : { groupId: "1", index: 0 } */ id,
+        viewId: id,
       };
     }
 

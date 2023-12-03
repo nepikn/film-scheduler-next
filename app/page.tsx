@@ -17,22 +17,24 @@ import { useEffect, useState } from "react";
 export default function App() {
   console.group("app");
   // localforage.clear();
-  // localforage.getItem("localConfig").then((v) => console.log(v));
   const [{ checkStatusGroup, viewId, userViews }, dispatch] = useViewReducer();
   const [removedSuggestViews, setRemovedSuggestViews] = useState(
     new Set<View["id"]>(),
   );
-  console.log({ checkStatusGroup, viewId, userViews });
 
+  console.log([viewId, checkStatusGroup]);
   const checkStatus =
-    checkStatusGroup[viewId] ?? checkStatusGroup["suggestViews"];
-  const suggestViews = checkStatus.getShownsuggestViews(/* removedSuggestViews */);
+    checkStatusGroup[
+      userViews.find((view) => view.id == viewId) ? viewId : "suggestViews"
+    ];
+  const suggestViews =
+    checkStatus.getShownsuggestViews(/* removedSuggestViews */);
   const filteredFilms = checkStatus.getFilteredFilms();
-  const view = [
-    ...userViews,
-    ...suggestViews,
-    new View(undefined, undefined, undefined, "fallback"),
-  ].find((v) => v.id == viewId)!;
+  const view =
+    (viewId == "firstSuggestView"
+      ? suggestViews[0]
+      : [...userViews, ...suggestViews].find((v) => v.id == viewId)) ??
+    new View();
 
   useEffect(() => {
     // console.log("get");
@@ -66,7 +68,7 @@ export default function App() {
               }
               handleViewRemove={handleViewRemove}
               viewGroups={[userViews, suggestViews]}
-              curViewId={viewId}
+              curViewId={view.id}
             />
             <IcsDownloadLink {...{ filteredFilms, view }} />
           </div>
@@ -103,7 +105,7 @@ export default function App() {
     dispatch({
       type: "changeView",
       nextView:
-        removedViewId == viewId
+        removedViewId == view.id
           ? getSiblingView(1) ?? getSiblingView(-1)!
           : view,
     });

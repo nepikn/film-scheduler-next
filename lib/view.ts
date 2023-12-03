@@ -9,6 +9,10 @@ interface ViewConfig {
 
 export default class View {
   static userViewGroupId = "0";
+  get belongUserViewGroup() {
+    return this.groupId == View.userViewGroupId;
+  }
+
   static removed = new Set();
   static remove(view: View) {
     this.removed.add(view.id);
