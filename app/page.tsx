@@ -8,51 +8,64 @@ import ViewNav from "@/components/ui/ViewNav";
 import Aside from "@/components/ui/aside";
 import type { CheckConfig, FilmConfig } from "@/lib/definitions";
 import type Film from "@/lib/film";
-import { getLocalConfig, setLocalConfig } from "@/lib/localforage";
-import type View from "@/lib/view";
+import { getLocalConstructor, setLocalConstructor } from "@/lib/localforage";
+import View from "@/lib/view";
 import useViewReducer from "@/lib/viewReducer";
-import { useEffect } from "react";
+import localforage from "localforage";
+import { useEffect, useState } from "react";
 
 export default function App() {
   console.group("app");
+  // localforage.clear();
+  // localforage.getItem("localConfig").then((v) => console.log(v));
+  const [{ checkStatusGroup, viewId, userViews }, dispatch] = useViewReducer();
+  const [removedSuggestViews, setRemovedSuggestViews] = useState(
+    new Set<View["id"]>(),
+  );
+  console.log({ checkStatusGroup, viewId, userViews });
 
-  const [{ check, viewId, userViews }, dispatch] = useViewReducer();
-  const validViews = check.getShownValidViews();
-  const filteredFilms = check.getFilteredFilms();
-  const view = [...userViews, ...validViews].find((v) => v.id == viewId)!;
-
-  if (!view) {
-    dispatch({ type: "changeView", nextView: userViews[0] });
-  }
+  const checkStatus =
+    checkStatusGroup[viewId] ?? checkStatusGroup["suggestViews"];
+  const suggestViews = checkStatus.getShownsuggestViews(/* removedSuggestViews */);
+  const filteredFilms = checkStatus.getFilteredFilms();
+  const view = [
+    ...userViews,
+    ...suggestViews,
+    new View(undefined, undefined, undefined, "fallback"),
+  ].find((v) => v.id == viewId)!;
 
   useEffect(() => {
-    getLocalConfig().then((val) => {
+    // console.log("get");
+
+    getLocalConstructor().then((val) => {
       if (!val) return;
 
-      dispatch({ type: "localize", localConfig: val });
+      dispatch({ type: "localize", localConstructor: val });
     });
   }, [dispatch]);
 
   useEffect(() => {
-    setLocalConfig({
-      checkConstructor: check,
-      userViewConstructors: userViews,
+    // console.log("set");
+
+    setLocalConstructor({
+      checkStatusGroup: checkStatusGroup,
+      userViews: userViews,
     });
-  }, [check, userViews]);
+  }, [checkStatusGroup, userViews]);
 
   console.groupEnd();
   return (
     <main className="m-auto grid gap-8 px-16 py-8">
       <div className="grid gap-2">
         <div className="grid gap-2">
-          <NameFilter check={check} handleChange={handleFilterChange} />
+          <NameFilter check={checkStatus} handleChange={handleFilterChange} />
           <div className="grid grid-cols-[1fr_auto] items-center gap-2">
             <ViewNav
               handleViewChange={(view: View) =>
                 dispatch({ type: "changeView", nextView: view })
               }
               handleViewRemove={handleViewRemove}
-              viewGroups={[userViews, validViews]}
+              viewGroups={[userViews, suggestViews]}
               curViewId={viewId}
             />
             <IcsDownloadLink {...{ filteredFilms, view }} />
@@ -60,7 +73,7 @@ export default function App() {
         </div>
         <Calendar
           view={view}
-          dateCheck={check.date}
+          dateCheck={checkStatus.date}
           filteredFilms={filteredFilms}
           handleFilterChange={handleFilterChange}
           handleJoinChange={handleCalendarTableChange}
@@ -81,11 +94,12 @@ export default function App() {
   function handleViewRemove(removedView: View) {
     const removedViewId = removedView.id;
     const getSiblingView = (offset: number) =>
-      [...userViews, ...validViews].find(
+      [...userViews, ...suggestViews].find(
         (_, i, views) => views[i - offset]?.id == removedViewId,
       );
 
-    dispatch({ type: "removeView", removedView: removedView });
+    setRemovedSuggestViews(new Set([...removedSuggestViews, removedView.id]));
+    dispatch({ type: "removeUserView", removedView: removedView });
     dispatch({
       type: "changeView",
       nextView:

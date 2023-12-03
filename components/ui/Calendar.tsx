@@ -14,13 +14,13 @@ import Film from "../../lib/film";
 import View from "../../lib/view";
 import FilmInput from "./Input";
 import { FilmConfig } from "@/lib/definitions";
-import Check from "../../lib/check";
+import CheckStatus from "../../lib/check";
 import clsx from "clsx";
 import { CheckConfig } from "@/lib/definitions";
 
 interface CalendarProp {
   view: View;
-  dateCheck: Check["date"];
+  dateCheck: CheckStatus["date"];
   filteredFilms: Film[];
   handleFilterChange: (k: CheckConfig) => void;
   handleJoinChange: (this: Film, input: FilmConfig) => void;

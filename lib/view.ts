@@ -25,16 +25,19 @@ export default class View {
     joinIds?: ViewJoiningIds,
     config?: ViewConfig,
     groupId = View.userViewGroupId,
-    randomId = true,
+    randomOrId: boolean | string = true,
   ) {
     this.joiningIds = { ...joinIds };
     this.groupId = groupId;
-    this.id = randomId
-      ? v4()
-      : v5(
-          Object.values(this.joiningIds).join(""),
-          "72d85d0e-f574-41d3-abee-1028cf9dd3c1",
-        );
+    this.id =
+      typeof randomOrId == "string"
+        ? randomOrId
+        : randomOrId
+        ? v4()
+        : v5(
+            Object.values(this.joiningIds).join(""),
+            "72d85d0e-f574-41d3-abee-1028cf9dd3c1",
+          );
     if (config) {
       this.handleChange(config);
     }

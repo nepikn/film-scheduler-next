@@ -1,4 +1,5 @@
 import { AsideAction } from "@/lib/definitions";
+import localforage from "localforage";
 
 interface AsideProp {
   handleNameFilterClear: () => void;
@@ -17,6 +18,7 @@ export default function Aside({
   const buttons: Button[] = [
     { name: "清空名稱篩選", handleClick: handleNameFilterClear },
     { name: "反向篩選名稱", handleClick: handleNameFilterReverse },
+    // { name: "c", handleClick: () => localforage.clear() },
   ];
   return (
     <aside className="fixed right-0 top-0 py-2">

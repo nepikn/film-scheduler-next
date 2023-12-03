@@ -1,10 +1,11 @@
 import localforage from "localforage";
-import type { LocalConfig } from "./definitions";
+import type { LocalConstructor } from "./definitions";
 
-export function getLocalConfig() {
-  return localforage.getItem<LocalConfig>("localConfig");
+const key = "localConfig";
+
+export function getLocalConstructor() {
+  return localforage.getItem<LocalConstructor>(key);
 }
-
-export function setLocalConfig(val: LocalConfig) {
-  return localforage.setItem("localConfig", val);
+export function setLocalConstructor(val: LocalConstructor) {
+  return localforage.setItem(key, val);
 }

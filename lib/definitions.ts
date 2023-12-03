@@ -1,5 +1,5 @@
 import Film from "./film";
-import Check from "./check";
+import CheckStatus from "./check";
 import View from "./view";
 
 type FlagExcludedType<Base, Type> = {
@@ -25,12 +25,17 @@ export interface SoldoutFilm {
   venue: string;
 }
 
-export type CheckConstructor = ConstructorType<Check>;
-export interface CheckConfig {
-  type: "name" | "date";
-  filmNameOrMonthDate: string | number;
-  checked: boolean;
-}
+export type CheckStatusConstructor = ConstructorType<CheckStatus>;
+export type CheckConfig =
+  | {
+      type: "name" | "date";
+      filmNameOrMonthDate: string | number;
+      checked: boolean;
+    }
+  | {
+      type: "name" | "date";
+      status: CheckStatusConstructor["name"];
+    };
 
 export type ViewConstructor = ConstructorType<View>;
 export interface ViewJoiningIds {
@@ -42,11 +47,11 @@ export interface ViewInfo {
 }
 
 export interface ViewState {
-  check: Check;
+  check: CheckStatus;
   viewId: string;
   userViews: View[];
 }
-export interface LocalConfig {
-  checkConstructor: CheckConstructor;
-  userViewConstructors: ViewConstructor[];
+export interface LocalConstructor {
+  checkStatusGroup: { [id: View["id"]]: CheckStatusConstructor };
+  userViews: ViewConstructor[];
 }

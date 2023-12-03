@@ -1,28 +1,38 @@
 "use client";
 
 import { useReducer } from "react";
-import Check from "./check";
-import { CheckConfig, LocalConfig, ViewState } from "./definitions";
-import { setLocalConfig } from "./localforage";
+import CheckStatus from "./check";
+import { CheckConfig, LocalConstructor } from "./definitions";
 import View from "./view";
 import Film from "./film";
 
 export default function useViewReducer() {
-  const [state, dispatch] = useReducer(reducer, null, () => {
-    const userViews = [new View()];
-    return {
-      check: new Check(),
-      viewId: userViews[0].id,
-      userViews: userViews,
-    } satisfies ReturnType<typeof reducer>;
-  });
+  return useReducer(reducer, null, getInitialState);
+}
 
-  return [state, dispatch] as const;
+type ViewState = {
+  checkStatusGroup: {
+    [k: View["id"]]: CheckStatus;
+    suggestViews: CheckStatus;
+  };
+  viewId: View["id"];
+  userViews: View[];
+};
+export function getInitialState(): ViewState {
+  const userViews = [new View()];
+  const id = userViews[0].id;
+  const status = new CheckStatus();
+
+  return {
+    checkStatusGroup: { [id]: status, suggestViews: status },
+    viewId: id,
+    userViews: userViews,
+  };
 }
 
 type Action =
   | { type: "reverseNameCheck" }
-  | { type: "localize"; localConfig: LocalConfig }
+  | { type: "localize"; localConstructor: LocalConstructor }
   | { type: "updateUserViews"; newView: View }
   | {
       type: "clearNameCheck";
@@ -32,37 +42,57 @@ type Action =
       checkConfig: CheckConfig;
     }
   | {
-      type: "removeView";
+      type: "removeUserView";
       removedView: View;
     }
   | { type: "changeView"; nextView: View };
 
 function reducer(state: ViewState, action: Action): ViewState {
-  const { viewId, check, userViews } = state;
+  const { viewId, checkStatusGroup, userViews } = state;
   const isUserViewGroup = !!userViews.find((v) => v.id == viewId);
-  // console.time('reducer')
+  const checkStatus =
+    checkStatusGroup[viewId] ?? checkStatusGroup["suggestViews"];
 
   switch (action.type) {
     case "reverseNameCheck": {
+      const id = isUserViewGroup ? viewId : "fallback";
       return {
         ...state,
-        check: new Check({
-          ...check,
-          name: Object.fromEntries(
-            Array.from(Film.names).map((name) => [name, !check.name[name]]),
-          ),
-        }),
+        viewId: id,
+        checkStatusGroup: generateCheckStatusGroup(
+          id,
+          new CheckStatus(checkStatus, {
+            type: "name",
+            status: Object.fromEntries(
+              Array.from(Film.names).map((filmName) => [
+                filmName,
+                !checkStatus.name[filmName],
+              ]),
+            ),
+          }),
+        ),
       };
     }
 
     case "localize": {
-      const userViews = action.localConfig.userViewConstructors.map(
-        (construtor) => new View(construtor.joiningIds),
-      ) ?? [new View()];
+      const userViews = action.localConstructor.userViews?.map(
+        (construtor) =>
+          new View(construtor.joiningIds, undefined, undefined, construtor.id),
+      );
+      const localStatus = action.localConstructor.checkStatusGroup;
+      const nextStatus = Object.fromEntries(
+        Object.entries(localStatus).map(([id, constructor]) => [
+          id,
+          new CheckStatus(constructor),
+        ]),
+      );
+      const id = userViews[0].id;
+
+      nextStatus.suggestViews = nextStatus[id];
 
       return {
-        check: new Check(action.localConfig.checkConstructor),
-        viewId: userViews[0].id,
+        checkStatusGroup: nextStatus as ViewState["checkStatusGroup"],
+        viewId: id,
         userViews: userViews,
       };
     }
@@ -77,16 +107,17 @@ function reducer(state: ViewState, action: Action): ViewState {
           1,
           action.newView,
         ),
+        checkStatusGroup: generateCheckStatusGroup(
+          action.newView.id,
+          checkStatus,
+        ),
       };
     }
 
-    case "removeView": {
-      const removedView = action.removedView;
-
-      View.remove(removedView);
+    case "removeUserView": {
       return {
         ...state,
-        userViews: userViews.filter((v) => !v.removed),
+        userViews: userViews.filter((v) => v.id != action.removedView.id),
       };
     }
 
@@ -98,27 +129,43 @@ function reducer(state: ViewState, action: Action): ViewState {
     }
 
     case "updateCheck": {
-      const nextCheck = new Check(check, action.checkConfig);
-      const firstValidView = nextCheck.getShownValidViews()[0];
+      const nextCheckStatus = new CheckStatus(checkStatus, action.checkConfig);
+      const firstsuggestView = nextCheckStatus.getShownsuggestViews()[0];
+      const id = isUserViewGroup ? viewId : firstsuggestView?.id ?? "fallback";
       // const nextViewRemoved = structuredClone(viewRemoved);
       // nextViewRemoved[1] = {};
       return {
         // removedIdSets: removedIdSets,
         ...state,
-        check: nextCheck,
-        viewId: isUserViewGroup || !firstValidView ? viewId : firstValidView.id,
+        checkStatusGroup: generateCheckStatusGroup(id, nextCheckStatus),
+        viewId: /* isUserViewGroup ? viewId : { groupId: "1", index: 0 } */ id,
       };
     }
 
     case "clearNameCheck": {
       // const nextSets = { ...removedIdSets };
       // delete nextSets[action.viewGroupId];
+      const id = isUserViewGroup ? viewId : "fallback";
       return {
         // removedIdSets: removedIdSets,
         ...state,
-        check: new Check({ ...check, name: {} }),
-        // viewId: isUserViewGroup ? viewId : userViews[0].id,
+        viewId: id,
+        checkStatusGroup: generateCheckStatusGroup(
+          id,
+          new CheckStatus(checkStatus, { type: "name", status: {} }),
+        ),
       };
     }
+  }
+
+  function generateCheckStatusGroup(
+    viewId: View["id"],
+    status: CheckStatus,
+  ): ViewState["checkStatusGroup"] {
+    return {
+      ...checkStatusGroup,
+      [viewId]: status,
+      suggestViews: status,
+    };
   }
 }

@@ -1,8 +1,8 @@
 import Film from "./film";
 import View from "./view";
-import { CheckConfig, CheckConstructor } from "./definitions";
+import { CheckConfig, CheckStatusConstructor } from "./definitions";
 
-export default class Check {
+export default class CheckStatus {
   name: {
     [k: Film["name"]]: boolean | undefined;
   };
@@ -10,11 +10,19 @@ export default class Check {
     [k: Film["date"]]: boolean;
   };
 
-  constructor(prevCheck?: CheckConstructor | null, config?: CheckConfig) {
-    if (prevCheck) {
-      this.name = { ...prevCheck.name };
-      this.date = { ...prevCheck.date };
-      if (config) {
+  constructor(
+    prevStatus?: CheckStatusConstructor | null,
+    config?: CheckConfig,
+  ) {
+    if (prevStatus) {
+      this.name = { ...prevStatus.name };
+      this.date = { ...prevStatus.date };
+
+      if (!config) return;
+
+      if (config.status) {
+        this[config.type] = config.status;
+      } else {
         this[config.type][config.filmNameOrMonthDate] = config.checked;
       }
     } else {
@@ -33,7 +41,7 @@ export default class Check {
     );
   }
 
-  getShownValidViews(loopLimit = 5000) {
+  getShownsuggestViews(/* removedIds: Set<View["id"]>,  */ loopLimit = 5000) {
     const filteredFilms = this.getFilteredFilms();
     if (!filteredFilms.length) return [];
 
@@ -75,7 +83,7 @@ export default class Check {
           false,
         );
 
-        if (!view.removed) {
+        if (/* !removedIds.has(view.id) */ !view.removed) {
           result.push(view);
         }
       }
