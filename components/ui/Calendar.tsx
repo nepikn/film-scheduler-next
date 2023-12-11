@@ -14,7 +14,7 @@ import Film from "../../lib/film";
 import View from "../../lib/view";
 import FilmInput from "./Input";
 import { FilmConfig } from "@/lib/definitions";
-import FilterStatus from "../../lib/check";
+import FilterStatus from "../../lib/filterStatus";
 import clsx from "clsx";
 import { CheckConfig } from "@/lib/definitions";
 
@@ -144,7 +144,7 @@ function Agenda({
 }) {
   const filterStatus = films.map((film) => view.getJoinStatus(film));
   return (
-    <div className="max-h-48 space-y-2 overflow-auto px-2 pb-1 text-right">
+    <div className="max-h-48 space-y-2 overflow-auto pb-1 text-right">
       {films.map((film, i) => {
         const pClass = clsx("leading-none");
         const checked = filterStatus[i];

@@ -1,5 +1,5 @@
 import Film from "./film";
-import FilterStatus from "./check";
+import FilterStatus from "./filterStatus";
 import View from "./view";
 
 type FlagExcludedType<Base, Type> = {
@@ -25,7 +25,7 @@ export interface SoldoutFilm {
   venue: string;
 }
 
-export type FilterStatusConstructor = ConstructorType<FilterStatus>;
+export type FilterStatusConstructor = Partial<ConstructorType<FilterStatus>>;
 export type CheckConfig =
   | {
       type: "name" | "date";
@@ -33,8 +33,8 @@ export type CheckConfig =
       checked: boolean;
     }
   | {
-      type: "name" | "date";
-      status: FilterStatusConstructor["name"];
+      type: "name";
+      status: ConstructorType<FilterStatus>["name"];
     };
 
 export interface ViewConfig {

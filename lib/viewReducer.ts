@@ -1,7 +1,7 @@
 "use client";
 
 import { useReducer } from "react";
-import FilterStatus from "./check";
+import FilterStatus from "./filterStatus";
 import {
   CheckConfig,
   FilmConfig,
@@ -16,99 +16,108 @@ export default function useViewReducer() {
 }
 
 type ViewState = {
-  viewHint: View["id"];
+  viewId: View["id"];
+  userViewId: View["id"];
   userViews: View[];
-  filterStatus: FilterStatus;
+  // filterStatus: FilterStatus;
   filterStatusGroup: {
-    [k: View["id"]]: FilterStatus;
-    suggestViews: FilterStatus;
+    [userViewId: ViewState["userViewId"]]: FilterStatus;
   };
 };
+
 export function getInitialState(): ViewState {
-  const userViews = [new View(), new View()];
+  const joinIds = {
+    熱帶的甜蜜: "7b5cc6c1-0bdb-5107-8785-e5f3785417fe",
+    莊園魅影: "7085eaf3-68d3-5684-8fb6-a5c730ab0d5c",
+    漂流人生: "b522f98f-7a91-5ef2-af9e-28a430467c10",
+    "麗芙烏曼：幽徑綺思": undefined,
+  };
+  const userViews = [new View({ joinIds: joinIds }), new View(), new View()];
   const id = userViews[0].id;
-  const status = new FilterStatus();
+  const status = new FilterStatus({
+    name: Object.fromEntries(Object.keys(joinIds).map((key) => [key, true])),
+  });
 
   return {
-    viewHint: id,
+    viewId: id,
+    userViewId: id,
     userViews: userViews,
-    filterStatus: status,
     filterStatusGroup: {
       [id]: status,
-      [userViews[1].id]: status,
-      suggestViews: status,
+      [userViews[1].id]: new FilterStatus({
+        name: { 燃冬: true, 霧中潛行: true },
+      }),
+      [userViews[2].id]: new FilterStatus({
+        name: { "白雲蒼狗＼鷺鷥河＼夏夢迴＼幽暗小徑的鬼＼纏": true },
+      }),
     },
   };
 }
 
 type Action =
-  | { type: "reverseNameFilter" }
   | { type: "localize"; localConstructor: LocalConstructor }
   | { type: "changeFilmInput"; view: View; viewConfig: ViewConfig }
-  | {
-      type: "clearNameFilter";
-    }
+  | { type: "reverseNameFilter" }
+  | { type: "clearNameFilter" }
   | {
       type: "changeFilter";
       checkConfig: CheckConfig;
     }
+  | { type: "changeView"; nextView: View }
   | {
       type: "removeView";
       removedView: View;
       currentView: View;
       views: View[];
-    }
-  | { type: "changeView"; nextView: View };
+    };
 
 function reducer(state: ViewState, action: Action): ViewState {
-  const {
-    viewHint: viewId,
-    userViews,
-    filterStatus,
-    filterStatusGroup,
-  } = state;
-  const isUserViewGroup = !!userViews.find((v) => v.id == viewId);
-  // const filterStatus =
-  //   filterStatusGroup[
-  //     userViews.find((view) => view.id == viewId) ? viewId : "suggestViews"
-  //   ];
+  const { viewId, userViewId, userViews, filterStatusGroup: group } = state;
+  const isUserViewGroup = viewId == userViewId;
+  const filterStatus = group[viewId];
 
   switch (action.type) {
     case "reverseNameFilter": {
-      const id = isUserViewGroup ? viewId : "firstSuggestView";
+      if (!isUserViewGroup) {
+        return state;
+      }
+
+      const status = new FilterStatus(filterStatus, {
+        type: "name",
+        status: Object.fromEntries(
+          Array.from(Film.names).map((filmName) => [
+            filmName,
+            !filterStatus.name[filmName],
+          ]),
+        ),
+      });
+
       return {
         ...state,
-        viewHint: id,
-        filterStatusGroup: generateFilterStatusGroup(
-          id,
-          new FilterStatus(filterStatus, {
-            type: "name",
-            status: Object.fromEntries(
-              Array.from(Film.names).map((filmName) => [
-                filmName,
-                !filterStatus.name[filmName],
-              ]),
-            ),
-          }),
-        ),
+        filterStatusGroup: generateGroup(viewId, status),
       };
     }
 
     case "changeView": {
-      const nextId = action.nextView.id;
+      const nextView = action.nextView;
+      const nextId = nextView.id;
+      const nextUserViewId = nextView.belongUserGroup ? nextId : userViewId;
+
       return {
         ...state,
-        viewHint: nextId,
-        filterStatusGroup: action.nextView.belongUserViewGroup
-          ? generateFilterStatusGroup(nextId, filterStatusGroup[nextId])
-          : filterStatusGroup,
+        viewId: nextId,
+        userViewId: nextUserViewId,
+        filterStatusGroup: generateGroup(nextId, group[nextUserViewId]),
       };
     }
 
     case "localize": {
       const userViews = action.localConstructor.userViews?.map(
         (construtor) =>
-          new View(construtor.joiningIds, undefined, undefined, construtor.id),
+          new View({
+            joinIds: construtor.joiningIds,
+            randomOrId: construtor.id,
+          }),
       );
       const localStatus = action.localConstructor.filterStatusGroup;
       const statusGroup = Object.fromEntries(
@@ -121,17 +130,23 @@ function reducer(state: ViewState, action: Action): ViewState {
 
       return {
         ...state,
-        filterStatusGroup: generateFilterStatusGroup(id, statusGroup[id]),
-        viewHint: id,
+        viewId: id,
+        userViewId: id,
+        userViews: userViews,
+        filterStatusGroup: generateGroup(id, statusGroup[id]),
       };
     }
 
     case "changeFilmInput": {
-      const newUserView = new View(action.view.joiningIds, action.viewConfig);
+      const newUserView = new View({
+        joinIds: action.view.joiningIds,
+        config: action.viewConfig,
+      });
 
       return {
         ...state,
-        viewHint: newUserView.id,
+        viewId: newUserView.id,
+        userViewId: newUserView.id,
         userViews: userViews.toSpliced(
           isUserViewGroup
             ? userViews.findIndex((v) => v.id == viewId)
@@ -139,74 +154,57 @@ function reducer(state: ViewState, action: Action): ViewState {
           1,
           newUserView,
         ),
-        filterStatusGroup: generateFilterStatusGroup(
-          newUserView.id,
-          filterStatus,
-        ),
+        filterStatusGroup: generateGroup(newUserView.id, filterStatus),
       };
     }
 
     case "removeView": {
-      const removedViewId = action.removedView.id;
-      const getSiblingView = (offset: number) =>
-        action.views.find(
-          (_, i, views) => views[i - offset]?.id == removedViewId,
-        );
-      const nextView =
-        removedViewId == action.currentView.id
-          ? getSiblingView(1) ?? getSiblingView(-1)!
-          : action.currentView;
-      const nextId = nextView.id;
+      const removedId = action.removedView.id;
+      const nextUserViewId = removedId == userViewId ? userViews[0].id : viewId;
 
       return {
         ...state,
-        viewHint: nextId,
-        userViews: userViews.filter((v) => v.id != action.removedView.id),
-        filterStatusGroup: nextView.belongUserViewGroup
-          ? generateFilterStatusGroup(nextId, filterStatusGroup[nextId])
-          : filterStatusGroup,
+        viewId: nextUserViewId,
+        userViewId: nextUserViewId,
+        userViews: userViews.filter((v) => v.id != removedId),
       };
     }
 
     case "changeFilter": {
-      const nextFilterStatus = new FilterStatus(
-        filterStatus,
-        action.checkConfig,
-      );
-      const id = isUserViewGroup ? viewId : "firstSuggestView";
+      const id = isUserViewGroup ? viewId : userViewId;
 
       return {
-        // removedIdSets: removedIdSets,
         ...state,
-        filterStatusGroup: generateFilterStatusGroup(id, nextFilterStatus),
-        viewHint: id,
+        viewId: id,
+        filterStatusGroup: generateGroup(
+          id,
+          new FilterStatus(filterStatus, action.checkConfig),
+        ),
       };
     }
 
     case "clearNameFilter": {
-      // const nextSets = { ...removedIdSets };
-      // delete nextSets[action.viewGroupId];
-      const id = isUserViewGroup ? viewId : "fallback";
+      if (!isUserViewGroup) {
+        return state;
+      }
+
       return {
-        // removedIdSets: removedIdSets,
         ...state,
-        viewHint: id,
-        filterStatusGroup: generateFilterStatusGroup(
-          id,
+        filterStatusGroup: generateGroup(
+          viewId,
           new FilterStatus(filterStatus, { type: "name", status: {} }),
         ),
       };
     }
   }
 
-  function generateFilterStatusGroup(
+  function generateGroup(
     viewId: View["id"],
     status: FilterStatus,
   ): ViewState["filterStatusGroup"] {
     return {
-      ...filterStatusGroup,
+      ...group,
       [viewId]: status,
-      suggestViews: status,
     };
   }
 }

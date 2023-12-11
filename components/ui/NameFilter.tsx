@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import Film from "../../lib/film";
-import FilterStatus from "../../lib/check";
+import FilterStatus from "../../lib/filterStatus";
 import { CheckConfig } from "@/lib/definitions";
 
 interface NameFilter {

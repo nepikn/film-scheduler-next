@@ -6,9 +6,16 @@ interface ViewJoiningIds {
   [k: Film["name"]]: Film["id"] | undefined;
 }
 
+interface Prop {
+  joinIds?: ViewJoiningIds;
+  config?: ViewConfig;
+  groupId?: string;
+  randomOrId?: boolean | string;
+}
+
 export default class View {
   static userViewGroupId = "0";
-  get belongUserViewGroup() {
+  get belongUserGroup() {
     return this.groupId == View.userViewGroupId;
   }
 
@@ -24,12 +31,12 @@ export default class View {
   groupId;
   id;
 
-  constructor(
-    joinIds?: ViewJoiningIds,
-    config?: ViewConfig,
+  constructor({
+    joinIds,
+    config,
     groupId = View.userViewGroupId,
-    randomOrId: boolean | string = true,
-  ) {
+    randomOrId = true,
+  }: Prop = {}) {
     this.joiningIds = { ...joinIds };
     this.groupId = groupId;
     this.id =
@@ -44,10 +51,6 @@ export default class View {
     if (config) {
       this.handleChange(config);
     }
-  }
-
-  generateUserView(config: ViewConfig) {
-    return new View(this.joiningIds, config);
   }
 
   handleChange({ film, filmConfig }: ViewConfig) {

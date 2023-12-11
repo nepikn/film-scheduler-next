@@ -6,32 +6,28 @@ export default class FilterStatus {
   name: {
     [k: Film["name"]]: boolean | undefined;
   };
-  date: {
-    [k: Film["date"]]: boolean;
-  };
+  date = Object.fromEntries(
+    [...new Array(31)].map((_, i) => [i + 1, true]),
+    // todo: init date filter according to initial film data
+    // adjust <DateFilter /> argument
+  );
 
-  constructor(
-    prevStatus?: FilterStatusConstructor | null,
-    config?: CheckConfig,
-  ) {
+  constructor(prevStatus?: FilterStatusConstructor, config?: CheckConfig) {
     if (prevStatus) {
       this.name = { ...prevStatus.name };
-      this.date = { ...prevStatus.date };
+      if (prevStatus.date) {
+        this.date = { ...prevStatus.date };
+      }
 
       if (!config) return;
 
-      if (config.status) {
+      if ("status" in config) {
         this[config.type] = config.status;
       } else {
         this[config.type][config.filmNameOrMonthDate] = config.checked;
       }
     } else {
       this.name = { 燃冬: true, 霧中潛行: true };
-      this.date = Object.fromEntries(
-        [...new Array(31)].map((_, i) => [i + 1, true]),
-        // todo: init date filter according to initial film data
-        // adjust <DateFilter /> argument
-      );
     }
   }
 
@@ -41,7 +37,7 @@ export default class FilterStatus {
     );
   }
 
-  getSuggestViews(removedIds: Set<View["id"]>, loopLimit = 5000) {
+  getSuggestViews(/* removedIds: Set<View["id"]> , */ loopLimit = 5000) {
     const filteredFilms = this.getFilteredFilms();
     if (!filteredFilms.length) return [];
 
@@ -66,7 +62,7 @@ export default class FilterStatus {
         .map((index, j) => groups[j][index])
         .some((film) => curFilm.isOverlapping(film));
 
-      if (!overlapping) {
+      if (!curFilm.soldout && !overlapping) {
         loop++;
 
         if (i < groups.length - 1) {
@@ -74,18 +70,17 @@ export default class FilterStatus {
           continue;
         }
 
-        const view = new View(
-          Object.fromEntries(
+        const view = new View({
+          joinIds: Object.fromEntries(
             indexes.map((i, j) => [groups[j][i].name, groups[j][i].id]),
           ),
-          undefined,
-          "1",
-          false,
-        );
+          groupId: "1",
+          randomOrId: false,
+        });
 
-        if (!removedIds.has(view.id) /* !view.removed */) {
-          result.push(view);
-        }
+        // if (!removedIds.has(view.id) /* !view.removed */) {
+        result.push(view);
+        // }
       }
 
       while (indexes[i] >= groups[i].length - 1) {

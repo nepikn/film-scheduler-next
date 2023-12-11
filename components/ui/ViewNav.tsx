@@ -17,7 +17,7 @@ export default function ViewNav({
 }: Nav) {
   const titles = ["自\n訂", "生\n成"];
   return (
-    <nav className="flex overflow-x-auto py-2">
+    <nav className="flex overflow-x-scroll py-4">
       {viewGroups.map((viewGroup, i) => {
         const title = titles[i];
         return (
@@ -35,6 +35,7 @@ export default function ViewNav({
                     handleViewRemove={() => handleViewRemove(view)}
                     isChecked={view.id == curViewId}
                     isFirst={i == 0 && j == 0}
+                    isUserGroup={view.belongUserGroup}
                     label={j}
                   />
                 ))
@@ -55,6 +56,7 @@ interface ViewSwitch {
   handleViewChange: () => void;
   handleViewRemove: () => void;
   isChecked: boolean;
+  isUserGroup: boolean;
 }
 
 function ViewSwitch({
@@ -63,6 +65,7 @@ function ViewSwitch({
   handleViewChange,
   handleViewRemove,
   isChecked,
+  isUserGroup,
 }: ViewSwitch) {
   return (
     <fieldset className="group relative grid items-stretch">
@@ -70,7 +73,7 @@ function ViewSwitch({
         onClick={handleViewRemove}
         className={clsx(
           "absolute right-1 hidden w-4",
-          !isFirst && "group-hover:block",
+          !isFirst && isUserGroup && "group-hover:block",
         )}
       >
         <svg

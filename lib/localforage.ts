@@ -9,3 +9,6 @@ export function getLocalConstructor() {
 export function setLocalConstructor(val: LocalConstructor) {
   return localforage.setItem(key, val);
 }
+export function clearLocalConstructor() {
+  localforage.removeItem(key);
+}
