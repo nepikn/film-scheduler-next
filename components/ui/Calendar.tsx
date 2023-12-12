@@ -13,17 +13,17 @@ import {
 import Film from "../../lib/film";
 import View from "../../lib/view";
 import FilmInput from "./Input";
-import { FilmConfig } from "@/lib/definitions";
+import { FilmConfig, ViewConfig } from "@/lib/definitions";
 import FilterStatus from "../../lib/filterStatus";
 import clsx from "clsx";
-import { CheckConfig } from "@/lib/definitions";
+import { StatusConfig } from "@/lib/definitions";
 
 interface CalendarProp {
   view: View;
   dateCheck: FilterStatus["date"];
   filteredFilms: Film[];
-  handleFilterChange: (k: CheckConfig) => void;
-  handleJoinChange: (this: Film, input: FilmConfig) => void;
+  handleFilterChange: (k: StatusConfig) => void;
+  handleJoinChange: (viewConfig: ViewConfig) => void;
 }
 
 export default function Calendar({
@@ -86,7 +86,7 @@ export default function Calendar({
       <div className="w-full divide-y border">
         <ul className="grid grid-cols-7 text-center">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((title) => (
-            <li key={title} className="font-bold">
+            <li key={title} className="font-medium">
               {title}
             </li>
           ))}
@@ -170,15 +170,17 @@ function Agenda({
                 "text-rose-400 dark:hover:text-rose-200",
             )}
           >
-            <p className={clsx("font-semibold", pClass)}>{film.name}</p>
+            <p className={clsx("font-medium", pClass)}>{film.name}</p>
             <FilmInput
               prop="join"
               // val={view.getChecked(film)}
-              film={film}
+              // value={film['join']}
               // view={view}
               checked={checked}
               className={"row-span-2"}
-              handleChange={handleJoinChange.bind(film)}
+              handleChange={(filmConfig: FilmConfig) =>
+                handleJoinChange({ film, filmConfig })
+              }
             />
             <p className={pClass}>{"" + film.time}</p>
           </label>

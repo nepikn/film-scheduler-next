@@ -1,6 +1,6 @@
 import Film from "./film";
 import View from "./view";
-import { CheckConfig, FilterStatusConstructor } from "./definitions";
+import { StatusConfig, FilterStatusConstructor } from "./definitions";
 
 export default class FilterStatus {
   name: {
@@ -12,7 +12,7 @@ export default class FilterStatus {
     // adjust <DateFilter /> argument
   );
 
-  constructor(prevStatus?: FilterStatusConstructor, config?: CheckConfig) {
+  constructor(prevStatus?: FilterStatusConstructor, config?: StatusConfig) {
     if (prevStatus) {
       this.name = { ...prevStatus.name };
       if (prevStatus.date) {
