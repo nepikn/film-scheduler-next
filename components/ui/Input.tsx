@@ -7,7 +7,7 @@ import { FilmConfig } from "@/lib/definitions";
 
 interface FilmInputProp {
   prop: FilmPropKey;
-  film: Film;
+  value?: Film[Exclude<FilmPropKey, "join">];
   // view: View;
   checked?: boolean;
   disabled?: boolean;
@@ -25,7 +25,7 @@ const type: { [k in FilmPropKey]: string } = {
 
 export default function FilmInput({
   prop,
-  film,
+  value,
   // view,
   checked,
   className,
@@ -36,8 +36,8 @@ export default function FilmInput({
   // );
   const inputProps: React.InputHTMLAttributes<HTMLInputElement> = {
     type: type[prop],
-    value: prop == "name" ? film[prop] : undefined,
-    defaultValue: prop != "join" && prop != "name" ? film[prop] : undefined,
+    value: prop == "name" ? value : undefined,
+    defaultValue: prop != "join" && prop != "name" ? value : undefined,
     // value=name != "join" ? film[name] : undefined,
     name: prop,
     className: clsx("cursor-pointer disabled:cursor-default", className),

@@ -3,6 +3,7 @@ import View from "@/lib/view";
 import clsx from "clsx";
 import { formatISO } from "date-fns";
 import * as ics from "ics";
+import { Button } from "./button";
 
 export default function IcsDownloadLink({
   filteredFilms,
@@ -13,16 +14,19 @@ export default function IcsDownloadLink({
 }) {
   const joinedFilms = filteredFilms.filter((film) => view.getJoinStatus(film));
   return (
-    <a
-      download={"金馬.ics"}
-      href={joinedFilms.length ? getIcsLink(joinedFilms) : undefined}
-      className={clsx(
-        joinedFilms.length || "hidden",
-        "flex h-full items-center rounded border border-zinc-200 bg-white px-3 py-3 leading-none shadow-sm hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-neutral-600 dark:hover:text-zinc-50",
-      )}
+    <Button
+      size="sm"
+      className="grid h-full items-center dark:hover:bg-neutral-600 dark:hover:text-zinc-50"
+      variant="outline"
+      disabled={!joinedFilms.length}
     >
-      <span>下載 ics</span>
-    </a>
+      <a
+        download={"金馬.ics"}
+        href={joinedFilms.length ? getIcsLink(joinedFilms) : undefined}
+      >
+        <span>下載 ics</span>
+      </a>
+    </Button>
   );
 }
 

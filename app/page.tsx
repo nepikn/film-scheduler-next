@@ -3,71 +3,58 @@
 import Calendar from "@/components/ui/Calendar";
 import IcsDownloadLink from "@/components/ui/IcsDownloadLink";
 import NameFilter from "@/components/ui/NameFilter";
-import Table from "@/components/ui/Table";
 import ViewNav from "@/components/ui/ViewNav";
 import Aside from "@/components/ui/aside";
-import type { CheckConfig, FilmConfig, LocalConfig } from "@/lib/definitions";
-import type Film from "@/lib/film";
-import { getLocalConfig, setLocalConfig } from "@/lib/localforage";
-import type View from "@/lib/view";
+import type { LocalState, StatusConfig, ViewConfig } from "@/lib/definitions";
+import { useLocalEffect } from "@/lib/localforage";
+import View from "@/lib/view";
 import useViewReducer from "@/lib/viewReducer";
-import localforage from "localforage";
-import { experimental_useEffectEvent, useEffect } from "react";
+import { useCallback } from "react";
 
 export default function App() {
-  console.group("app");
-  const [{ check, viewId, userViews }, dispatch] = useViewReducer();
-  const validViews = check.getShownValidViews();
-  const filteredFilms = check.getFilteredFilms();
-  const view = [...userViews, ...validViews].find((v) => v.id == viewId)!;
-  // const onLocalConfig = useEffectEvent((val: LocalConfig) =>
-  //   dispatch({ type: "localize", localConfig: val }),
-  // );
-  // console.log(userViews[0].id, viewId);
+  const [state, dispatch] = useViewReducer();
+  const { viewId, userViews, filterStatusGroup } = state;
+  // console.group("app");
+  // console.log("id %s group %o", viewId, filterStatusGroup);
+  // console.groupEnd();
+  const filterStatus = filterStatusGroup[viewId];
+  const suggestViews = filterStatus.getSuggestViews();
+  const filteredFilms = filterStatus.getFilteredFilms();
+  const views = [...userViews, ...suggestViews];
+  const view = views.find((v) => v.id == viewId) ?? new View();
 
-  if (!view) {
-    dispatch({ type: "changeView", nextView: userViews[0] });
-  }
+  useLocalEffect(
+    state,
+    useCallback(
+      (localState: LocalState) => dispatch({ type: "localize", localState }),
+      [dispatch],
+    ),
+  );
 
-  useEffect(() => {
-    getLocalConfig().then((val) => {
-      if (!val) return;
-
-      dispatch({ type: "localize", localConfig: val });
-    });
-  }, [dispatch]);
-
-  useEffect(() => {
-    setLocalConfig({
-      checkConstructor: check,
-      userViewConstructors: userViews,
-    });
-  }, [check, userViews]);
-
-  console.groupEnd();
   return (
     <main className="m-auto grid gap-8 px-16 py-8">
-      <div className="grid gap-2">
+      <div className="grid gap-4">
         <div className="grid gap-2">
-          <NameFilter check={check} handleChange={handleFilterChange} />
+          <NameFilter
+            status={filterStatus.name}
+            handleChange={handleFilterChange}
+          />
           <div className="grid grid-cols-[1fr_auto] items-center gap-2">
             <ViewNav
-              handleViewChange={(view: View) =>
-                dispatch({ type: "changeView", nextView: view })
-              }
+              handleViewChange={handleViewChange}
               handleViewRemove={handleViewRemove}
-              viewGroups={[userViews, validViews]}
-              curViewId={viewId}
+              viewGroups={[userViews, suggestViews]}
+              curViewId={view.id}
             />
             <IcsDownloadLink {...{ filteredFilms, view }} />
           </div>
         </div>
         <Calendar
           view={view}
-          dateCheck={check.date}
+          dateCheck={filterStatus.date}
           filteredFilms={filteredFilms}
           handleFilterChange={handleFilterChange}
-          handleJoinChange={handleCalendarTableChange}
+          handleJoinChange={handleFilmInputChange}
         />
       </div>
       {/* <Table
@@ -76,43 +63,26 @@ export default function App() {
         handleChange={handleCalendarTableChange}
       /> */}
       <Aside
-        handleNameFilterReverse={() => dispatch({ type: "reverseNameCheck" })}
-        handleNameFilterClear={() => dispatch({ type: "clearNameCheck" })}
+        userView={view.belongUserGroup}
+        handleReverse={() => dispatch({ type: "reverseNameFilter" })}
+        handleClear={() => dispatch({ type: "clearNameFilter" })}
       />
     </main>
   );
 
+  function handleViewChange(nextView: View) {
+    dispatch({ type: "changeView", nextView });
+  }
+
   function handleViewRemove(removedView: View) {
-    const removedViewId = removedView.id;
-    const getSiblingView = (offset: number) =>
-      [...userViews, ...validViews].find(
-        (_, i, views) => views[i - offset]?.id == removedViewId,
-      );
-
-    dispatch({ type: "removeView", removedView: removedView });
-    dispatch({
-      type: "changeView",
-      nextView:
-        removedViewId == viewId
-          ? getSiblingView(1) ?? getSiblingView(-1)!
-          : view,
-    });
+    dispatch({ type: "removeView", removedView, views });
   }
 
-  function handleFilterChange(checkConfig: CheckConfig) {
-    dispatch({
-      type: "updateCheck",
-      checkConfig: checkConfig,
-    });
+  function handleFilterChange(statusConfig: StatusConfig) {
+    dispatch({ type: "changeFilter", statusConfig });
   }
 
-  function handleCalendarTableChange(this: Film, filmConfig: FilmConfig) {
-    const newView = view.generateUserView({
-      film: this,
-      filmConfig: filmConfig,
-    });
-
-    dispatch({ type: "updateUserViews", newView: newView });
-    dispatch({ type: "changeView", nextView: newView });
+  function handleFilmInputChange(viewConfig: ViewConfig) {
+    dispatch({ type: "changeFilmInput", view, viewConfig });
   }
 }
