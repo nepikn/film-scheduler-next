@@ -1,14 +1,24 @@
 import { v4, v5 } from "uuid";
 import Film from "./film";
-import { FilmConfig, ViewJoiningIds } from "./definitions";
+import { ViewConfig } from "./definitions";
 
-interface ViewConfig {
-  film: Film;
-  filmConfig: FilmConfig;
+interface ViewJoiningIds {
+  [k: Film["name"]]: Film["id"] | undefined;
+}
+
+interface Prop {
+  joinIds?: ViewJoiningIds;
+  config?: ViewConfig;
+  groupId?: string;
+  randomOrId?: boolean | string;
 }
 
 export default class View {
   static userViewGroupId = "0";
+  get belongUserGroup() {
+    return this.groupId == View.userViewGroupId;
+  }
+
   static removed = new Set();
   static remove(view: View) {
     this.removed.add(view.id);
@@ -21,27 +31,26 @@ export default class View {
   groupId;
   id;
 
-  constructor(
-    joinIds?: ViewJoiningIds,
-    config?: ViewConfig,
+  constructor({
+    joinIds,
+    config,
     groupId = View.userViewGroupId,
-    randomId = true,
-  ) {
+    randomOrId = true,
+  }: Prop = {}) {
     this.joiningIds = { ...joinIds };
     this.groupId = groupId;
-    this.id = randomId
-      ? v4()
-      : v5(
-          Object.values(this.joiningIds).join(""),
-          "72d85d0e-f574-41d3-abee-1028cf9dd3c1",
-        );
+    this.id =
+      typeof randomOrId == "string"
+        ? randomOrId
+        : randomOrId
+        ? v4()
+        : v5(
+            Object.values(this.joiningIds).join(""),
+            "72d85d0e-f574-41d3-abee-1028cf9dd3c1",
+          );
     if (config) {
       this.handleChange(config);
     }
-  }
-
-  generateUserView(config: ViewConfig) {
-    return new View(this.joiningIds, config);
   }
 
   handleChange({ film, filmConfig }: ViewConfig) {

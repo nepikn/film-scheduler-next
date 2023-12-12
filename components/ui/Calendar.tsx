@@ -14,13 +14,13 @@ import Film from "../../lib/film";
 import View from "../../lib/view";
 import FilmInput from "./Input";
 import { FilmConfig } from "@/lib/definitions";
-import Check from "../../lib/check";
+import FilterStatus from "../../lib/filterStatus";
 import clsx from "clsx";
 import { CheckConfig } from "@/lib/definitions";
 
 interface CalendarProp {
   view: View;
-  dateCheck: Check["date"];
+  dateCheck: FilterStatus["date"];
   filteredFilms: Film[];
   handleFilterChange: (k: CheckConfig) => void;
   handleJoinChange: (this: Film, input: FilmConfig) => void;
@@ -33,7 +33,7 @@ export default function Calendar({
   handleFilterChange,
   handleJoinChange,
 }: CalendarProp) {
-  console.group("cal");
+  // console.group("cal");
   const [monthStart, setMonthStart] = useState(new Date("2023-11"));
   const sortFilms = [...filteredFilms].sort((a, b) =>
     view.getSkipStatus(a) == view.getSkipStatus(b)
@@ -73,7 +73,7 @@ export default function Calendar({
     </fieldset>
   ));
 
-  console.groupEnd();
+  // console.groupEnd();
   return (
     <div className="flex flex-col items-center gap-4">
       {/* <label>
@@ -142,19 +142,19 @@ function Agenda({
   view: View;
   handleJoinChange: CalendarProp["handleJoinChange"];
 }) {
-  const checkStatus = films.map((film) => view.getJoinStatus(film));
+  const filterStatus = films.map((film) => view.getJoinStatus(film));
   return (
-    <div className="max-h-48 space-y-2 overflow-auto px-2 pb-1 text-right">
+    <div className="max-h-48 space-y-2 overflow-auto pb-1 text-right">
       {films.map((film, i) => {
         const pClass = clsx("leading-none");
-        const checked = checkStatus[i];
+        const checked = filterStatus[i];
         const overlapSiblingAndBothChecked = () =>
           checked &&
           [-1, 1].some((offset) => {
             const targFilm = films[i + offset];
             return (
               targFilm &&
-              checkStatus[i + offset] &&
+              filterStatus[i + offset] &&
               film.isOverlapping(targFilm)
             );
           });
