@@ -26,7 +26,7 @@ export interface SoldoutFilm {
 }
 
 export type FilterStatusConstructor = Partial<ConstructorType<FilterStatus>>;
-export type CheckConfig =
+export type StatusConfig =
   | {
       type: "name" | "date";
       filmNameOrMonthDate: string | number;
@@ -42,13 +42,15 @@ export interface ViewConfig {
   filmConfig: FilmConfig;
 }
 
-export type ViewConstructor = ConstructorType<View>;
-export interface ViewState {
-  check: FilterStatus;
-  viewId: string;
+export type ViewState = {
+  viewId: View["id"];
+  userViewId: View["id"];
   userViews: View[];
-}
-export interface LocalConstructor {
+  filterStatusGroup: {
+    [userViewId: ViewState["userViewId"]]: FilterStatus;
+  };
+};
+export interface LocalState {
   filterStatusGroup: { [id: View["id"]]: FilterStatusConstructor };
-  userViews: ViewConstructor[];
+  userViews: ConstructorType<View>[];
 }

@@ -3,27 +3,18 @@
 import { useReducer } from "react";
 import FilterStatus from "./filterStatus";
 import {
-  CheckConfig,
+  StatusConfig,
   FilmConfig,
-  LocalConstructor,
+  LocalState,
   ViewConfig,
 } from "./definitions";
 import View from "./view";
 import Film from "./film";
+import { ViewState } from "./definitions";
 
 export default function useViewReducer() {
   return useReducer(reducer, null, getInitialState);
 }
-
-type ViewState = {
-  viewId: View["id"];
-  userViewId: View["id"];
-  userViews: View[];
-  // filterStatus: FilterStatus;
-  filterStatusGroup: {
-    [userViewId: ViewState["userViewId"]]: FilterStatus;
-  };
-};
 
 export function getInitialState(): ViewState {
   const joinIds = {
@@ -55,19 +46,18 @@ export function getInitialState(): ViewState {
 }
 
 type Action =
-  | { type: "localize"; localConstructor: LocalConstructor }
+  | { type: "localize"; localState: LocalState }
   | { type: "changeFilmInput"; view: View; viewConfig: ViewConfig }
   | { type: "reverseNameFilter" }
   | { type: "clearNameFilter" }
   | {
       type: "changeFilter";
-      checkConfig: CheckConfig;
+      statusConfig: StatusConfig;
     }
   | { type: "changeView"; nextView: View }
   | {
       type: "removeView";
       removedView: View;
-      currentView: View;
       views: View[];
     };
 
@@ -123,16 +113,16 @@ function reducer(state: ViewState, action: Action): ViewState {
     }
 
     case "localize": {
-      console.log("localize %o", action.localConstructor);
+      console.log("localize %o", action.localState);
 
-      const userViews = action.localConstructor.userViews?.map(
+      const userViews = action.localState.userViews?.map(
         (construtor) =>
           new View({
-            joinIds: construtor.joiningIds,
+            joinIds: construtor.joinIds,
             randomOrId: construtor.id,
           }),
       );
-      const localGroup = action.localConstructor.filterStatusGroup;
+      const localGroup = action.localState.filterStatusGroup;
       const group = Object.fromEntries(
         Object.entries(localGroup).map(([id, constructor]) => [
           id,
@@ -151,10 +141,7 @@ function reducer(state: ViewState, action: Action): ViewState {
     }
 
     case "changeFilmInput": {
-      const newUserView = new View({
-        joinIds: action.view.joiningIds,
-        config: action.viewConfig,
-      });
+      const newUserView = action.view.getConfigured(action.viewConfig);
 
       return {
         ...state,
@@ -191,7 +178,7 @@ function reducer(state: ViewState, action: Action): ViewState {
         viewId: id,
         filterStatusGroup: generateGroup(
           id,
-          new FilterStatus(filterStatus, action.checkConfig),
+          new FilterStatus(filterStatus, action.statusConfig),
         ),
       };
     }

@@ -5,56 +5,43 @@ import IcsDownloadLink from "@/components/ui/IcsDownloadLink";
 import NameFilter from "@/components/ui/NameFilter";
 import ViewNav from "@/components/ui/ViewNav";
 import Aside from "@/components/ui/aside";
-import type { CheckConfig, FilmConfig } from "@/lib/definitions";
-import type Film from "@/lib/film";
-import {
-  clearLocalConstructor,
-  getLocalConstructor,
-  setLocalConstructor,
-} from "@/lib/localforage";
+import type { LocalState, StatusConfig, ViewConfig } from "@/lib/definitions";
+import { useLocalEffect } from "@/lib/localforage";
 import View from "@/lib/view";
 import useViewReducer from "@/lib/viewReducer";
-import { useEffect } from "react";
+import { useCallback } from "react";
 
 export default function App() {
-  console.group("app");
-
-  const [{ viewId, userViews, filterStatusGroup }, dispatch] = useViewReducer();
+  const [state, dispatch] = useViewReducer();
+  const { viewId, userViews, filterStatusGroup } = state;
+  // console.group("app");
   // console.log("id %s group %o", viewId, filterStatusGroup);
-
+  // console.groupEnd();
   const filterStatus = filterStatusGroup[viewId];
   const suggestViews = filterStatus.getSuggestViews();
   const filteredFilms = filterStatus.getFilteredFilms();
-  const view =
-    [...userViews, ...suggestViews].find((v) => v.id == viewId) ?? new View();
+  const views = [...userViews, ...suggestViews];
+  const view = views.find((v) => v.id == viewId) ?? new View();
 
-  // console.log([view.id, userViews]);
-  useEffect(() => {
-    getLocalConstructor().then((val) => {
-      if (!val) return;
+  useLocalEffect(
+    state,
+    useCallback(
+      (localState: LocalState) => dispatch({ type: "localize", localState }),
+      [dispatch],
+    ),
+  );
 
-      dispatch({ type: "localize", localConstructor: val });
-    });
-  }, [dispatch]);
-
-  useEffect(() => {
-    setLocalConstructor({
-      filterStatusGroup,
-      userViews,
-    });
-  }, [filterStatusGroup, userViews]);
-
-  console.groupEnd();
   return (
     <main className="m-auto grid gap-8 px-16 py-8">
       <div className="grid gap-4">
         <div className="grid gap-2">
-          <NameFilter check={filterStatus} handleChange={handleFilterChange} />
+          <NameFilter
+            status={filterStatus.name}
+            handleChange={handleFilterChange}
+          />
           <div className="grid grid-cols-[1fr_auto] items-center gap-2">
             <ViewNav
-              handleViewChange={(view: View) =>
-                dispatch({ type: "changeView", nextView: view })
-              }
+              handleViewChange={handleViewChange}
               handleViewRemove={handleViewRemove}
               viewGroups={[userViews, suggestViews]}
               curViewId={view.id}
@@ -76,37 +63,26 @@ export default function App() {
         handleChange={handleCalendarTableChange}
       /> */}
       <Aside
-        suggestView={!view.belongUserGroup}
-        handleNameFilterReverse={() => dispatch({ type: "reverseNameFilter" })}
-        handleNameFilterClear={() => dispatch({ type: "clearNameFilter" })}
+        userView={view.belongUserGroup}
+        handleReverse={() => dispatch({ type: "reverseNameFilter" })}
+        handleClear={() => dispatch({ type: "clearNameFilter" })}
       />
     </main>
   );
 
+  function handleViewChange(nextView: View) {
+    dispatch({ type: "changeView", nextView });
+  }
+
   function handleViewRemove(removedView: View) {
-    dispatch({
-      type: "removeView",
-      removedView: removedView,
-      currentView: view,
-      views: [...userViews, ...suggestViews],
-    });
+    dispatch({ type: "removeView", removedView, views });
   }
 
-  function handleFilterChange(checkConfig: CheckConfig) {
-    dispatch({
-      type: "changeFilter",
-      checkConfig: checkConfig,
-    });
+  function handleFilterChange(statusConfig: StatusConfig) {
+    dispatch({ type: "changeFilter", statusConfig });
   }
 
-  function handleFilmInputChange(this: Film, filmConfig: FilmConfig) {
-    dispatch({
-      type: "changeFilmInput",
-      view: view,
-      viewConfig: {
-        film: this,
-        filmConfig: filmConfig,
-      },
-    });
+  function handleFilmInputChange(viewConfig: ViewConfig) {
+    dispatch({ type: "changeFilmInput", view, viewConfig });
   }
 }

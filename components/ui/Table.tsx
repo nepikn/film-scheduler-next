@@ -25,8 +25,7 @@ export default function Table({
               <label>
                 <FilmInput
                   prop={title}
-                  // val={title == "join" ? view.getChecked(film) : film[title]}
-                  film={film}
+                  value={title == "join" ? undefined : film[title]}
                   checked={view.getJoinStatus(film)}
                   // view={view}
                   handleChange={handleChange.bind(film)}

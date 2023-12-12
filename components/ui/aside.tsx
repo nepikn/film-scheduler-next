@@ -3,9 +3,9 @@ import View from "@/lib/view";
 import clsx from "clsx";
 
 interface AsideProp {
-  suggestView: boolean;
-  handleNameFilterClear: () => void;
-  handleNameFilterReverse: () => void;
+  userView: boolean;
+  handleClear: () => void;
+  handleReverse: () => void;
 }
 
 interface Button {
@@ -15,11 +15,11 @@ interface Button {
 }
 
 export default function Aside({
-  suggestView,
-  handleNameFilterClear,
-  handleNameFilterReverse,
+  userView,
+  handleClear,
+  handleReverse,
 }: AsideProp) {
-  const disabled = suggestView;
+  const disabled = !userView;
   const buttons: Button[] = [
     {
       name: "回到預設狀態",
@@ -31,12 +31,12 @@ export default function Aside({
     {
       name: "清空名稱篩選",
       disabled: disabled,
-      handleClick: handleNameFilterClear,
+      handleClick: handleClear,
     },
     {
       name: "反向篩選名稱",
       disabled: disabled,
-      handleClick: handleNameFilterReverse,
+      handleClick: handleReverse,
     },
   ];
   return (
