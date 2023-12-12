@@ -3,11 +3,14 @@ import type { LocalConstructor } from "./definitions";
 
 const key = "localConfig";
 
-export function getLocalConstructor() {
-  return localforage.getItem<LocalConstructor>(key);
+export async function getLocalConstructor() {
+  const val = await localforage.getItem<LocalConstructor>(key);
+  // console.log("get %o", val);
+  return val;
 }
-export function setLocalConstructor(val: LocalConstructor) {
-  return localforage.setItem(key, val);
+export async function setLocalConstructor(val: LocalConstructor) {
+  await localforage.setItem(key, val);
+  // console.log("set %o", val);
 }
 export function clearLocalConstructor() {
   localforage.removeItem(key);

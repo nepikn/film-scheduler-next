@@ -33,7 +33,7 @@ export default function Calendar({
   handleFilterChange,
   handleJoinChange,
 }: CalendarProp) {
-  console.group("cal");
+  // console.group("cal");
   const [monthStart, setMonthStart] = useState(new Date("2023-11"));
   const sortFilms = [...filteredFilms].sort((a, b) =>
     view.getSkipStatus(a) == view.getSkipStatus(b)
@@ -73,7 +73,7 @@ export default function Calendar({
     </fieldset>
   ));
 
-  console.groupEnd();
+  // console.groupEnd();
   return (
     <div className="flex flex-col items-center gap-4">
       {/* <label>

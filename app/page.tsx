@@ -20,6 +20,8 @@ export default function App() {
   console.group("app");
 
   const [{ viewId, userViews, filterStatusGroup }, dispatch] = useViewReducer();
+  // console.log("id %s group %o", viewId, filterStatusGroup);
+
   const filterStatus = filterStatusGroup[viewId];
   const suggestViews = filterStatus.getSuggestViews();
   const filteredFilms = filterStatus.getFilteredFilms();
@@ -37,11 +39,9 @@ export default function App() {
 
   useEffect(() => {
     setLocalConstructor({
-      filterStatusGroup: filterStatusGroup,
-      userViews: userViews,
+      filterStatusGroup,
+      userViews,
     });
-
-    return clearLocalConstructor;
   }, [filterStatusGroup, userViews]);
 
   console.groupEnd();

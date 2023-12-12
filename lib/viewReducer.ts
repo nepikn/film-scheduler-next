@@ -76,6 +76,17 @@ function reducer(state: ViewState, action: Action): ViewState {
   const isUserViewGroup = viewId == userViewId;
   const filterStatus = group[viewId];
 
+  function generateGroup(
+    targViewId: View["id"],
+    status: FilterStatus,
+    statusGroup = group,
+  ) {
+    return {
+      ...statusGroup,
+      [targViewId]: status,
+    } as ViewState["filterStatusGroup"];
+  }
+
   switch (action.type) {
     case "reverseNameFilter": {
       if (!isUserViewGroup) {
@@ -112,6 +123,8 @@ function reducer(state: ViewState, action: Action): ViewState {
     }
 
     case "localize": {
+      console.log("localize %o", action.localConstructor);
+
       const userViews = action.localConstructor.userViews?.map(
         (construtor) =>
           new View({
@@ -119,9 +132,9 @@ function reducer(state: ViewState, action: Action): ViewState {
             randomOrId: construtor.id,
           }),
       );
-      const localStatus = action.localConstructor.filterStatusGroup;
-      const statusGroup = Object.fromEntries(
-        Object.entries(localStatus).map(([id, constructor]) => [
+      const localGroup = action.localConstructor.filterStatusGroup;
+      const group = Object.fromEntries(
+        Object.entries(localGroup).map(([id, constructor]) => [
           id,
           new FilterStatus(constructor),
         ]),
@@ -133,7 +146,7 @@ function reducer(state: ViewState, action: Action): ViewState {
         viewId: id,
         userViewId: id,
         userViews: userViews,
-        filterStatusGroup: generateGroup(id, statusGroup[id]),
+        filterStatusGroup: group,
       };
     }
 
@@ -196,15 +209,5 @@ function reducer(state: ViewState, action: Action): ViewState {
         ),
       };
     }
-  }
-
-  function generateGroup(
-    viewId: View["id"],
-    status: FilterStatus,
-  ): ViewState["filterStatusGroup"] {
-    return {
-      ...group,
-      [viewId]: status,
-    };
   }
 }
