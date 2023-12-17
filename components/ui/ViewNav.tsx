@@ -91,7 +91,7 @@ function ViewSwitch({
           ></path>
         </svg>
       </button>
-      <label className="grid w-14 cursor-pointer place-items-center text-center leading-none hover:text-gray-400 [&:has(:checked)]:cursor-default [&:has(:checked)]:font-bold [&:has(:checked)]:text-blue-300">
+      <label className="grid w-14 cursor-pointer place-items-center text-center leading-none hover:text-gray-400 [&:has(:checked)]:cursor-default [&:has(:checked)]:font-bold [&:has(:checked)]:text-blue-500 dark:[&:has(:checked)]:text-blue-300">
         <span>{label}</span>
         <input
           type="radio"

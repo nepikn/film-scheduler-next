@@ -1,5 +1,6 @@
 import { clearLocalConstructor } from "@/lib/localforage";
 import clsx from "clsx";
+import { Button } from "./button";
 
 interface AsideProp {
   isUserView: boolean;
@@ -15,23 +16,22 @@ interface Button {
 }
 
 export function DateFilterAside({ isUserView, handlers }: AsideProp) {
-  const { selectWeekend, selectWeekday, clear } = handlers;
   const disabled = !isUserView;
   const buttons: Button[] = [
     {
-      name: "僅選擇週末",
-      disabled: disabled,
-      handleClick: selectWeekend,
+      name: "僅篩選週末",
+      handleClick: handlers.selectWeekend,
+      disabled,
     },
     {
-      name: "僅選擇週間日場",
-      disabled: disabled,
-      handleClick: selectWeekday,
+      name: "僅篩選週間", // TODO: 日場
+      handleClick: handlers.selectWeekdayMorn,
+      disabled,
     },
     {
-      name: "清空日期篩選",
-      disabled: disabled,
-      handleClick: clear,
+      name: "日期全選",
+      handleClick: handlers.reset,
+      disabled,
     },
   ];
 
@@ -43,21 +43,21 @@ export function NameFilterAside({ isUserView, handlers }: AsideProp) {
   const disabled = !isUserView;
   const buttons: Button[] = [
     {
+      name: "反向篩選名稱",
+      handleClick: reverse,
+      disabled,
+    },
+    {
+      name: "清空名稱篩選",
+      handleClick: clear,
+      disabled,
+    },
+    {
       name: "回到預設狀態",
       handleClick: () => {
         clearLocalConstructor();
         location.reload();
       },
-    },
-    {
-      name: "反向篩選名稱",
-      disabled: disabled,
-      handleClick: reverse,
-    },
-    {
-      name: "清空名稱篩選",
-      disabled: disabled,
-      handleClick: clear,
     },
   ];
 
@@ -78,20 +78,17 @@ export default function Aside({ buttons, pos }: Aside) {
     <aside className={clsx("fixed top-0 py-2", style.aside[pos])}>
       <fieldset className="grid gap-1">
         {buttons.map(({ name, disabled, handleClick }) => (
-          <button
+          <Button
             key={name}
+            variant={"outline"}
             onClick={handleClick}
             disabled={disabled}
-            className={clsx(
-              "border p-2",
-              style.button[pos],
-              disabled && "text-gray-400",
-            )}
+            className={clsx("p-2", style.button[pos])}
           >
             <div className="whitespace-pre leading-tight">
               {name.split("").join("\n")}
             </div>
-          </button>
+          </Button>
         ))}
       </fieldset>
     </aside>

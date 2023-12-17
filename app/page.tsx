@@ -1,7 +1,7 @@
 "use client";
 
 import Calendar from "@/components/ui/Calendar";
-import IcsDownloadLink from "@/components/ui/IcsDownloadLink";
+import IcsDownloader from "@/components/ui/IcsDownloader";
 import NameFilter from "@/components/ui/NameFilter";
 import ViewNav from "@/components/ui/ViewNav";
 import { DateFilterAside, NameFilterAside } from "@/components/ui/aside";
@@ -36,9 +36,9 @@ export default function App() {
       <DateFilterAside
         isUserView={view.belongUserGroup}
         handlers={{
-          selectWeekend: () => dispatch({ type: "reverseNameFilter" }),
-          selectWeekday: () => dispatch({ type: "clearNameFilter" }),
-          clear: () => dispatch({ type: "clearNameFilter" }),
+          selectWeekend: () => dispatch({ type: "selectWeekend" }),
+          selectWeekdayMorn: () => dispatch({ type: "selectWeekdayMorn" }),
+          reset: () => dispatch({ type: "resetDateFilter" }),
         }}
       />
       <div className="grid gap-4">
@@ -54,7 +54,7 @@ export default function App() {
               viewGroups={[userViews, suggestViews]}
               curViewId={view.id}
             />
-            <IcsDownloadLink {...{ filteredFilms, view }} />
+            <IcsDownloader {...{ filteredFilms, view }} />
           </div>
         </div>
         <Calendar

@@ -3,9 +3,11 @@
 import { useState } from "react";
 import {
   eachWeekOfInterval,
-  eachDayOfInterval, endOfMonth,
+  eachDayOfInterval,
+  endOfMonth,
   endOfWeek,
-  isSameDay, startOfMonth
+  isSameDay,
+  startOfMonth,
 } from "date-fns";
 import Film from "../../lib/film";
 import View from "../../lib/view";
@@ -55,7 +57,7 @@ export default function Calendar({
           {date.getMonth() == monthStart.getMonth() && (
             <>
               <DateFilter
-                isChecked={dateFilterStatus[+date]}
+                isChecked={!!dateFilterStatus[+date]}
                 date={date}
                 handleChange={handleFilterChange}
               />

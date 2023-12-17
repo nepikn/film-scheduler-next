@@ -1,11 +1,10 @@
 import Film from "@/lib/film";
 import View from "@/lib/view";
-import clsx from "clsx";
 import { formatISO } from "date-fns";
 import * as ics from "ics";
 import { Button } from "./button";
 
-export default function IcsDownloadLink({
+export default function IcsDownloader({
   filteredFilms,
   view,
 }: {
@@ -16,8 +15,8 @@ export default function IcsDownloadLink({
   return (
     <Button
       size="sm"
-      className="grid h-full items-center dark:hover:bg-neutral-600 dark:hover:text-zinc-50"
-      variant="outline"
+      className="grid h-full items-center"
+      variant="secondary"
       disabled={!joinedFilms.length}
     >
       <a
