@@ -1,19 +1,22 @@
 import { Fragment } from "react";
 import View from "../../lib/view";
 import clsx from "clsx";
+import { Icons } from "../icons";
 
 interface Nav {
   handleViewChange: (k: View) => void;
   handleViewRemove: (k: View) => void;
   viewGroups: View[][];
-  curViewId: View["id"];
+  userViewId: View["id"];
+  viewId: View["id"];
 }
 
 export default function ViewNav({
   handleViewChange,
   handleViewRemove,
   viewGroups,
-  curViewId,
+  userViewId,
+  viewId: curViewId,
 }: Nav) {
   const titles = ["自\n訂", "生\n成"];
   return (
@@ -28,17 +31,20 @@ export default function ViewNav({
               className="flex items-stretch divide-x py-1"
             >
               {viewGroup.length ? (
-                viewGroup.map((view, j) => (
-                  <ViewSwitch
-                    key={view.id}
-                    handleViewChange={() => handleViewChange(view)}
-                    handleViewRemove={() => handleViewRemove(view)}
-                    isChecked={view.id == curViewId}
-                    isFirst={i == 0 && j == 0}
-                    isUserGroup={view.belongUserGroup}
-                    label={j}
-                  />
-                ))
+                viewGroup.map((view, j) => {
+                  const isChecked = view.id == curViewId;
+                  return (
+                    <ViewSwitch
+                      key={view.id}
+                      label={j}
+                      handleViewChange={() => handleViewChange(view)}
+                      handleViewRemove={() => handleViewRemove(view)}
+                      isChecked={isChecked}
+                      showRemove={i == 0 && j != 0}
+                      isCurrentUserView={i == 0 && view.id == userViewId}
+                    />
+                  );
+                })
               ) : (
                 <span className="ml-2">（無）</span>
               )}
@@ -51,48 +57,43 @@ export default function ViewNav({
 }
 
 interface ViewSwitch {
-  isFirst: boolean;
   label: number;
   handleViewChange: () => void;
   handleViewRemove: () => void;
   isChecked: boolean;
-  isUserGroup: boolean;
+  showRemove: boolean;
+  isCurrentUserView: boolean;
 }
 
 function ViewSwitch({
-  isFirst,
   label,
   handleViewChange,
   handleViewRemove,
   isChecked,
-  isUserGroup,
+  showRemove,
+  isCurrentUserView,
 }: ViewSwitch) {
   return (
-    <fieldset className="group relative grid items-stretch">
+    <fieldset className="group relative grid items-stretch px-2">
       <button
         onClick={handleViewRemove}
         className={clsx(
           "absolute right-1 hidden w-4",
-          !isFirst && isUserGroup && "group-hover:block",
+          showRemove && "group-hover:block",
         )}
       >
-        <svg
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          ></path>
-        </svg>
+        <Icons.cross />
       </button>
-      <label className="grid w-14 cursor-pointer place-items-center text-center leading-none hover:text-gray-400 [&:has(:checked)]:cursor-default [&:has(:checked)]:font-bold [&:has(:checked)]:text-blue-500 dark:[&:has(:checked)]:text-blue-300">
-        <span>{label}</span>
+      <label
+        className={clsx(
+          "grid w-10 place-items-center",
+          isCurrentUserView || "text-gray-400",
+          isCurrentUserView && !isChecked && "font-semibold",
+          isChecked || "cursor-pointer hover:opacity-50",
+          isChecked && "font-bold text-blue-500 dark:text-blue-300",
+        )}
+      >
+        <span className={"w-full text-center"}>{label}</span>
         <input
           type="radio"
           name="view"

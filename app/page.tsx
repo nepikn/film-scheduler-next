@@ -13,7 +13,7 @@ import { useCallback } from "react";
 
 export default function App() {
   const [state, dispatch] = useViewReducer();
-  const { viewId, userViews, filterStatusGroup } = state;
+  const { viewId, userViewId, userViews, filterStatusGroup } = state;
   // console.group("app");
   // console.log("id %s group %o", viewId, filterStatusGroup);
   // console.groupEnd();
@@ -49,20 +49,25 @@ export default function App() {
           />
           <div className="grid grid-cols-[1fr_auto] items-center gap-2">
             <ViewNav
-              handleViewChange={handleViewChange}
-              handleViewRemove={handleViewRemove}
-              viewGroups={[userViews, suggestViews]}
-              curViewId={view.id}
+              {...{
+                userViewId,
+                handleViewChange,
+                handleViewRemove,
+                viewId: view.id,
+                viewGroups: [userViews, suggestViews],
+              }}
             />
             <IcsDownloader {...{ filteredFilms, view }} />
           </div>
         </div>
         <Calendar
-          view={view}
-          dateFilterStatus={filterStatus.date}
-          filteredFilms={filteredFilms}
-          handleFilterChange={handleFilterChange}
-          handleJoinChange={handleFilmInputChange}
+          {...{
+            view,
+            filteredFilms,
+            handleFilterChange,
+            dateFilterStatus: filterStatus.date,
+            handleJoinChange: handleFilmInputChange,
+          }}
         />
       </div>
       {/* <Table
