@@ -1,11 +1,12 @@
 import { clearLocalConstructor } from "@/lib/localforage";
-import View from "@/lib/view";
 import clsx from "clsx";
+import { Button } from "./button";
 
 interface AsideProp {
-  userView: boolean;
-  handleClear: () => void;
-  handleReverse: () => void;
+  isUserView: boolean;
+  handlers: {
+    [x: string]: () => void;
+  };
 }
 
 interface Button {
@@ -14,13 +15,43 @@ interface Button {
   handleClick: () => void;
 }
 
-export default function Aside({
-  userView,
-  handleClear,
-  handleReverse,
-}: AsideProp) {
-  const disabled = !userView;
+export function DateFilterAside({ isUserView, handlers }: AsideProp) {
+  const disabled = !isUserView;
   const buttons: Button[] = [
+    {
+      name: "僅篩選週末",
+      handleClick: handlers.selectWeekend,
+      disabled,
+    },
+    {
+      name: "僅篩選週間", // TODO: 日場
+      handleClick: handlers.selectWeekdayMorn,
+      disabled,
+    },
+    {
+      name: "日期全選",
+      handleClick: handlers.reset,
+      disabled,
+    },
+  ];
+
+  return <Aside {...{ buttons, pos: "left" }} />;
+}
+
+export function NameFilterAside({ isUserView, handlers }: AsideProp) {
+  const { reverse, clear } = handlers;
+  const disabled = !isUserView;
+  const buttons: Button[] = [
+    {
+      name: "反向篩選名稱",
+      handleClick: reverse,
+      disabled,
+    },
+    {
+      name: "清空名稱篩選",
+      handleClick: clear,
+      disabled,
+    },
     {
       name: "回到預設狀態",
       handleClick: () => {
@@ -28,34 +59,36 @@ export default function Aside({
         location.reload();
       },
     },
-    {
-      name: "清空名稱篩選",
-      disabled: disabled,
-      handleClick: handleClear,
-    },
-    {
-      name: "反向篩選名稱",
-      disabled: disabled,
-      handleClick: handleReverse,
-    },
   ];
+
+  return <Aside {...{ buttons, pos: "right" }} />;
+}
+
+interface Aside {
+  buttons: Button[];
+  pos: "left" | "right";
+}
+
+export default function Aside({ buttons, pos }: Aside) {
+  const style = {
+    aside: { left: "left-0", right: "right-0" },
+    button: { left: "border-l-0", right: "border-r-0" },
+  };
   return (
-    <aside className="fixed right-0 top-0 py-2">
+    <aside className={clsx("fixed top-0 py-2", style.aside[pos])}>
       <fieldset className="grid gap-1">
         {buttons.map(({ name, disabled, handleClick }) => (
-          <button
+          <Button
             key={name}
+            variant={"outline"}
             onClick={handleClick}
             disabled={disabled}
-            className={clsx(
-              disabled && "text-gray-400",
-              "border border-r-0 p-2",
-            )}
+            className={clsx("p-2", style.button[pos])}
           >
             <div className="whitespace-pre leading-tight">
               {name.split("").join("\n")}
             </div>
-          </button>
+          </Button>
         ))}
       </fieldset>
     </aside>

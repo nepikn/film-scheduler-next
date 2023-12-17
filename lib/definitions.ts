@@ -33,8 +33,8 @@ export type StatusConfig =
       checked: boolean;
     }
   | {
-      type: "name";
-      status: ConstructorType<FilterStatus>["name"];
+      type: "name" | "date";
+      status: ConstructorType<FilterStatus>[StatusConfig["type"]];
     };
 
 export interface ViewConfig {

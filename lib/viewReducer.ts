@@ -2,15 +2,11 @@
 
 import { useReducer } from "react";
 import FilterStatus from "./filterStatus";
-import {
-  StatusConfig,
-  FilmConfig,
-  LocalState,
-  ViewConfig,
-} from "./definitions";
+import { StatusConfig, LocalState, ViewConfig } from "./definitions";
 import View from "./view";
 import Film from "./film";
 import { ViewState } from "./definitions";
+import { isWeekend } from "date-fns";
 
 export default function useViewReducer() {
   return useReducer(reducer, null, getInitialState);
@@ -47,6 +43,9 @@ export function getInitialState(): ViewState {
 
 type Action =
   | { type: "localize"; localState: LocalState }
+  | { type: "selectWeekend" }
+  | { type: "selectWeekdayMorn" }
+  | { type: "resetDateFilter" }
   | { type: "changeFilmInput"; view: View; viewConfig: ViewConfig }
   | { type: "reverseNameFilter" }
   | { type: "clearNameFilter" }
@@ -78,6 +77,52 @@ function reducer(state: ViewState, action: Action): ViewState {
   }
 
   switch (action.type) {
+    case "selectWeekend": {
+      return {
+        ...state,
+        filterStatusGroup: generateGroup(
+          viewId,
+          new FilterStatus(filterStatus, {
+            type: "date",
+            status: Object.fromEntries(
+              Object.keys(filterStatus.date).map((time) => [
+                time,
+                isWeekend(+time),
+              ]),
+            ),
+          }),
+        ),
+      };
+    }
+
+    case "selectWeekdayMorn": {
+      return {
+        ...state,
+        filterStatusGroup: generateGroup(
+          viewId,
+          new FilterStatus(filterStatus, {
+            type: "date",
+            status: Object.fromEntries(
+              Object.keys(filterStatus.date).map((time) => [
+                time,
+                !isWeekend(+time),
+              ]),
+            ),
+          }),
+        ),
+      };
+    }
+
+    case "resetDateFilter": {
+      return {
+        ...state,
+        filterStatusGroup: generateGroup(
+          viewId,
+          new FilterStatus({ ...filterStatus, date: undefined }),
+        ),
+      };
+    }
+
     case "reverseNameFilter": {
       if (!isUserViewGroup) {
         return state;

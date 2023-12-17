@@ -66,7 +66,7 @@ export default function RootLayout({
   return (
     <html
       // suppressHydrationWarning
-      className="bg-stone-100 text-gray-800 dark:bg-neutral-800 dark:text-neutral-200"
+      className="bg-stone-100 text-stone-900 dark:bg-neutral-800 dark:text-neutral-200 dark:selection:bg-blue-300"
     >
       <body className={``}>
         {/* <Provider attribute="class" defaultTheme="system" enableSystem> */}
