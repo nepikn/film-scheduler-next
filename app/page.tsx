@@ -4,7 +4,7 @@ import Calendar from "@/components/ui/Calendar";
 import IcsDownloadLink from "@/components/ui/IcsDownloadLink";
 import NameFilter from "@/components/ui/NameFilter";
 import ViewNav from "@/components/ui/ViewNav";
-import Aside from "@/components/ui/aside";
+import { DateFilterAside, NameFilterAside } from "@/components/ui/aside";
 import type { LocalState, StatusConfig, ViewConfig } from "@/lib/definitions";
 import { useLocalEffect } from "@/lib/localforage";
 import View from "@/lib/view";
@@ -33,6 +33,14 @@ export default function App() {
 
   return (
     <main className="m-auto grid gap-8 px-16 py-8">
+      <DateFilterAside
+        isUserView={view.belongUserGroup}
+        handlers={{
+          selectWeekend: () => dispatch({ type: "reverseNameFilter" }),
+          selectWeekday: () => dispatch({ type: "clearNameFilter" }),
+          clear: () => dispatch({ type: "clearNameFilter" }),
+        }}
+      />
       <div className="grid gap-4">
         <div className="grid gap-2">
           <NameFilter
@@ -51,7 +59,7 @@ export default function App() {
         </div>
         <Calendar
           view={view}
-          dateCheck={filterStatus.date}
+          dateFilterStatus={filterStatus.date}
           filteredFilms={filteredFilms}
           handleFilterChange={handleFilterChange}
           handleJoinChange={handleFilmInputChange}
@@ -62,10 +70,12 @@ export default function App() {
         filteredFilms={filteredFilms}
         handleChange={handleCalendarTableChange}
       /> */}
-      <Aside
-        userView={view.belongUserGroup}
-        handleReverse={() => dispatch({ type: "reverseNameFilter" })}
-        handleClear={() => dispatch({ type: "clearNameFilter" })}
+      <NameFilterAside
+        isUserView={view.belongUserGroup}
+        handlers={{
+          reverse: () => dispatch({ type: "reverseNameFilter" }),
+          clear: () => dispatch({ type: "clearNameFilter" }),
+        }}
       />
     </main>
   );

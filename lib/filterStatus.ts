@@ -1,39 +1,39 @@
 import Film from "./film";
 import View from "./view";
 import { StatusConfig, FilterStatusConstructor } from "./definitions";
+import { eachDayOfInterval, endOfMonth, startOfMonth } from "date-fns";
 
 export default class FilterStatus {
-  name: {
-    [k: Film["name"]]: boolean | undefined;
+  name = { 燃冬: true, 霧中潛行: true } as {
+    [filmName: Film["name"]]: boolean | undefined;
   };
   date = Object.fromEntries(
-    [...new Array(31)].map((_, i) => [i + 1, true]),
+    eachDayOfInterval({
+      start: startOfMonth(Film.interval.start),
+      end: endOfMonth(Film.interval.end),
+    }).map((date) => [+date, true]),
     // todo: init date filter according to initial film data
     // adjust <DateFilter /> argument
   );
 
   constructor(prevStatus?: FilterStatusConstructor, config?: StatusConfig) {
-    if (prevStatus) {
-      this.name = { ...prevStatus.name };
-      if (prevStatus.date) {
-        this.date = { ...prevStatus.date };
-      }
+    if (!prevStatus) return;
 
-      if (!config) return;
+    this.name = prevStatus.name ? { ...prevStatus.name } : this.name;
+    this.date = prevStatus.date ? { ...prevStatus.date } : this.date;
 
-      if ("status" in config) {
-        this[config.type] = config.status;
-      } else {
-        this[config.type][config.filmNameOrMonthDate] = config.checked;
-      }
+    if (!config) return;
+
+    if ("status" in config) {
+      this[config.type] = config.status;
     } else {
-      this.name = { 燃冬: true, 霧中潛行: true };
+      this[config.type][config.filmNameOrMonthDate] = config.checked;
     }
   }
 
   getFilteredFilms() {
     return Film.instances.filter(
-      (film) => this.name[film.name] && this.date[film.time.date.getDate()],
+      (film) => this.name[film.name] && this.date[+film.time.date],
     );
   }
 

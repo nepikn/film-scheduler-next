@@ -47,6 +47,7 @@ export function getInitialState(): ViewState {
 
 type Action =
   | { type: "localize"; localState: LocalState }
+  | { type: "selectWeekend" }
   | { type: "changeFilmInput"; view: View; viewConfig: ViewConfig }
   | { type: "reverseNameFilter" }
   | { type: "clearNameFilter" }
@@ -78,6 +79,9 @@ function reducer(state: ViewState, action: Action): ViewState {
   }
 
   switch (action.type) {
+    case 'selectWeekend':{
+      
+    }
     case "reverseNameFilter": {
       if (!isUserViewGroup) {
         return state;

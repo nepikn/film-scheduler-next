@@ -28,6 +28,21 @@ export default class Film {
     );
   }
   static names = new Set(this.instances.map((film) => film.name));
+  static interval = {
+    start: startOfDay(
+      this.instances
+        .map((film) => film.time.start)
+        .reduce(
+          (startTime, earliest) => Math.min(startTime, +earliest),
+          Infinity,
+        ),
+    ),
+    end: startOfDay(
+      this.instances
+        .map((film) => film.time.end)
+        .reduce((endTime, latest) => Math.max(endTime, +latest), -Infinity),
+    ),
+  } satisfies Interval;
 
   static getSoldoutStatus(name: string) {
     return this.instances
