@@ -32,16 +32,17 @@ export default function ViewNav({
             >
               {viewGroup.length ? (
                 viewGroup.map((view, j) => {
-                  const isChecked = view.id == curViewId;
                   return (
                     <ViewSwitch
                       key={view.id}
                       label={j}
                       handleViewChange={() => handleViewChange(view)}
                       handleViewRemove={() => handleViewRemove(view)}
-                      isChecked={isChecked}
-                      showRemove={i == 0 && j != 0}
-                      isCurrentUserView={i == 0 && view.id == userViewId}
+                      checked={view.id == curViewId}
+                      showRemove={view.belongUserGroup && j != 0}
+                      isCurrentUserView={
+                        view.belongUserGroup && view.id == userViewId
+                      }
                     />
                   );
                 })
@@ -60,7 +61,7 @@ interface ViewSwitch {
   label: number;
   handleViewChange: () => void;
   handleViewRemove: () => void;
-  isChecked: boolean;
+  checked: boolean;
   showRemove: boolean;
   isCurrentUserView: boolean;
 }
@@ -69,7 +70,7 @@ function ViewSwitch({
   label,
   handleViewChange,
   handleViewRemove,
-  isChecked,
+  checked,
   showRemove,
   isCurrentUserView,
 }: ViewSwitch) {
@@ -88,16 +89,16 @@ function ViewSwitch({
         className={clsx(
           "grid w-10 place-items-center",
           isCurrentUserView || "text-gray-400",
-          isCurrentUserView && !isChecked && "font-semibold",
-          isChecked || "cursor-pointer hover:opacity-50",
-          isChecked && "font-bold text-blue-500 dark:text-blue-300",
+          isCurrentUserView && !checked && "font-semibold",
+          checked || "cursor-pointer hover:opacity-50",
+          checked && "font-bold text-blue-500 dark:text-blue-300",
         )}
       >
         <span className={"w-full text-center"}>{label}</span>
         <input
           type="radio"
           name="view"
-          checked={isChecked}
+          checked={checked}
           className="hidden"
           onChange={handleViewChange}
         />
