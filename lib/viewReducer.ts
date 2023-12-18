@@ -6,7 +6,7 @@ import { StatusConfig, LocalState, ViewConfig } from "./definitions";
 import View from "./view";
 import Film from "./film";
 import { ViewState } from "./definitions";
-import { isWeekend } from "date-fns";
+import { isWeekend, parseISO } from "date-fns";
 
 export default function useViewReducer() {
   return useReducer(reducer, null, getInitialState);
@@ -24,6 +24,10 @@ export function getInitialState(): ViewState {
   const status = new FilterStatus({
     name: Object.fromEntries(Object.keys(joinIds).map((key) => [key, true])),
   });
+
+  status.date[+parseISO("2023-11-12")] = false;
+  status.date[+parseISO("2023-11-14")] = false;
+  status.date[+parseISO("2023-11-15")] = false;
 
   return {
     viewId: id,
@@ -158,8 +162,6 @@ function reducer(state: ViewState, action: Action): ViewState {
     }
 
     case "localize": {
-      console.log("localize %o", action.localState);
-
       const userViews = action.localState.userViews?.map(
         (construtor) =>
           new View({
