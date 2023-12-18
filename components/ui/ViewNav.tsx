@@ -1,19 +1,17 @@
-import { Fragment } from "react";
 import View from "../../lib/view";
 import clsx from "clsx";
 import { Icons } from "../icons";
+import { Button } from "./button";
 
 interface Nav {
-  handleViewChange: (k: View) => void;
-  handleViewRemove: (k: View) => void;
   viewGroups: View[][];
   userViewId: View["id"];
   viewId: View["id"];
+  handlers: { [k: string]: (view: View) => void };
 }
 
 export default function ViewNav({
-  handleViewChange,
-  handleViewRemove,
+  handlers,
   viewGroups,
   userViewId,
   viewId: curViewId,
@@ -21,77 +19,119 @@ export default function ViewNav({
   const titles = ["自\n訂", "生\n成"];
   return (
     <nav className="flex overflow-x-scroll py-4">
-      {viewGroups.map((viewGroup, i) => {
+      {viewGroups.map((views, i) => {
         const title = titles[i];
+        const isUserGroup = i == 0;
         return (
-          <Fragment key={title}>
-            <h3 className="whitespace-pre leading-none">{title}</h3>
-            <fieldset
-              // name={title}
-              className="flex items-stretch divide-x py-1"
-            >
-              {viewGroup.length ? (
-                viewGroup.map((view, j) => {
-                  return (
-                    <ViewSwitch
-                      key={view.id}
-                      label={j}
-                      handleViewChange={() => handleViewChange(view)}
-                      handleViewRemove={() => handleViewRemove(view)}
-                      checked={view.id == curViewId}
-                      showRemove={view.belongUserGroup && j != 0}
-                      isCurrentUserView={
-                        view.belongUserGroup && view.id == userViewId
-                      }
-                    />
-                  );
+          <div key={title} className="flex">
+            <span className="whitespace-pre leading-none">{title}</span>
+            <fieldset className="grid grid-flow-col divide-x py-1">
+              {views.length ? (
+                ViewGroup({
+                  views,
+                  curViewId,
+                  userViewId,
+                  handlers,
+                  isUserGroup,
                 })
               ) : (
                 <span className="ml-2">（無）</span>
               )}
             </fieldset>
-          </Fragment>
+          </div>
         );
       })}
     </nav>
   );
 }
 
+interface ViewGroup {
+  views: View[];
+  curViewId: string;
+  isUserGroup: boolean;
+  userViewId: string;
+  handlers: {
+    [k: string]: (view: View) => void;
+  };
+}
+
+function ViewGroup({
+  views,
+  curViewId,
+  isUserGroup,
+  userViewId,
+  handlers,
+}: ViewGroup) {
+  const group = views.map((view, j) => {
+    return (
+      <ViewSwitch
+        key={view.id}
+        label={j}
+        checked={view.id == curViewId}
+        showRemove={isUserGroup && j != 0}
+        isCurrentUserView={view.id == userViewId}
+        handlers={Object.fromEntries(
+          Object.entries(handlers).map(([key, handler]) => [
+            key,
+            () => handler(view),
+          ]),
+        )}
+      />
+    );
+  });
+
+  if (isUserGroup) {
+    group.push(
+      <Button
+        variant={"icon"}
+        size={"icon"}
+        onClick={handlers.copy as () => void}
+        className={"w-14"}
+      >
+        <Icons.plus />
+      </Button>,
+    );
+  }
+
+  return group;
+}
+
 interface ViewSwitch {
   label: number;
-  handleViewChange: () => void;
-  handleViewRemove: () => void;
   checked: boolean;
   showRemove: boolean;
   isCurrentUserView: boolean;
+  handlers: { [k: string]: () => void };
 }
 
 function ViewSwitch({
   label,
-  handleViewChange,
-  handleViewRemove,
+  handlers,
   checked,
   showRemove,
   isCurrentUserView,
 }: ViewSwitch) {
   return (
-    <fieldset className="group relative grid items-stretch px-2">
-      <button
-        onClick={handleViewRemove}
-        className={clsx(
-          "absolute right-1 hidden w-4",
-          showRemove && "group-hover:block",
-        )}
-      >
-        <Icons.cross />
-      </button>
+    <fieldset className="group relative grid w-14 place-items-center">
+      {showRemove && (
+        <Button
+          variant={"icon"}
+          size={"icon"}
+          onClick={handlers.remove}
+          className={clsx(
+            "absolute right-1 top-0 hidden w-4 group-hover:block",
+          )}
+        >
+          <Icons.cross />
+        </Button>
+      )}
       <label
         className={clsx(
-          "grid w-10 place-items-center",
-          isCurrentUserView || "text-gray-400",
-          isCurrentUserView && !checked && "font-semibold",
-          checked || "cursor-pointer hover:opacity-50",
-          checked && "font-bold text-blue-500 dark:text-blue-300",
+          "w-max font-bold",
+          isCurrentUserView || checked || "font-normal text-gray-400",
+          checked ||
+            "cursor-pointer hover:text-stone-900 dark:hover:text-neutral-200",
+          checked && "text-blue-500 dark:text-blue-300",
         )}
       >
         <span className={"w-full text-center"}>{label}</span>
@@ -100,11 +140,9 @@ function ViewSwitch({
           name="view"
           checked={checked}
           className="hidden"
-          onChange={handleViewChange}
+          onChange={handlers.change}
         />
       </label>
     </fieldset>
   );
 }
-
-export function useViewGroup(name: string) {}

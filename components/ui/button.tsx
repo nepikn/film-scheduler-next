@@ -22,13 +22,14 @@ const buttonVariants = cva(
         link: "text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-50",
         brand:
           "inline-block text-base transition-all duration-100 ease-linear font-medium hover:bg-black/90 group bg-black px-7 py-4 text-center text-white dark:bg-white dark:text-black dark:hover:bg-white/90",
+        icon: "text-gray-400 hover:text-stone-900 dark:hover:text-neutral-200",
       },
       size: {
         default: "px-4 py-3",
         sm: "py-2 px-3 text-xs",
         lg: "py-3 px-8",
         xl: "py-4 px-8",
-        icon: "h-9 w-9",
+        icon: "",
       },
     },
     defaultVariants: {

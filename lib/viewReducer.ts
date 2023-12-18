@@ -57,6 +57,7 @@ type Action =
       type: "changeFilter";
       statusConfig: StatusConfig;
     }
+  | { type: "copyUserView",targView:View }
   | { type: "changeView"; nextView: View }
   | {
       type: "removeView";
@@ -179,7 +180,6 @@ function reducer(state: ViewState, action: Action): ViewState {
       const id = userViews[0].id;
 
       return {
-        ...state,
         viewId: id,
         userViewId: id,
         userViews: userViews,
@@ -187,11 +187,23 @@ function reducer(state: ViewState, action: Action): ViewState {
       };
     }
 
+    case "copyUserView": {
+      const index = userViews.findIndex((view) => view.id == userViewId);
+      const newView = new View({ joinIds: action.targView.joinIds });
+      const nextId = newView.id;
+
+      return {
+        viewId: nextId,
+        userViewId: nextId,
+        userViews: userViews.toSpliced(index + 1, 0, newView),
+        filterStatusGroup: generateGroup(nextId, group[userViewId]),
+      };
+    }
+
     case "changeFilmInput": {
       const newUserView = action.view.getConfigured(action.viewConfig);
 
       return {
-        ...state,
         viewId: newUserView.id,
         userViewId: newUserView.id,
         userViews: userViews.toSpliced(

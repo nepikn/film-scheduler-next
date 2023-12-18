@@ -14,9 +14,12 @@ import { useCallback } from "react";
 export default function App() {
   const [state, dispatch] = useViewReducer();
   const { viewId, userViewId, userViews, filterStatusGroup } = state;
-  // console.group("app");
-  // console.log("id %s group %o", viewId, filterStatusGroup);
-  // console.groupEnd();
+  console.group("app");
+  console.log(
+    "ids %o",
+    userViews.map((v) => v.id),
+  );
+  console.groupEnd();
   const filterStatus = filterStatusGroup[viewId];
   const suggestViews = filterStatus.getSuggestViews();
   const filteredFilms = filterStatus.getFilteredFilms();
@@ -49,12 +52,13 @@ export default function App() {
           />
           <div className="grid grid-cols-[1fr_auto] items-center gap-2">
             <ViewNav
-              {...{
-                userViewId,
-                handleViewChange,
-                handleViewRemove,
-                viewId: view.id,
-                viewGroups: [userViews, suggestViews],
+              viewId={view.id}
+              userViewId={userViewId}
+              viewGroups={[userViews, suggestViews]}
+              handlers={{
+                copy: handleViewCopy,
+                change: handleViewChange,
+                remove: handleViewRemove,
               }}
             />
             <IcsDownloader {...{ filteredFilms, view }} />
@@ -84,6 +88,10 @@ export default function App() {
       />
     </main>
   );
+
+  function handleViewCopy() {
+    dispatch({ type: "copyUserView", targView: view });
+  }
 
   function handleViewChange(nextView: View) {
     dispatch({ type: "changeView", nextView });
