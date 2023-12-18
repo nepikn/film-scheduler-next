@@ -35,7 +35,6 @@ export default class View {
     joinIds = {},
     groupId = View.userViewGroupId,
     randomOrId = true,
-    config,
   }: Prop = {}) {
     this.joinIds = { ...joinIds };
     this.groupId = groupId;
@@ -48,9 +47,6 @@ export default class View {
             Object.values(this.joinIds).join(""),
             "72d85d0e-f574-41d3-abee-1028cf9dd3c1",
           );
-    if (config) {
-      this.handleChange(config);
-    }
   }
 
   getConfigured(config: ViewConfig) {

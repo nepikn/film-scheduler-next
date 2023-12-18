@@ -19,7 +19,7 @@ export function getInitialState(): ViewState {
     漂流人生: "b522f98f-7a91-5ef2-af9e-28a430467c10",
     "麗芙烏曼：幽徑綺思": undefined,
   };
-  const userViews = [new View({ joinIds: joinIds }), new View(), new View()];
+  const userViews = [new View({ joinIds }), new View(), new View()];
   const id = userViews[0].id;
   const status = new FilterStatus({
     name: Object.fromEntries(Object.keys(joinIds).map((key) => [key, true])),
@@ -57,7 +57,7 @@ type Action =
       type: "changeFilter";
       statusConfig: StatusConfig;
     }
-  | { type: "copyUserView",targView:View }
+  | { type: "copyUserView"; views: View[] }
   | { type: "changeView"; nextView: View }
   | {
       type: "removeView";
@@ -67,8 +67,8 @@ type Action =
 
 function reducer(state: ViewState, action: Action): ViewState {
   const { viewId, userViewId, userViews, filterStatusGroup: group } = state;
-  const isUserViewGroup = viewId == userViewId;
-  const filterStatus = group[viewId];
+  const viewingSuggests = viewId != userViewId;
+  const filterStatus = group[userViewId];
 
   function generateGroup(
     targViewId: View["id"],
@@ -129,7 +129,7 @@ function reducer(state: ViewState, action: Action): ViewState {
     }
 
     case "reverseNameFilter": {
-      if (!isUserViewGroup) {
+      if (viewingSuggests) {
         return state;
       }
 
@@ -187,50 +187,51 @@ function reducer(state: ViewState, action: Action): ViewState {
       };
     }
 
-    case "copyUserView": {
+    case "copyUserView":
+    case "changeFilmInput": {
       const index = userViews.findIndex((view) => view.id == userViewId);
-      const newView = new View({ joinIds: action.targView.joinIds });
+      const copying = action.type == "copyUserView";
+      const newView = copying
+        ? new View({
+            joinIds: action.views.find((view) => view.id == viewId)?.joinIds,
+          })
+        : action.view.getConfigured(action.viewConfig);
       const nextId = newView.id;
 
       return {
         viewId: nextId,
         userViewId: nextId,
-        userViews: userViews.toSpliced(index + 1, 0, newView),
-        filterStatusGroup: generateGroup(nextId, group[userViewId]),
-      };
-    }
-
-    case "changeFilmInput": {
-      const newUserView = action.view.getConfigured(action.viewConfig);
-
-      return {
-        viewId: newUserView.id,
-        userViewId: newUserView.id,
-        userViews: userViews.toSpliced(
-          isUserViewGroup
-            ? userViews.findIndex((v) => v.id == viewId)
-            : userViews.length,
-          1,
-          newUserView,
-        ),
-        filterStatusGroup: generateGroup(newUserView.id, filterStatus),
+        userViews:
+          copying || viewingSuggests
+            ? userViews.toSpliced(index + 1, 0, newView)
+            : userViews.toSpliced(index, 1, newView),
+        filterStatusGroup: generateGroup(nextId, filterStatus),
       };
     }
 
     case "removeView": {
       const removedId = action.removedView.id;
-      const nextUserViewId = removedId == userViewId ? userViews[0].id : viewId;
-
-      return {
+      const nextState = {
         ...state,
-        viewId: nextUserViewId,
-        userViewId: nextUserViewId,
         userViews: userViews.filter((v) => v.id != removedId),
       };
+
+      if (removedId == userViewId) {
+        const findSibling = (offset: number) =>
+          userViews.find((_, i) => userViews[i + offset]?.id == userViewId);
+
+        nextState.viewId = nextState.userViewId = (
+          findSibling(-1) ??
+          findSibling(1) ??
+          userViews[0]
+        ).id;
+      }
+
+      return nextState;
     }
 
     case "changeFilter": {
-      const id = isUserViewGroup ? viewId : userViewId;
+      const id = viewingSuggests ? userViewId : viewId;
 
       return {
         ...state,
@@ -243,7 +244,7 @@ function reducer(state: ViewState, action: Action): ViewState {
     }
 
     case "clearNameFilter": {
-      if (!isUserViewGroup) {
+      if (viewingSuggests) {
         return state;
       }
 

@@ -20,6 +20,7 @@ export default function App() {
     userViews.map((v) => v.id),
   );
   console.groupEnd();
+  const viewingSuggests = viewId != userViewId;
   const filterStatus = filterStatusGroup[viewId];
   const suggestViews = filterStatus.getSuggestViews();
   const filteredFilms = filterStatus.getFilteredFilms();
@@ -37,7 +38,7 @@ export default function App() {
   return (
     <main className="m-auto grid gap-8 px-16 py-8">
       <DateFilterAside
-        isUserView={view.belongUserGroup}
+        viewingSuggests={viewingSuggests}
         handlers={{
           selectWeekend: () => dispatch({ type: "selectWeekend" }),
           selectWeekdayMorn: () => dispatch({ type: "selectWeekdayMorn" }),
@@ -80,7 +81,7 @@ export default function App() {
         handleChange={handleCalendarTableChange}
       /> */}
       <NameFilterAside
-        isUserView={view.belongUserGroup}
+        viewingSuggests={viewingSuggests}
         handlers={{
           reverse: () => dispatch({ type: "reverseNameFilter" }),
           clear: () => dispatch({ type: "clearNameFilter" }),
@@ -90,7 +91,7 @@ export default function App() {
   );
 
   function handleViewCopy() {
-    dispatch({ type: "copyUserView", targView: view });
+    dispatch({ type: "copyUserView", views });
   }
 
   function handleViewChange(nextView: View) {
