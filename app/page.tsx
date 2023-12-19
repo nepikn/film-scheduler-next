@@ -14,14 +14,18 @@ import { useCallback } from "react";
 export default function App() {
   const [state, dispatch] = useViewReducer();
   const { viewId, userViewId, userViews, filterStatusGroup } = state;
-  // console.group("app");
-  // console.log("id %s group %o", viewId, filterStatusGroup);
-  // console.groupEnd();
+  console.group("app");
+  console.log(
+    "ids %o",
+    userViews.map((v) => v.id),
+  );
+  console.groupEnd();
+  const viewingSuggests = viewId != userViewId;
   const filterStatus = filterStatusGroup[viewId];
   const suggestViews = filterStatus.getSuggestViews();
   const filteredFilms = filterStatus.getFilteredFilms();
   const views = [...userViews, ...suggestViews];
-  const view = views.find((v) => v.id == viewId) ?? new View();
+  const view = View.find(views, viewId) ?? new View();
 
   useLocalEffect(
     state,
@@ -34,7 +38,7 @@ export default function App() {
   return (
     <main className="m-auto grid gap-8 px-16 py-8">
       <DateFilterAside
-        isUserView={view.belongUserGroup}
+        viewingSuggests={viewingSuggests}
         handlers={{
           selectWeekend: () => dispatch({ type: "selectWeekend" }),
           selectWeekdayMorn: () => dispatch({ type: "selectWeekdayMorn" }),
@@ -49,12 +53,13 @@ export default function App() {
           />
           <div className="grid grid-cols-[1fr_auto] items-center gap-2">
             <ViewNav
-              {...{
-                userViewId,
-                handleViewChange,
-                handleViewRemove,
-                viewId: view.id,
-                viewGroups: [userViews, suggestViews],
+              viewId={view.id}
+              userViewId={userViewId}
+              viewGroups={[userViews, suggestViews]}
+              handlers={{
+                copy: handleViewCopy,
+                change: handleViewChange,
+                remove: handleViewRemove,
               }}
             />
             <IcsDownloader {...{ filteredFilms, view }} />
@@ -76,7 +81,7 @@ export default function App() {
         handleChange={handleCalendarTableChange}
       /> */}
       <NameFilterAside
-        isUserView={view.belongUserGroup}
+        viewingSuggests={viewingSuggests}
         handlers={{
           reverse: () => dispatch({ type: "reverseNameFilter" }),
           clear: () => dispatch({ type: "clearNameFilter" }),
@@ -84,6 +89,10 @@ export default function App() {
       />
     </main>
   );
+
+  function handleViewCopy() {
+    dispatch({ type: "copyUserView", views });
+  }
 
   function handleViewChange(nextView: View) {
     dispatch({ type: "changeView", nextView });

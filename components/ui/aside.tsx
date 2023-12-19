@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { Button } from "./button";
 
 interface AsideProp {
-  isUserView: boolean;
+  viewingSuggests: boolean;
   handlers: {
     [x: string]: () => void;
   };
@@ -15,8 +15,8 @@ interface Button {
   handleClick: () => void;
 }
 
-export function DateFilterAside({ isUserView, handlers }: AsideProp) {
-  const disabled = !isUserView;
+export function DateFilterAside({ viewingSuggests, handlers }: AsideProp) {
+  const disabled = viewingSuggests;
   const buttons: Button[] = [
     {
       name: "僅篩選週末",
@@ -38,9 +38,9 @@ export function DateFilterAside({ isUserView, handlers }: AsideProp) {
   return <Aside {...{ buttons, pos: "left" }} />;
 }
 
-export function NameFilterAside({ isUserView, handlers }: AsideProp) {
+export function NameFilterAside({ viewingSuggests, handlers }: AsideProp) {
   const { reverse, clear } = handlers;
-  const disabled = !isUserView;
+  const disabled = viewingSuggests;
   const buttons: Button[] = [
     {
       name: "反向篩選名稱",

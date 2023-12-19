@@ -33,7 +33,7 @@ export default function Calendar({
   handleJoinChange,
 }: CalendarProp) {
   // console.group("cal");
-  console.log(dateFilterStatus);
+  // console.log(dateFilterStatus);
   const [monthStart, setMonthStart] = useState(
     startOfMonth(Film.interval.start),
   );
@@ -57,7 +57,7 @@ export default function Calendar({
           {date.getMonth() == monthStart.getMonth() && (
             <>
               <DateFilter
-                isChecked={!!dateFilterStatus[+date]}
+                checked={!!dateFilterStatus[+date]}
                 date={date}
                 handleChange={handleFilterChange}
               />
@@ -102,19 +102,19 @@ export default function Calendar({
 }
 
 interface DateFilter {
-  isChecked: boolean;
+  checked: boolean;
   date: Date;
   handleChange: CalendarProp["handleFilterChange"];
 }
 
-function DateFilter({ isChecked, date, handleChange }: DateFilter) {
+function DateFilter({ checked, date, handleChange }: DateFilter) {
   return (
     <label className="cursor-pointer hover:text-gray-400">
       <input
         type="checkbox"
         name={"date"}
         value={+date}
-        checked={isChecked}
+        checked={checked}
         className="hidden"
         onChange={(e) =>
           handleChange({
@@ -127,7 +127,7 @@ function DateFilter({ isChecked, date, handleChange }: DateFilter) {
       <p
         className={clsx(
           "whitespace-nowrap text-right leading-none",
-          isChecked || "text-gray-400 line-through decoration-4",
+          checked || "text-gray-400 line-through decoration-4",
         )}
       >
         {date.getDate()}

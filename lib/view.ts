@@ -14,6 +14,13 @@ interface Prop {
 }
 
 export default class View {
+  static findIndex(views: View[], viewId: View["id"]) {
+    return views.findIndex((view) => view.id == viewId);
+  }
+  static find(views: View[], viewId: View["id"]) {
+    return views[this.findIndex(views, viewId)];
+  }
+
   static userViewGroupId = "0";
   get belongUserGroup() {
     return this.groupId == View.userViewGroupId;
@@ -35,7 +42,6 @@ export default class View {
     joinIds = {},
     groupId = View.userViewGroupId,
     randomOrId = true,
-    config,
   }: Prop = {}) {
     this.joinIds = { ...joinIds };
     this.groupId = groupId;
@@ -48,9 +54,6 @@ export default class View {
             Object.values(this.joinIds).join(""),
             "72d85d0e-f574-41d3-abee-1028cf9dd3c1",
           );
-    if (config) {
-      this.handleChange(config);
-    }
   }
 
   getConfigured(config: ViewConfig) {
