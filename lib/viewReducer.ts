@@ -189,11 +189,11 @@ function reducer(state: ViewState, action: Action): ViewState {
 
     case "copyUserView":
     case "changeFilmInput": {
-      const index = userViews.findIndex((view) => view.id == userViewId);
+      const index = View.findIndex(userViews, userViewId);
       const copying = action.type == "copyUserView";
       const newView = copying
         ? new View({
-            joinIds: action.views.find((view) => view.id == viewId)?.joinIds,
+            joinIds: View.find(action.views, viewId)?.joinIds,
           })
         : action.view.getConfigured(action.viewConfig);
       const nextId = newView.id;
@@ -217,12 +217,11 @@ function reducer(state: ViewState, action: Action): ViewState {
       };
 
       if (removedId == userViewId) {
-        const findSibling = (offset: number) =>
-          userViews.find((_, i) => userViews[i + offset]?.id == userViewId);
+        const index = View.findIndex(userViews, removedId);
 
         nextState.viewId = nextState.userViewId = (
-          findSibling(-1) ??
-          findSibling(1) ??
+          userViews[index - 1] ??
+          userViews[index + 1] ??
           userViews[0]
         ).id;
       }

@@ -14,6 +14,13 @@ interface Prop {
 }
 
 export default class View {
+  static findIndex(views: View[], viewId: View["id"]) {
+    return views.findIndex((view) => view.id == viewId);
+  }
+  static find(views: View[], viewId: View["id"]) {
+    return views[this.findIndex(views, viewId)];
+  }
+
   static userViewGroupId = "0";
   get belongUserGroup() {
     return this.groupId == View.userViewGroupId;

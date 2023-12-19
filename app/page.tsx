@@ -25,7 +25,7 @@ export default function App() {
   const suggestViews = filterStatus.getSuggestViews();
   const filteredFilms = filterStatus.getFilteredFilms();
   const views = [...userViews, ...suggestViews];
-  const view = views.find((v) => v.id == viewId) ?? new View();
+  const view = View.find(views, viewId) ?? new View();
 
   useLocalEffect(
     state,
