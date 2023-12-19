@@ -39,17 +39,17 @@ export function DateFilterAside({ viewingSuggests, handlers }: AsideProp) {
 }
 
 export function NameFilterAside({ viewingSuggests, handlers }: AsideProp) {
-  const { reverse, clear } = handlers;
+  const { all, clear } = handlers;
   const disabled = viewingSuggests;
   const buttons: Button[] = [
     {
-      name: "反向篩選名稱",
-      handleClick: reverse,
+      name: "清空名稱篩選",
+      handleClick: clear,
       disabled,
     },
     {
-      name: "清空名稱篩選",
-      handleClick: clear,
+      name: "名稱全選",
+      handleClick: all,
       disabled,
     },
     {

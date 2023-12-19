@@ -18,6 +18,7 @@ export function getInitialState(): ViewState {
     莊園魅影: "7085eaf3-68d3-5684-8fb6-a5c730ab0d5c",
     漂流人生: "b522f98f-7a91-5ef2-af9e-28a430467c10",
     "麗芙烏曼：幽徑綺思": undefined,
+    所有謊言的起源: undefined,
   };
   const userViews = [new View({ joinIds }), new View(), new View()];
   const id = userViews[0].id;
@@ -25,7 +26,6 @@ export function getInitialState(): ViewState {
     name: Object.fromEntries(Object.keys(joinIds).map((key) => [key, true])),
   });
 
-  status.date[+parseISO("2023-11-12")] = false;
   status.date[+parseISO("2023-11-14")] = false;
   status.date[+parseISO("2023-11-15")] = false;
 
@@ -51,7 +51,7 @@ type Action =
   | { type: "selectWeekdayMorn" }
   | { type: "resetDateFilter" }
   | { type: "changeFilmInput"; view: View; viewConfig: ViewConfig }
-  | { type: "reverseNameFilter" }
+  | { type: "allNameFilter" }
   | { type: "clearNameFilter" }
   | {
       type: "changeFilter";
@@ -128,7 +128,7 @@ function reducer(state: ViewState, action: Action): ViewState {
       };
     }
 
-    case "reverseNameFilter": {
+    case "allNameFilter": {
       if (viewingSuggests) {
         return state;
       }
@@ -136,10 +136,7 @@ function reducer(state: ViewState, action: Action): ViewState {
       const status = new FilterStatus(filterStatus, {
         type: "name",
         status: Object.fromEntries(
-          Array.from(Film.names).map((filmName) => [
-            filmName,
-            !filterStatus.name[filmName],
-          ]),
+          Array.from(Film.names).map((filmName) => [filmName, true]),
         ),
       });
 
