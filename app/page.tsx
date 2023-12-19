@@ -36,7 +36,7 @@ export default function App() {
   );
 
   return (
-    <main className="m-auto grid gap-8 px-16 py-8">
+    <main className="m-auto grid gap-8 py-8">
       <DateFilterAside
         viewingSuggests={viewingSuggests}
         handlers={{
@@ -45,8 +45,8 @@ export default function App() {
           reset: () => dispatch({ type: "resetDateFilter" }),
         }}
       />
-      <div className="grid gap-4">
-        <div className="grid gap-2">
+      <div className="grid gap-4 mx-16">
+        <div className="grid gap-4">
           <NameFilter
             status={filterStatus.name}
             handleChange={handleFilterChange}

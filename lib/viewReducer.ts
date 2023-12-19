@@ -217,8 +217,8 @@ function reducer(state: ViewState, action: Action): ViewState {
         const index = View.findIndex(userViews, removedId);
 
         nextState.viewId = nextState.userViewId = (
-          userViews[index - 1] ??
           userViews[index + 1] ??
+          userViews[index - 1] ??
           userViews[0]
         ).id;
       }
