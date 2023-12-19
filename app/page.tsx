@@ -83,7 +83,7 @@ export default function App() {
       <NameFilterAside
         viewingSuggests={viewingSuggests}
         handlers={{
-          reverse: () => dispatch({ type: "reverseNameFilter" }),
+          all: () => dispatch({ type: "allNameFilter" }),
           clear: () => dispatch({ type: "clearNameFilter" }),
         }}
       />
