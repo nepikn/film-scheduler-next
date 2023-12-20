@@ -2,6 +2,7 @@ import View from "../../lib/view";
 import clsx from "clsx";
 import { Icons } from "../icons";
 import { Button } from "./button";
+import { Carousel } from "./Carousel";
 
 interface Nav {
   viewGroups: View[][];
@@ -16,28 +17,27 @@ export default function ViewNav({
   userViewId,
   viewId: curViewId,
 }: Nav) {
-  const titles = ["自\n訂", "生\n成"];
+  const configs = [
+    {
+      title: "自\n訂",
+      style: "flex",
+      component: UserGroup,
+    },
+    {
+      title: "生\n成",
+      style: "grid grid-flow-col",
+      component: SuggestGroup,
+    },
+  ];
+
   return (
-    <nav className="flex overflow-x-scroll py-4">
+    <nav className="grid grid-flow-col grid-cols-[auto_1fr] justify-items-start pb-2 pt-1">
       {viewGroups.map((views, i) => {
-        const title = titles[i];
-        const isUserGroup = i == 0;
+        const config = configs[i];
         return (
-          <div key={title} className="flex">
-            <span className="whitespace-pre leading-none">{title}</span>
-            <fieldset className="grid grid-flow-col divide-x py-1">
-              {views.length ? (
-                ViewGroup({
-                  views,
-                  curViewId,
-                  userViewId,
-                  handlers,
-                  isUserGroup,
-                })
-              ) : (
-                <span className="ml-2">（無）</span>
-              )}
-            </fieldset>
+          <div key={config.title} className={config.style}>
+            <span className="whitespace-pre leading-none">{config.title}</span>
+            <config.component {...{ views, curViewId, userViewId, handlers }} />
           </div>
         );
       })}
@@ -45,55 +45,68 @@ export default function ViewNav({
   );
 }
 
-interface ViewGroup {
+interface Group {
   views: View[];
   curViewId: string;
-  isUserGroup: boolean;
-  userViewId: string;
+  userViewId?: string;
   handlers: {
     [k: string]: (view: View) => void;
   };
 }
 
-function ViewGroup({
-  views,
-  curViewId,
-  isUserGroup,
-  userViewId,
-  handlers,
-}: ViewGroup) {
-  const group = views.map((view, j) => {
-    return (
-      <ViewSwitch
-        key={view.id}
-        label={j}
-        checked={view.id == curViewId}
-        showRemove={isUserGroup && j != 0}
-        isCurrentUserView={view.id == userViewId}
-        handlers={Object.fromEntries(
-          Object.entries(handlers).map(([key, handler]) => [
-            key,
-            () => handler(view),
-          ]),
-        )}
-      />
-    );
-  });
-
-  if (isUserGroup) {
-    group.push(
+function UserGroup({ views, curViewId, userViewId, handlers }: Group) {
+  return (
+    <fieldset className="grid grid-flow-col divide-x py-1">
+      {views.map((view, j) => (
+        <ViewSwitch
+          key={view.id}
+          label={j}
+          checked={view.id == curViewId}
+          showRemove={j != 0}
+          isCurrentUserView={view.id == userViewId}
+          handlers={Object.fromEntries(
+            Object.entries(handlers).map(([key, handler]) => [
+              key,
+              () => handler(view),
+            ]),
+          )}
+        />
+      ))}
       <Button
+        key={"plus"}
         variant={"icon"}
         size={"icon"}
         onClick={handlers.copy as () => void}
         className={"w-14"}
       >
         <Icons.plus />
-      </Button>,
-    );
-  }
+      </Button>
+    </fieldset>
+  );
+}
 
-  return group;
+function SuggestGroup({ views, curViewId, handlers }: Group) {
+  return (
+    <Carousel key={views[0].id}>
+      <>
+        {views.map((view, j) => (
+          <ViewSwitch
+            key={view.id}
+            label={j}
+            checked={view.id == curViewId}
+            showRemove={false}
+            isCurrentUserView={false}
+            handlers={Object.fromEntries(
+              Object.entries(handlers).map(([key, handler]) => [
+                key,
+                () => handler(view),
+              ]),
+            )}
+          />
+        ))}
+      </>
+    </Carousel>
+  );
 }
 
 interface ViewSwitch {
@@ -127,14 +140,14 @@ function ViewSwitch({
       )}
       <label
         className={clsx(
-          "w-max font-bold",
+          "grid w-full place-items-center font-bold",
           isCurrentUserView || checked || "font-normal text-gray-400",
           checked ||
             "cursor-pointer hover:text-stone-900 dark:hover:text-neutral-200",
           checked && "text-blue-500 dark:text-blue-300",
         )}
       >
-        <span className={"w-full text-center"}>{label}</span>
+        <span>{label}</span>
         <input
           type="radio"
           name="view"

@@ -14,12 +14,12 @@ import { useCallback } from "react";
 export default function App() {
   const [state, dispatch] = useViewReducer();
   const { viewId, userViewId, userViews, filterStatusGroup } = state;
-  console.group("app");
-  console.log(
-    "ids %o",
-    userViews.map((v) => v.id),
-  );
-  console.groupEnd();
+  // console.group("app");
+  // console.log(
+  //   "ids %o",
+  //   userViews.map((v) => v.id),
+  // );
+  // console.groupEnd();
   const viewingSuggests = viewId != userViewId;
   const filterStatus = filterStatusGroup[viewId];
   const suggestViews = filterStatus.getSuggestViews();
@@ -36,7 +36,7 @@ export default function App() {
   );
 
   return (
-    <main className="m-auto grid gap-8 px-16 py-8">
+    <main className="m-auto grid gap-8 py-8">
       <DateFilterAside
         viewingSuggests={viewingSuggests}
         handlers={{
@@ -45,8 +45,8 @@ export default function App() {
           reset: () => dispatch({ type: "resetDateFilter" }),
         }}
       />
-      <div className="grid gap-4">
-        <div className="grid gap-2">
+      <div className="grid gap-4 mx-16">
+        <div className="grid gap-4">
           <NameFilter
             status={filterStatus.name}
             handleChange={handleFilterChange}
