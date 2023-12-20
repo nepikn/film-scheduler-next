@@ -14,12 +14,12 @@ import { useCallback } from "react";
 export default function App() {
   const [state, dispatch] = useViewReducer();
   const { viewId, userViewId, userViews, filterStatusGroup } = state;
-  console.group("app");
-  console.log(
-    "ids %o",
-    userViews.map((v) => v.id),
-  );
-  console.groupEnd();
+  // console.group("app");
+  // console.log(
+  //   "ids %o",
+  //   userViews.map((v) => v.id),
+  // );
+  // console.groupEnd();
   const viewingSuggests = viewId != userViewId;
   const filterStatus = filterStatusGroup[viewId];
   const suggestViews = filterStatus.getSuggestViews();

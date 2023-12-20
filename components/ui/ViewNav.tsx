@@ -2,6 +2,7 @@ import View from "../../lib/view";
 import clsx from "clsx";
 import { Icons } from "../icons";
 import { Button } from "./button";
+import { Carousel } from "./Carousel";
 
 interface Nav {
   viewGroups: View[][];
@@ -24,7 +25,7 @@ export default function ViewNav({
     },
     {
       title: "生\n成",
-      style: "grid grid-flow-col grid-cols-[auto_auto_1fr_auto]",
+      style: "grid grid-flow-col",
       component: SuggestGroup,
     },
   ];
@@ -86,90 +87,27 @@ function UserGroup({ views, curViewId, userViewId, handlers }: Group) {
 
 function SuggestGroup({ views, curViewId, handlers }: Group) {
   return (
-    <>
-      <Button
-        variant={"icon"}
-        size={"icon"}
-        onClick={handlers.copy as () => void}
-        className={"w-8 justify-end"}
-      >
-        <Icons.left />
-      </Button>
-      <div className="grid items-center overflow-x-hidden">
-        <fieldset className="flex flex-shrink-0 divide-x py-1">
-          {views.map((view, j) => (
-            <ViewSwitch
-              key={view.id}
-              label={j}
-              checked={view.id == curViewId}
-              showRemove={false}
-              isCurrentUserView={false}
-              handlers={Object.fromEntries(
-                Object.entries(handlers).map(([key, handler]) => [
-                  key,
-                  () => handler(view),
-                ]),
-              )}
-            />
-          ))}
-        </fieldset>
-      </div>
-      <Button
-        variant={"icon"}
-        size={"icon"}
-        onClick={handlers.copy as () => void}
-        className={"w-8 justify-start"}
-      >
-        <Icons.right />
-      </Button>
-    </>
+    <Carousel key={views[0].id}>
+      <>
+        {views.map((view, j) => (
+          <ViewSwitch
+            key={view.id}
+            label={j}
+            checked={view.id == curViewId}
+            showRemove={false}
+            isCurrentUserView={false}
+            handlers={Object.fromEntries(
+              Object.entries(handlers).map(([key, handler]) => [
+                key,
+                () => handler(view),
+              ]),
+            )}
+          />
+        ))}
+      </>
+    </Carousel>
   );
 }
-
-// function Views({ views, curViewId, isUserGroup, userViewId, handlers }: Views) {
-//   const elems = views.length ? (
-//     views.map((view, j) => (
-//       <ViewSwitch
-//         key={view.id}
-//         label={j}
-//         checked={view.id == curViewId}
-//         showRemove={isUserGroup && j != 0}
-//         isCurrentUserView={view.id == userViewId}
-//         handlers={Object.fromEntries(
-//           Object.entries(handlers).map(([key, handler]) => [
-//             key,
-//             () => handler(view),
-//           ]),
-//         )}
-//       />
-//     ))
-//   ) : (
-//     <span className="ml-2">（無）</span>
-//   );
-
-//   if (Array.isArray(elems) && isUserGroup) {
-//     elems.push(
-//       <Button
-//         key={"plus"}
-//         variant={"icon"}
-//         size={"icon"}
-//         onClick={handlers.copy as () => void}
-//         className={"w-14"}
-//       >
-//         <Icons.plus />
-//       </Button>,
-//     );
-//   } else {
-//     // group.unshift(
-//     // );
-//   }
-
-//   return (
-//     <fieldset className="inline-grid grid-flow-col divide-x py-1">
-//       {elems}
-//     </fieldset>
-//   );
-// }
 
 interface ViewSwitch {
   label: number;
