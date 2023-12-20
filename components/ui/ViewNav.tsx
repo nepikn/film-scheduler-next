@@ -5,7 +5,7 @@ import { Button } from "./button";
 import { Carousel } from "./Carousel";
 
 interface Nav {
-  viewGroups: View[][];
+  viewGroups: (View[] | null)[];
   userViewId: View["id"];
   viewId: View["id"];
   handlers: { [k: string]: (view: View) => void };
@@ -25,7 +25,7 @@ export default function ViewNav({
     },
     {
       title: "生\n成",
-      style: "grid grid-flow-col",
+      style: "grid grid-flow-col items-center",
       component: SuggestGroup,
     },
   ];
@@ -46,7 +46,7 @@ export default function ViewNav({
 }
 
 interface Group {
-  views: View[];
+  views: View[] | null;
   curViewId: string;
   userViewId?: string;
   handlers: {
@@ -57,7 +57,7 @@ interface Group {
 function UserGroup({ views, curViewId, userViewId, handlers }: Group) {
   return (
     <fieldset className="grid grid-flow-col divide-x py-1">
-      {views.map((view, j) => (
+      {views?.map((view, j) => (
         <ViewSwitch
           key={view.id}
           label={j}
@@ -86,6 +86,8 @@ function UserGroup({ views, curViewId, userViewId, handlers }: Group) {
 }
 
 function SuggestGroup({ views, curViewId, handlers }: Group) {
+  if (!views) return <span className="ml-2">（無）</span>;
+
   return (
     <Carousel key={views[0].id}>
       <>

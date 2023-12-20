@@ -1,4 +1,4 @@
-import { getSoldoutByFilm } from "@/public/film/golden-tp-soldout";
+import { getSoldoutByFilm } from "@/public/golden/2023-tp-soldout";
 import {
   add,
   areIntervalsOverlapping,
@@ -9,7 +9,7 @@ import {
   startOfDay,
 } from "date-fns";
 import { v5 } from "uuid";
-import filmData from "../public/film/film-golden-tp-id";
+import filmData from "../public/golden/2023-tp-id";
 
 type FormatKey = keyof Film["format"];
 interface Time extends Interval {

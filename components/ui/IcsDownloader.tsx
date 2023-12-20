@@ -15,7 +15,7 @@ export default function IcsDownloader({
   return (
     <Button
       size="sm"
-      className="h-full p-0 rounded"
+      className="h-full rounded p-0"
       variant="secondary"
       disabled={!joinedFilms.length}
     >
@@ -38,6 +38,8 @@ const ADDRESS = {
 };
 
 function getIcsLink(films: Film[], format = { summary: "電影：%s" }) {
+  if (window == undefined) return undefined;
+
   const { error, value } = ics.createEvents(
     films.map((film) => {
       const [theater, screen] = film.venue.split(" ") as [
@@ -66,5 +68,5 @@ function getIcsLink(films: Film[], format = { summary: "電影：%s" }) {
     return;
   }
 
-  return window && URL.createObjectURL(new Blob([value]));
+  return URL.createObjectURL(new Blob([value]));
 }

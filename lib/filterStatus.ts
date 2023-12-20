@@ -1,6 +1,6 @@
 import Film from "./film";
 import View from "./view";
-import { StatusConfig, FilterStatusConstructor } from "./definitions";
+import { StatusConfig, StatusConstructor } from "./definitions";
 import { eachDayOfInterval, endOfMonth, startOfMonth } from "date-fns";
 
 interface StatusByNameOrTime {
@@ -16,7 +16,7 @@ export default class FilterStatus {
     }).map((date) => [+date, true]),
   ) as StatusByNameOrTime;
 
-  constructor(prevStatus?: FilterStatusConstructor, config?: StatusConfig) {
+  constructor(prevStatus?: StatusConstructor, config?: StatusConfig) {
     if (!prevStatus) return;
 
     this.name = { ...(prevStatus.name ? prevStatus.name : this.name) };
@@ -40,7 +40,7 @@ export default class FilterStatus {
 
   getSuggestViews(/* removedIds: Set<View["id"]> , */ loopLimit = 5000) {
     const filteredFilms = this.getFilteredFilms();
-    if (!filteredFilms.length) return [];
+    if (!filteredFilms.length) return null;
 
     const groupByName: { [k: Film["name"]]: Film[] } = {};
     filteredFilms.forEach((film) => {
@@ -86,7 +86,7 @@ export default class FilterStatus {
 
       while (indexes[i] >= groups[i].length - 1) {
         if (i == 0 || loop++ >= loopLimit) {
-          return result;
+          return result.length ? result : null;
         }
 
         indexes[i--] = 0;
