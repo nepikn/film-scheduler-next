@@ -71,6 +71,16 @@ export default function RootLayout({
       <body className={``}>
         {/* <Provider attribute="class" defaultTheme="system" enableSystem> */}
         {children}
+        <footer className="p-6 text-center font-serif">
+          <p>
+            <span className="text-gray-400">資料來源</span>{" "}
+            <a target="_blank" href="https://www.goldenhorse.org.tw">台北金馬影展</a>
+          </p>
+          <p className="text-gray-400">
+            © {new Date().getFullYear()}{" "}
+            <a target="_blank" href="https://github.com/nepikn">Pin-Chien Ho</a>
+          </p>
+        </footer>
         {/* </Provider> */}
       </body>
     </html>

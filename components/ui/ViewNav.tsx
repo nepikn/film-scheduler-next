@@ -125,7 +125,7 @@ function ViewSwitch({
   isCurrentUserView,
 }: ViewSwitch) {
   return (
-    <fieldset className="group relative grid w-14 place-items-center">
+    <fieldset className="group relative grid w-14">
       {showRemove && (
         <Button
           variant={"icon"}
@@ -140,7 +140,7 @@ function ViewSwitch({
       )}
       <label
         className={clsx(
-          "grid w-full place-items-center font-bold",
+          "grid w-full place-content-center font-bold",
           isCurrentUserView || checked || "font-normal text-gray-400",
           checked ||
             "cursor-pointer hover:text-stone-900 dark:hover:text-neutral-200",
