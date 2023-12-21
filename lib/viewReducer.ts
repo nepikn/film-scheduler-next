@@ -17,7 +17,9 @@ export function getInitialState(): ViewState {
     熱帶的甜蜜: "7b5cc6c1-0bdb-5107-8785-e5f3785417fe",
     莊園魅影: "7085eaf3-68d3-5684-8fb6-a5c730ab0d5c",
     漂流人生: "b522f98f-7a91-5ef2-af9e-28a430467c10",
+    "以此片預告一部不存在的電影：可笑的戰爭＼非常高達": undefined,
     "麗芙烏曼：幽徑綺思": undefined,
+    "影人講堂：陳英雄": undefined,
     所有謊言的起源: undefined,
   };
   const userViews = [new View({ joinIds }), new View(), new View()];

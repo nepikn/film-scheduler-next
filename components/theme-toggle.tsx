@@ -3,41 +3,35 @@
 import React from "react";
 import { Icons } from "@/components/icons";
 import { useTheme } from "next-themes";
+import clsx from "clsx";
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const buttons = [
+    { theme: "system", icon: "monitor" },
+    { theme: "dark", icon: "moon" },
+    { theme: "light", icon: "sun" },
+  ] as { theme: string; icon: keyof typeof Icons }[];
+
   return (
-    <div className="shado w- flex items-center justify-between rounded-full border bg-[#fafafa] p-2 px-4 dark:border-zinc-800 dark:bg-[#111]">
-      <button
-        className={`mr-2 p-1 text-zinc-700 dark:text-zinc-500 ${
-          theme === "system"
-            ? "rounded-full bg-white text-zinc-50 shadow-xl dark:bg-[#333]"
-            : ""
-        }`}
-        onClick={() => setTheme("system")}
-      >
-        <Icons.monitor />
-      </button>
-      <button
-        className={`mr-2 p-1 text-zinc-700 dark:text-zinc-500 ${
-          theme === "dark"
-            ? "rounded-full bg-white text-zinc-50 shadow-xl dark:bg-[#333]"
-            : ""
-        }`}
-        onClick={() => setTheme("dark")}
-      >
-        <Icons.moon />
-      </button>
-      <button
-        className={`mr-2 p-1 text-zinc-700 dark:text-zinc-500 ${
-          theme === "light"
-            ? "rounded-full bg-white text-zinc-700 shadow-xl dark:bg-[#333]"
-            : ""
-        }`}
-        onClick={() => setTheme("light")}
-      >
-        <Icons.sun />
-      </button>
-    </div>
+    <fieldset className="flex justify-items-center gap-1 rounded-full bg-stone-200 px-2 py-1 dark:bg-neutral-600">
+      {buttons.map((button) => {
+        const Icon = Icons[button.icon];
+
+        return (
+          <button
+            key={button.theme}
+            className={clsx(
+              "px-2 py-1 text-stone-400",
+              theme == button.theme &&
+                "rounded-full bg-stone-50 text-stone-500 shadow dark:bg-neutral-700 dark:text-neutral-200",
+            )}
+            onClick={() => setTheme(button.theme)}
+          >
+            <Icon />
+          </button>
+        );
+      })}
+    </fieldset>
   );
 }

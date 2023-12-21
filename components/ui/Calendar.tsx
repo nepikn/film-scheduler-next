@@ -52,7 +52,7 @@ export default function Calendar({
       {eachDayOfInterval({ start: sun, end: endOfWeek(sun) }).map((date) => (
         <div
           key={date.getTime()}
-          className="space-y-3 border-neutral-300 p-4 py-3"
+          className="space-y-4 border-neutral-300 py-3 [&>*]:px-4"
         >
           {date.getMonth() == monthStart.getMonth() && (
             <>
@@ -109,7 +109,7 @@ interface DateFilter {
 
 function DateFilter({ checked, date, handleChange }: DateFilter) {
   return (
-    <label className="cursor-pointer hover:text-gray-400">
+    <label className="grid cursor-pointer justify-end hover:text-gray-400">
       <input
         type="checkbox"
         name={"date"}
@@ -124,14 +124,14 @@ function DateFilter({ checked, date, handleChange }: DateFilter) {
           })
         }
       />
-      <p
+      <span
         className={clsx(
-          "whitespace-nowrap text-right leading-none",
+          "whitespace-nowrap leading-none",
           checked || "text-gray-400 line-through decoration-4",
         )}
       >
         {date.getDate()}
-      </p>
+      </span>
     </label>
   );
 }

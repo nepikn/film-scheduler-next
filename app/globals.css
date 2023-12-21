@@ -4,19 +4,21 @@
 
 @layer base {
   ::-webkit-scrollbar-thumb {
-    background: hsla(0, 0%, 100%, 0.25);
+    background: rgb(250, 250, 249);
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgb(64 64 64);
   }
 
   ::-webkit-scrollbar {
     width: 0.5rem;
     height: 0.5rem;
-    background-color: black;
+    background: rgb(197, 193, 190);
   }
 
-  @media (prefers-color-scheme: light) {
-    ::-webkit-scrollbar {
-      background-color: silver;
-    }
+  .dark ::-webkit-scrollbar {
+    background: black;
   }
 }
 

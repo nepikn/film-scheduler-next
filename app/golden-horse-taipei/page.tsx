@@ -24,7 +24,7 @@ export default function App() {
   const filterStatus = filterStatusGroup[viewId];
   const suggestViews = filterStatus.getSuggestViews();
   const filteredFilms = filterStatus.getFilteredFilms();
-  const views = [...userViews, ...suggestViews ?? []];
+  const views = [...userViews, ...(suggestViews ?? [])];
   const view = View.find(views, viewId) ?? new View();
 
   useLocalEffect(
@@ -36,7 +36,7 @@ export default function App() {
   );
 
   return (
-    <main className="m-auto grid gap-8 py-8">
+    <main className="m-auto grid gap-8">
       <DateFilterAside
         viewingSuggests={viewingSuggests}
         handlers={{
@@ -45,7 +45,7 @@ export default function App() {
           reset: () => dispatch({ type: "resetDateFilter" }),
         }}
       />
-      <div className="grid gap-4 mx-16">
+      <div className="grid gap-4">
         <div className="grid gap-4">
           <NameFilter
             status={filterStatus.name}

@@ -72,7 +72,7 @@ interface Aside {
 export default function Aside({ buttons, pos }: Aside) {
   const style = {
     aside: { left: "left-0", right: "right-0" },
-    button: { left: "border-l-0", right: "border-r-0" },
+    button: { left: "dark:border-l-0", right: "dark:border-r-0" },
   };
   return (
     <aside className={clsx("fixed top-0 py-2", style.aside[pos])}>

@@ -1,3 +1,5 @@
+import clsx from "clsx";
+
 type IconProp = {
   className?: string;
 };
@@ -10,7 +12,7 @@ export const Icons = {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className={`h-4 w-4 ${props.className}`}
+      className={clsx('h-4 w-4', props.className)}
     >
       <path
         strokeLinecap="round"
@@ -26,7 +28,7 @@ export const Icons = {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className={`h-4 w-4 ${props.className}`}
+      className={clsx('h-4 w-4', props.className)}
     >
       <path
         strokeLinecap="round"
@@ -42,7 +44,7 @@ export const Icons = {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className={`h-4 w-4 ${props.className}`}
+      className={clsx('h-4 w-4', props.className)}
     >
       <path
         strokeLinecap="round"
@@ -69,15 +71,13 @@ export const Icons = {
   sun: (props: IconProp) => (
     <svg
       fill="none"
-      height="24"
       shapeRendering="geometricPrecision"
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth="1.5"
       viewBox="0 0 24 24"
-      width="24"
-      className={`h-4 w-4 ${props.className}`}
+      className={clsx('h-4 w-4', props.className)}
     >
       <circle cx="12" cy="12" r="5" />
       <path d="M12 1v2" />
@@ -101,7 +101,7 @@ export const Icons = {
       strokeWidth="1.5"
       viewBox="0 0 24 24"
       width="24"
-      className={`h-4 w-4 ${props.className}`}
+      className={clsx('h-4 w-4', props.className)}
     >
       <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
     </svg>
@@ -117,7 +117,7 @@ export const Icons = {
       strokeWidth="1.5"
       viewBox="0 0 24 24"
       width="24"
-      className={`h-4 w-4 ${props.className}`}
+      className={clsx('h-4 w-4', props.className)}
     >
       <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
       <path d="M8 21h8" />
