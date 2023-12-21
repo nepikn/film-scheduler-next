@@ -12,7 +12,7 @@ export const metadata = {
   title: "台北金馬影展",
 } satisfies Metadata;
 
-export default function ({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-16 min-w-[768px]">
       <div className="grid gap-8 py-8">
