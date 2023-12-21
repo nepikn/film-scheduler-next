@@ -38,8 +38,6 @@ const ADDRESS = {
 };
 
 function getIcsLink(films: Film[], format = { summary: "電影：%s" }) {
-  if (window == undefined) return undefined;
-
   const { error, value } = ics.createEvents(
     films.map((film) => {
       const [theater, screen] = film.venue.split(" ") as [

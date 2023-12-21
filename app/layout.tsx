@@ -52,7 +52,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html>
       <body className="bg-stone-100 text-stone-900 dark:bg-neutral-800 dark:text-neutral-200 dark:selection:bg-blue-300">
