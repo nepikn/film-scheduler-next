@@ -8,10 +8,6 @@ type FlagExcludedType<Base, Type> = {
 type AllowedNames<Base, Type> = FlagExcludedType<Base, Type>[keyof Base];
 type ConstructorType<T> = Pick<T, AllowedNames<T, Function>>;
 
-export interface AsideAction {
-  type: "clearNameFilter";
-}
-
 export type FilmPropKey = "name" | "date" | "start" | "end" | "join";
 export type FilmConfig =
   | { propChange: "join"; checked: boolean }
@@ -19,13 +15,8 @@ export type FilmConfig =
       propChange: Exclude<FilmPropKey, "join">;
       nextValue: string;
     };
-export interface SoldoutFilm {
-  name: string;
-  start: string;
-  venue: string;
-}
 
-export type FilterStatusConstructor = Partial<ConstructorType<FilterStatus>>;
+export type StatusConstructor = Partial<ConstructorType<FilterStatus>>;
 export type StatusConfig =
   | {
       type: "name" | "date";
@@ -33,8 +24,8 @@ export type StatusConfig =
       checked: boolean;
     }
   | {
-      type: "name";
-      status: ConstructorType<FilterStatus>["name"];
+      type: "name" | "date";
+      status: ConstructorType<FilterStatus>[StatusConfig["type"]];
     };
 
 export interface ViewConfig {
@@ -51,6 +42,6 @@ export type ViewState = {
   };
 };
 export interface LocalState {
-  filterStatusGroup: { [id: View["id"]]: FilterStatusConstructor };
+  filterStatusGroup: { [id: View["id"]]: StatusConstructor };
   userViews: ConstructorType<View>[];
 }

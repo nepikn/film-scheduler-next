@@ -4,11 +4,10 @@ import { useState } from "react";
 import {
   eachWeekOfInterval,
   eachDayOfInterval,
-  previousSunday,
   endOfMonth,
   endOfWeek,
   isSameDay,
-  isSunday,
+  startOfMonth,
 } from "date-fns";
 import Film from "../../lib/film";
 import View from "../../lib/view";
@@ -20,7 +19,7 @@ import { StatusConfig } from "@/lib/definitions";
 
 interface CalendarProp {
   view: View;
-  dateCheck: FilterStatus["date"];
+  dateFilterStatus: FilterStatus["date"];
   filteredFilms: Film[];
   handleFilterChange: (k: StatusConfig) => void;
   handleJoinChange: (viewConfig: ViewConfig) => void;
@@ -28,13 +27,16 @@ interface CalendarProp {
 
 export default function Calendar({
   view,
-  dateCheck,
   filteredFilms,
+  dateFilterStatus,
   handleFilterChange,
   handleJoinChange,
 }: CalendarProp) {
   // console.group("cal");
-  const [monthStart, setMonthStart] = useState(new Date("2023-11"));
+  // console.log(dateFilterStatus);
+  const [monthStart, setMonthStart] = useState(
+    startOfMonth(Film.interval.start),
+  );
   const sortFilms = [...filteredFilms].sort((a, b) =>
     view.getSkipStatus(a) == view.getSkipStatus(b)
       ? +a.time.start - +b.time.start
@@ -43,20 +45,20 @@ export default function Calendar({
       : -1,
   );
   const weeks = eachWeekOfInterval({
-    start: isSunday(monthStart) ? monthStart : previousSunday(monthStart),
+    start: monthStart,
     end: endOfMonth(monthStart),
   }).map((sun) => (
     <fieldset key={sun.getTime()} className="grid grid-cols-7 divide-x">
       {eachDayOfInterval({ start: sun, end: endOfWeek(sun) }).map((date) => (
         <div
           key={date.getTime()}
-          className="space-y-3 border-neutral-300 p-4 py-3"
+          className="space-y-4 border-neutral-300 py-3 [&>*]:px-4"
         >
           {date.getMonth() == monthStart.getMonth() && (
             <>
               <DateFilter
-                isChecked={dateCheck[date.getDate()]}
-                date={date.getDate()}
+                checked={!!dateFilterStatus[+date]}
+                date={date}
                 handleChange={handleFilterChange}
               />
               <Agenda
@@ -100,35 +102,36 @@ export default function Calendar({
 }
 
 interface DateFilter {
-  isChecked: boolean;
-  date: number;
+  checked: boolean;
+  date: Date;
   handleChange: CalendarProp["handleFilterChange"];
 }
 
-function DateFilter({ isChecked, date, handleChange }: DateFilter) {
+function DateFilter({ checked, date, handleChange }: DateFilter) {
   return (
-    <label className="cursor-pointer hover:text-gray-400">
+    <label className="grid cursor-pointer justify-end hover:text-gray-400">
       <input
         type="checkbox"
         name={"date"}
-        value={date}
-        checked={isChecked}
+        value={+date}
+        checked={checked}
         className="hidden"
         onChange={(e) =>
           handleChange({
             type: "date",
-            filmNameOrMonthDate: date,
+            filmNameOrMonthDate: +date,
             checked: e.target.checked,
           })
         }
       />
-      <p
-        className={`whitespace-nowrap text-right leading-none ${
-          isChecked ? "no-underline" : "text-gray-400 line-through decoration-4"
-        }`}
+      <span
+        className={clsx(
+          "whitespace-nowrap leading-none",
+          checked || "text-gray-400 line-through decoration-4",
+        )}
       >
-        {date}
-      </p>
+        {date.getDate()}
+      </span>
     </label>
   );
 }

@@ -1,43 +1,37 @@
 "use client";
 
 import React from "react";
-import { Icon } from "@/components/icons";
+import { Icons } from "@/components/icons";
 import { useTheme } from "next-themes";
+import clsx from "clsx";
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const buttons = [
+    { theme: "system", icon: "monitor" },
+    { theme: "dark", icon: "moon" },
+    { theme: "light", icon: "sun" },
+  ] as { theme: string; icon: keyof typeof Icons }[];
+
   return (
-    <div className="flex border items-center bg-[#fafafa] shado dark:bg-[#111] dark:border-zinc-800 p-2 px-4 w- justify-between rounded-full">
-      <button
-        className={`mr-2 p-1 dark:text-zinc-500 text-zinc-700 ${
-          theme === "system"
-            ? "bg-white dark:bg-[#333] text-zinc-50 rounded-full shadow-xl"
-            : ""
-        }`}
-        onClick={() => setTheme("system")}
-      >
-        <Icon.monitor />
-      </button>
-      <button
-        className={`mr-2 p-1 dark:text-zinc-500 text-zinc-700 ${
-          theme === "dark"
-            ? "bg-white dark:bg-[#333] text-zinc-50 rounded-full shadow-xl"
-            : ""
-        }`}
-        onClick={() => setTheme("dark")}
-      >
-        <Icon.moon />
-      </button>
-      <button
-        className={`mr-2 p-1 dark:text-zinc-500 text-zinc-700 ${
-          theme === "light"
-            ? "bg-white dark:bg-[#333] text-zinc-700 rounded-full shadow-xl"
-            : ""
-        }`}
-        onClick={() => setTheme("light")}
-      >
-        <Icon.sun />
-      </button>
-    </div>
+    <fieldset className="flex justify-items-center gap-1 rounded-full bg-stone-200 px-2 py-1 dark:bg-neutral-600">
+      {buttons.map((button) => {
+        const Icon = Icons[button.icon];
+
+        return (
+          <button
+            key={button.theme}
+            className={clsx(
+              "px-2 py-1 text-stone-400",
+              theme == button.theme &&
+                "rounded-full bg-stone-50 text-stone-500 shadow dark:bg-neutral-700 dark:text-neutral-200",
+            )}
+            onClick={() => setTheme(button.theme)}
+          >
+            <Icon />
+          </button>
+        );
+      })}
+    </fieldset>
   );
 }

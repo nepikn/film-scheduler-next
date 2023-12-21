@@ -1,45 +1,46 @@
 import Film from "./film";
 import View from "./view";
-import { StatusConfig, FilterStatusConstructor } from "./definitions";
+import { StatusConfig, StatusConstructor } from "./definitions";
+import { eachDayOfInterval, endOfMonth, startOfMonth } from "date-fns";
+
+interface StatusByNameOrTime {
+  [k: string]: boolean | undefined;
+}
 
 export default class FilterStatus {
-  name: {
-    [k: Film["name"]]: boolean | undefined;
-  };
+  name = {} as StatusByNameOrTime;
   date = Object.fromEntries(
-    [...new Array(31)].map((_, i) => [i + 1, true]),
-    // todo: init date filter according to initial film data
-    // adjust <DateFilter /> argument
-  );
+    eachDayOfInterval({
+      start: startOfMonth(Film.interval.start),
+      end: endOfMonth(Film.interval.end),
+    }).map((date) => [+date, true]),
+  ) as StatusByNameOrTime;
 
-  constructor(prevStatus?: FilterStatusConstructor, config?: StatusConfig) {
-    if (prevStatus) {
-      this.name = { ...prevStatus.name };
-      if (prevStatus.date) {
-        this.date = { ...prevStatus.date };
-      }
+  constructor(prevStatus?: StatusConstructor, config?: StatusConfig) {
+    if (!prevStatus) return;
 
-      if (!config) return;
+    this.name = { ...(prevStatus.name ? prevStatus.name : this.name) };
+    this.date = { ...(prevStatus.date ? prevStatus.date : this.date) };
 
-      if ("status" in config) {
-        this[config.type] = config.status;
-      } else {
-        this[config.type][config.filmNameOrMonthDate] = config.checked;
-      }
-    } else {
-      this.name = { 燃冬: true, 霧中潛行: true };
+    if (!config) return;
+
+    if ("checked" in config) {
+      this[config.type][config.filmNameOrMonthDate] = config.checked;
+      return;
     }
+
+    this[config.type] = config.status;
   }
 
   getFilteredFilms() {
     return Film.instances.filter(
-      (film) => this.name[film.name] && this.date[film.time.date.getDate()],
+      (film) => this.name[film.name] && this.date[+film.time.date],
     );
   }
 
   getSuggestViews(/* removedIds: Set<View["id"]> , */ loopLimit = 5000) {
     const filteredFilms = this.getFilteredFilms();
-    if (!filteredFilms.length) return [];
+    if (!filteredFilms.length) return null;
 
     const groupByName: { [k: Film["name"]]: Film[] } = {};
     filteredFilms.forEach((film) => {
@@ -85,7 +86,7 @@ export default class FilterStatus {
 
       while (indexes[i] >= groups[i].length - 1) {
         if (i == 0 || loop++ >= loopLimit) {
-          return result;
+          return result.length ? result : null;
         }
 
         indexes[i--] = 0;

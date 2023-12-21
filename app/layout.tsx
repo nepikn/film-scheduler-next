@@ -2,14 +2,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Provider } from "@/components/provider";
 
-import localFont from "next/font/local";
-
-// const spaceMono = localFont({
-//   src: []
-// });
-
 export const metadata: Metadata = {
-  title: "台北金馬排程",
+  title: { template: "影展排程 - %s", default: "影展排程" },
   generator: "Next.js",
   // applicationName: "Kaminari",
   referrer: "origin-when-cross-origin",
@@ -33,7 +27,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://nepikn.vercel.app"),
   alternates: {},
   // openGraph: {
-  //   title: "台北金馬排程",
+  //   title: "金馬國際影展排程",
   //   description: "Next.js, TailwindCSS and shadcn-ui Starter Template",
   //   url: "https://kaminari.vercel.app",
   //   siteName: "Kaminari",
@@ -58,20 +52,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      // suppressHydrationWarning
-      className="bg-stone-100 text-gray-800 dark:bg-neutral-800 dark:text-neutral-200"
-    >
-      <body className={``}>
-        {/* <Provider attribute="class" defaultTheme="system" enableSystem> */}
-        {children}
-        {/* </Provider> */}
+    <html>
+      <body className="bg-stone-100 text-stone-900 dark:bg-neutral-800 dark:text-neutral-200 dark:selection:bg-blue-300">
+        <Provider attribute="class">{children}</Provider>
       </body>
     </html>
   );

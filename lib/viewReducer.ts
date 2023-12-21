@@ -2,15 +2,11 @@
 
 import { useReducer } from "react";
 import FilterStatus from "./filterStatus";
-import {
-  StatusConfig,
-  FilmConfig,
-  LocalState,
-  ViewConfig,
-} from "./definitions";
+import { StatusConfig, LocalState, ViewConfig } from "./definitions";
 import View from "./view";
 import Film from "./film";
 import { ViewState } from "./definitions";
+import { isWeekend, parseISO } from "date-fns";
 
 export default function useViewReducer() {
   return useReducer(reducer, null, getInitialState);
@@ -21,13 +17,19 @@ export function getInitialState(): ViewState {
     熱帶的甜蜜: "7b5cc6c1-0bdb-5107-8785-e5f3785417fe",
     莊園魅影: "7085eaf3-68d3-5684-8fb6-a5c730ab0d5c",
     漂流人生: "b522f98f-7a91-5ef2-af9e-28a430467c10",
+    "以此片預告一部不存在的電影：可笑的戰爭＼非常高達": undefined,
     "麗芙烏曼：幽徑綺思": undefined,
+    "影人講堂：陳英雄": undefined,
+    所有謊言的起源: undefined,
   };
-  const userViews = [new View({ joinIds: joinIds }), new View(), new View()];
+  const userViews = [new View({ joinIds }), new View(), new View()];
   const id = userViews[0].id;
   const status = new FilterStatus({
     name: Object.fromEntries(Object.keys(joinIds).map((key) => [key, true])),
   });
+
+  status.date[+parseISO("2023-11-14")] = false;
+  status.date[+parseISO("2023-11-15")] = false;
 
   return {
     viewId: id,
@@ -47,13 +49,17 @@ export function getInitialState(): ViewState {
 
 type Action =
   | { type: "localize"; localState: LocalState }
+  | { type: "selectWeekend" }
+  | { type: "selectWeekdayMorn" }
+  | { type: "resetDateFilter" }
   | { type: "changeFilmInput"; view: View; viewConfig: ViewConfig }
-  | { type: "reverseNameFilter" }
+  | { type: "allNameFilter" }
   | { type: "clearNameFilter" }
   | {
       type: "changeFilter";
       statusConfig: StatusConfig;
     }
+  | { type: "copyUserView"; views: View[] }
   | { type: "changeView"; nextView: View }
   | {
       type: "removeView";
@@ -63,8 +69,8 @@ type Action =
 
 function reducer(state: ViewState, action: Action): ViewState {
   const { viewId, userViewId, userViews, filterStatusGroup: group } = state;
-  const isUserViewGroup = viewId == userViewId;
-  const filterStatus = group[viewId];
+  const viewingSuggests = viewId != userViewId;
+  const filterStatus = group[userViewId];
 
   function generateGroup(
     targViewId: View["id"],
@@ -78,18 +84,61 @@ function reducer(state: ViewState, action: Action): ViewState {
   }
 
   switch (action.type) {
-    case "reverseNameFilter": {
-      if (!isUserViewGroup) {
+    case "selectWeekend": {
+      return {
+        ...state,
+        filterStatusGroup: generateGroup(
+          viewId,
+          new FilterStatus(filterStatus, {
+            type: "date",
+            status: Object.fromEntries(
+              Object.keys(filterStatus.date).map((time) => [
+                time,
+                isWeekend(+time),
+              ]),
+            ),
+          }),
+        ),
+      };
+    }
+
+    case "selectWeekdayMorn": {
+      return {
+        ...state,
+        filterStatusGroup: generateGroup(
+          viewId,
+          new FilterStatus(filterStatus, {
+            type: "date",
+            status: Object.fromEntries(
+              Object.keys(filterStatus.date).map((time) => [
+                time,
+                !isWeekend(+time),
+              ]),
+            ),
+          }),
+        ),
+      };
+    }
+
+    case "resetDateFilter": {
+      return {
+        ...state,
+        filterStatusGroup: generateGroup(
+          viewId,
+          new FilterStatus({ ...filterStatus, date: undefined }),
+        ),
+      };
+    }
+
+    case "allNameFilter": {
+      if (viewingSuggests) {
         return state;
       }
 
       const status = new FilterStatus(filterStatus, {
         type: "name",
         status: Object.fromEntries(
-          Array.from(Film.names).map((filmName) => [
-            filmName,
-            !filterStatus.name[filmName],
-          ]),
+          Array.from(Film.names).map((filmName) => [filmName, true]),
         ),
       });
 
@@ -113,8 +162,6 @@ function reducer(state: ViewState, action: Action): ViewState {
     }
 
     case "localize": {
-      console.log("localize %o", action.localState);
-
       const userViews = action.localState.userViews?.map(
         (construtor) =>
           new View({
@@ -132,7 +179,6 @@ function reducer(state: ViewState, action: Action): ViewState {
       const id = userViews[0].id;
 
       return {
-        ...state,
         viewId: id,
         userViewId: id,
         userViews: userViews,
@@ -140,38 +186,50 @@ function reducer(state: ViewState, action: Action): ViewState {
       };
     }
 
+    case "copyUserView":
     case "changeFilmInput": {
-      const newUserView = action.view.getConfigured(action.viewConfig);
+      const index = View.findIndex(userViews, userViewId);
+      const copying = action.type == "copyUserView";
+      const newView = copying
+        ? new View({
+            joinIds: View.find(action.views, viewId)?.joinIds,
+          })
+        : action.view.getConfigured(action.viewConfig);
+      const nextId = newView.id;
 
       return {
-        ...state,
-        viewId: newUserView.id,
-        userViewId: newUserView.id,
-        userViews: userViews.toSpliced(
-          isUserViewGroup
-            ? userViews.findIndex((v) => v.id == viewId)
-            : userViews.length,
-          1,
-          newUserView,
-        ),
-        filterStatusGroup: generateGroup(newUserView.id, filterStatus),
+        viewId: nextId,
+        userViewId: nextId,
+        userViews:
+          copying || viewingSuggests
+            ? userViews.toSpliced(index + 1, 0, newView)
+            : userViews.toSpliced(index, 1, newView),
+        filterStatusGroup: generateGroup(nextId, filterStatus),
       };
     }
 
     case "removeView": {
       const removedId = action.removedView.id;
-      const nextUserViewId = removedId == userViewId ? userViews[0].id : viewId;
-
-      return {
+      const nextState = {
         ...state,
-        viewId: nextUserViewId,
-        userViewId: nextUserViewId,
         userViews: userViews.filter((v) => v.id != removedId),
       };
+
+      if (removedId == userViewId) {
+        const index = View.findIndex(userViews, removedId);
+
+        nextState.viewId = nextState.userViewId = (
+          userViews[index + 1] ??
+          userViews[index - 1] ??
+          userViews[0]
+        ).id;
+      }
+
+      return nextState;
     }
 
     case "changeFilter": {
-      const id = isUserViewGroup ? viewId : userViewId;
+      const id = viewingSuggests ? userViewId : viewId;
 
       return {
         ...state,
@@ -184,7 +242,7 @@ function reducer(state: ViewState, action: Action): ViewState {
     }
 
     case "clearNameFilter": {
-      if (!isUserViewGroup) {
+      if (viewingSuggests) {
         return state;
       }
 

@@ -1,108 +1,163 @@
-import { Fragment } from "react";
 import View from "../../lib/view";
 import clsx from "clsx";
+import { Icons } from "../icons";
+import { Button } from "./button";
+import { Carousel } from "./Carousel";
 
 interface Nav {
-  handleViewChange: (k: View) => void;
-  handleViewRemove: (k: View) => void;
-  viewGroups: View[][];
-  curViewId: View["id"];
+  viewGroups: (View[] | null)[];
+  userViewId: View["id"];
+  viewId: View["id"];
+  handlers: { [k: string]: (view: View) => void };
 }
 
 export default function ViewNav({
-  handleViewChange,
-  handleViewRemove,
+  handlers,
   viewGroups,
-  curViewId,
+  userViewId,
+  viewId: curViewId,
 }: Nav) {
-  const titles = ["自\n訂", "生\n成"];
+  const configs = [
+    {
+      title: "自\n訂",
+      style: "flex",
+      component: UserGroup,
+    },
+    {
+      title: "生\n成",
+      style: "grid grid-flow-col items-center",
+      component: SuggestGroup,
+    },
+  ];
+
   return (
-    <nav className="flex overflow-x-scroll py-4">
-      {viewGroups.map((viewGroup, i) => {
-        const title = titles[i];
+    <nav className="grid grid-flow-col grid-cols-[auto_1fr] justify-items-start pb-2 pt-1">
+      {viewGroups.map((views, i) => {
+        const config = configs[i];
         return (
-          <Fragment key={title}>
-            <h3 className="whitespace-pre leading-none">{title}</h3>
-            <fieldset
-              // name={title}
-              className="flex items-stretch divide-x py-1"
-            >
-              {viewGroup.length ? (
-                viewGroup.map((view, j) => (
-                  <ViewSwitch
-                    key={view.id}
-                    handleViewChange={() => handleViewChange(view)}
-                    handleViewRemove={() => handleViewRemove(view)}
-                    isChecked={view.id == curViewId}
-                    isFirst={i == 0 && j == 0}
-                    isUserGroup={view.belongUserGroup}
-                    label={j}
-                  />
-                ))
-              ) : (
-                <span className="ml-2">（無）</span>
-              )}
-            </fieldset>
-          </Fragment>
+          <div key={config.title} className={config.style}>
+            <span className="whitespace-pre leading-none">{config.title}</span>
+            <config.component {...{ views, curViewId, userViewId, handlers }} />
+          </div>
         );
       })}
     </nav>
   );
 }
 
+interface Group {
+  views: View[] | null;
+  curViewId: string;
+  userViewId?: string;
+  handlers: {
+    [k: string]: (view: View) => void;
+  };
+}
+
+function UserGroup({ views, curViewId, userViewId, handlers }: Group) {
+  return (
+    <fieldset className="grid grid-flow-col divide-x py-1">
+      {views?.map((view, j) => (
+        <ViewSwitch
+          key={view.id}
+          label={j}
+          checked={view.id == curViewId}
+          showRemove={j != 0}
+          isCurrentUserView={view.id == userViewId}
+          handlers={Object.fromEntries(
+            Object.entries(handlers).map(([key, handler]) => [
+              key,
+              () => handler(view),
+            ]),
+          )}
+        />
+      ))}
+      <Button
+        key={"plus"}
+        variant={"icon"}
+        size={"icon"}
+        onClick={handlers.copy as () => void}
+        className={"w-14"}
+      >
+        <Icons.plus />
+      </Button>
+    </fieldset>
+  );
+}
+
+function SuggestGroup({ views, curViewId, handlers }: Group) {
+  if (!views) return <span className="ml-2">（無）</span>;
+
+  return (
+    <Carousel key={views[0].id}>
+      <>
+        {views.map((view, j) => (
+          <ViewSwitch
+            key={view.id}
+            label={j}
+            checked={view.id == curViewId}
+            showRemove={false}
+            isCurrentUserView={false}
+            handlers={Object.fromEntries(
+              Object.entries(handlers).map(([key, handler]) => [
+                key,
+                () => handler(view),
+              ]),
+            )}
+          />
+        ))}
+      </>
+    </Carousel>
+  );
+}
+
 interface ViewSwitch {
-  isFirst: boolean;
   label: number;
-  handleViewChange: () => void;
-  handleViewRemove: () => void;
-  isChecked: boolean;
-  isUserGroup: boolean;
+  checked: boolean;
+  showRemove: boolean;
+  isCurrentUserView: boolean;
+  handlers: { [k: string]: () => void };
 }
 
 function ViewSwitch({
-  isFirst,
   label,
-  handleViewChange,
-  handleViewRemove,
-  isChecked,
-  isUserGroup,
+  handlers,
+  checked,
+  showRemove,
+  isCurrentUserView,
 }: ViewSwitch) {
   return (
-    <fieldset className="group relative grid items-stretch">
-      <button
-        onClick={handleViewRemove}
+    <fieldset className="group relative grid w-14">
+      {showRemove && (
+        <Button
+          variant={"icon"}
+          size={"icon"}
+          onClick={handlers.remove}
+          className={clsx(
+            "absolute right-1 top-0 hidden w-4 group-hover:block",
+          )}
+        >
+          <Icons.cross />
+        </Button>
+      )}
+      <label
         className={clsx(
-          "absolute right-1 hidden w-4",
-          !isFirst && isUserGroup && "group-hover:block",
+          "grid w-full place-content-center font-bold",
+          isCurrentUserView || checked || "font-normal text-gray-400",
+          checked ||
+            "cursor-pointer hover:text-stone-900 dark:hover:text-neutral-200",
+          checked && "text-blue-500 dark:text-blue-300",
         )}
       >
-        <svg
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          ></path>
-        </svg>
-      </button>
-      <label className="grid w-14 cursor-pointer place-items-center text-center leading-none hover:text-gray-400 [&:has(:checked)]:cursor-default [&:has(:checked)]:font-bold [&:has(:checked)]:text-blue-300">
         <span>{label}</span>
         <input
           type="radio"
           name="view"
-          checked={isChecked}
+          checked={checked}
           className="hidden"
-          onChange={handleViewChange}
+          onChange={handlers.change}
         />
       </label>
     </fieldset>
   );
 }
-
-export function useViewGroup(name: string) {}

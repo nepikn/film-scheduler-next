@@ -1,4 +1,4 @@
-import { getSoldoutByFilm } from "@/public/film/golden-tp-soldout";
+import { getSoldoutByFilm } from "@/public/golden/2023-tp-soldout";
 import {
   add,
   areIntervalsOverlapping,
@@ -9,7 +9,7 @@ import {
   startOfDay,
 } from "date-fns";
 import { v5 } from "uuid";
-import filmData from "../public/film/film-golden-tp-id";
+import filmData from "../public/golden/2023-tp-id";
 
 type FormatKey = keyof Film["format"];
 interface Time extends Interval {
@@ -28,6 +28,21 @@ export default class Film {
     );
   }
   static names = new Set(this.instances.map((film) => film.name));
+  static interval = {
+    start: startOfDay(
+      this.instances
+        .map((film) => film.time.start)
+        .reduce(
+          (startTime, earliest) => Math.min(startTime, +earliest),
+          Infinity,
+        ),
+    ),
+    end: startOfDay(
+      this.instances
+        .map((film) => film.time.end)
+        .reduce((endTime, latest) => Math.max(endTime, +latest), -Infinity),
+    ),
+  } satisfies Interval;
 
   static getSoldoutStatus(name: string) {
     return this.instances

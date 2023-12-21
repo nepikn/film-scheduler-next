@@ -1,5 +1,10 @@
-import { SoldoutFilm } from "@/lib/definitions";
 import Film from "@/lib/film";
+
+interface SoldoutFilm {
+  name: string;
+  start: string;
+  venue: string;
+}
 
 export function getSoldoutByFilm(film: Film) {
   return !!soldoutFilms.find(

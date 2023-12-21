@@ -1,11 +1,10 @@
 import Film from "@/lib/film";
 import View from "@/lib/view";
-import clsx from "clsx";
 import { formatISO } from "date-fns";
 import * as ics from "ics";
 import { Button } from "./button";
 
-export default function IcsDownloadLink({
+export default function IcsDownloader({
   filteredFilms,
   view,
 }: {
@@ -16,13 +15,14 @@ export default function IcsDownloadLink({
   return (
     <Button
       size="sm"
-      className="grid h-full items-center dark:hover:bg-neutral-600 dark:hover:text-zinc-50"
-      variant="outline"
+      className="h-full rounded p-0"
+      variant="secondary"
       disabled={!joinedFilms.length}
     >
       <a
         download={"金馬.ics"}
-        href={joinedFilms.length ? getIcsLink(joinedFilms) : undefined}
+        href={getIcsLink(joinedFilms)}
+        className="grid h-full items-center p-2"
       >
         <span>下載 ics</span>
       </a>
@@ -38,6 +38,8 @@ const ADDRESS = {
 };
 
 function getIcsLink(films: Film[], format = { summary: "電影：%s" }) {
+  if (window == undefined) return undefined;
+
   const { error, value } = ics.createEvents(
     films.map((film) => {
       const [theater, screen] = film.venue.split(" ") as [

@@ -1,10 +1,10 @@
 "use client";
 
 import Calendar from "@/components/ui/Calendar";
-import IcsDownloadLink from "@/components/ui/IcsDownloadLink";
+import IcsDownloader from "@/components/ui/IcsDownloader";
 import NameFilter from "@/components/ui/NameFilter";
 import ViewNav from "@/components/ui/ViewNav";
-import Aside from "@/components/ui/aside";
+import { DateFilterAside, NameFilterAside } from "@/components/ui/aside";
 import type { LocalState, StatusConfig, ViewConfig } from "@/lib/definitions";
 import { useLocalEffect } from "@/lib/localforage";
 import View from "@/lib/view";
@@ -13,15 +13,19 @@ import { useCallback } from "react";
 
 export default function App() {
   const [state, dispatch] = useViewReducer();
-  const { viewId, userViews, filterStatusGroup } = state;
+  const { viewId, userViewId, userViews, filterStatusGroup } = state;
   // console.group("app");
-  // console.log("id %s group %o", viewId, filterStatusGroup);
+  // console.log(
+  //   "ids %o",
+  //   userViews.map((v) => v.id),
+  // );
   // console.groupEnd();
+  const viewingSuggests = viewId != userViewId;
   const filterStatus = filterStatusGroup[viewId];
   const suggestViews = filterStatus.getSuggestViews();
   const filteredFilms = filterStatus.getFilteredFilms();
-  const views = [...userViews, ...suggestViews];
-  const view = views.find((v) => v.id == viewId) ?? new View();
+  const views = [...userViews, ...(suggestViews ?? [])];
+  const view = View.find(views, viewId) ?? new View();
 
   useLocalEffect(
     state,
@@ -32,29 +36,43 @@ export default function App() {
   );
 
   return (
-    <main className="m-auto grid gap-8 px-16 py-8">
+    <main className="m-auto grid gap-8">
+      <DateFilterAside
+        viewingSuggests={viewingSuggests}
+        handlers={{
+          selectWeekend: () => dispatch({ type: "selectWeekend" }),
+          selectWeekdayMorn: () => dispatch({ type: "selectWeekdayMorn" }),
+          reset: () => dispatch({ type: "resetDateFilter" }),
+        }}
+      />
       <div className="grid gap-4">
-        <div className="grid gap-2">
+        <div className="grid gap-4">
           <NameFilter
             status={filterStatus.name}
             handleChange={handleFilterChange}
           />
           <div className="grid grid-cols-[1fr_auto] items-center gap-2">
             <ViewNav
-              handleViewChange={handleViewChange}
-              handleViewRemove={handleViewRemove}
+              viewId={view.id}
+              userViewId={userViewId}
               viewGroups={[userViews, suggestViews]}
-              curViewId={view.id}
+              handlers={{
+                copy: handleViewCopy,
+                change: handleViewChange,
+                remove: handleViewRemove,
+              }}
             />
-            <IcsDownloadLink {...{ filteredFilms, view }} />
+            <IcsDownloader {...{ filteredFilms, view }} />
           </div>
         </div>
         <Calendar
-          view={view}
-          dateCheck={filterStatus.date}
-          filteredFilms={filteredFilms}
-          handleFilterChange={handleFilterChange}
-          handleJoinChange={handleFilmInputChange}
+          {...{
+            view,
+            filteredFilms,
+            handleFilterChange,
+            dateFilterStatus: filterStatus.date,
+            handleJoinChange: handleFilmInputChange,
+          }}
         />
       </div>
       {/* <Table
@@ -62,13 +80,19 @@ export default function App() {
         filteredFilms={filteredFilms}
         handleChange={handleCalendarTableChange}
       /> */}
-      <Aside
-        userView={view.belongUserGroup}
-        handleReverse={() => dispatch({ type: "reverseNameFilter" })}
-        handleClear={() => dispatch({ type: "clearNameFilter" })}
+      <NameFilterAside
+        viewingSuggests={viewingSuggests}
+        handlers={{
+          all: () => dispatch({ type: "allNameFilter" }),
+          clear: () => dispatch({ type: "clearNameFilter" }),
+        }}
       />
     </main>
   );
+
+  function handleViewCopy() {
+    dispatch({ type: "copyUserView", views });
+  }
 
   function handleViewChange(nextView: View) {
     dispatch({ type: "changeView", nextView });
