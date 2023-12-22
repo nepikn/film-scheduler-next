@@ -83,7 +83,7 @@ export default function Aside({ buttons, pos }: Aside) {
             variant={"outline"}
             onClick={handleClick}
             disabled={disabled}
-            className={clsx("p-2", style.button[pos])}
+            className={clsx("p-2 text-xl", style.button[pos])}
           >
             <div className="whitespace-pre leading-tight">
               {name.split("").join("\n")}

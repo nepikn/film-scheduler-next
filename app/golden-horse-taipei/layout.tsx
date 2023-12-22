@@ -4,22 +4,27 @@ import { Metadata } from "next";
 import { Noto_Serif_TC } from "next/font/google";
 
 const noto = Noto_Serif_TC({
-  weight: "700",
+  weight: ["600", "700"],
   preload: false,
 });
 
 export const metadata = {
-  title: "台北金馬影展",
+  title: "2023 台北金馬影展",
 } satisfies Metadata;
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const [year, fest] = metadata.title.split(" ");
   return (
     <div className="mx-16 min-w-[768px]">
-      <div className="grid gap-8 py-8">
+      <div className="grid gap-8 py-10">
         <header className="flex justify-between">
-          <h1 className={clsx(noto.className, "text-3xl")}>{metadata.title}</h1>
+          <h1 className="text-4xl font-bold">影展排程</h1>
           <ThemeToggle />
         </header>
+        <h2 className={clsx("text-2xl")}>
+          <span className="font-serif">{year}</span>&nbsp;
+          <span className={clsx(noto.className, "font-semibold")}>{fest}</span>
+        </h2>
         {children}
       </div>
       <footer className="p-6 text-center font-serif">

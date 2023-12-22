@@ -18,6 +18,7 @@ const config: Config = {
       },
     },
     extend: {
+      colors: { secondary: "#78716c" },
       borderColor: {
         ...defaultTheme.borderColor,
         DEFAULT: "rgb(115 115 115)",

@@ -59,7 +59,7 @@ export default function RootLayout({
 }) {
   return (
     <html>
-      <body className="bg-stone-100 text-stone-900 dark:bg-neutral-800 dark:text-neutral-200 dark:selection:bg-blue-300">
+      <body className="bg-stone-100 text-[15px] text-stone-900 dark:bg-neutral-800 dark:text-neutral-200 dark:selection:bg-blue-300">
         <Provider attribute="class">{children}</Provider>
       </body>
     </html>
