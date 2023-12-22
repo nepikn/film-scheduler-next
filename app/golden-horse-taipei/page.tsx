@@ -9,7 +9,6 @@ import type { LocalState, StatusConfig, ViewConfig } from "@/lib/definitions";
 import { useLocalView } from "@/lib/localforage";
 import View from "@/lib/view";
 import useViewReducer from "@/lib/viewReducer";
-import { usePathname } from "next/navigation";
 import { useCallback } from "react";
 
 export default function App() {
@@ -28,7 +27,7 @@ export default function App() {
   const views = [...userViews, ...(suggestViews ?? [])];
   const view = View.find(views, viewId) ?? new View();
 
-  useLocalView(
+  const handleLocalClear = useLocalView(
     state,
     useCallback(
       (localState: LocalState) => dispatch({ type: "localize", localState }),
@@ -86,6 +85,7 @@ export default function App() {
         handlers={{
           all: () => dispatch({ type: "allNameFilter" }),
           clear: () => dispatch({ type: "clearNameFilter" }),
+          localClear: handleLocalClear,
         }}
       />
     </main>

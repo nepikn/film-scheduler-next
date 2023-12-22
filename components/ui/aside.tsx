@@ -1,4 +1,3 @@
-import { clearLocalConstructor } from "@/lib/localforage";
 import clsx from "clsx";
 import { Button } from "./button";
 
@@ -39,7 +38,7 @@ export function DateFilterAside({ viewingSuggests, handlers }: AsideProp) {
 }
 
 export function NameFilterAside({ viewingSuggests, handlers }: AsideProp) {
-  const { all, clear } = handlers;
+  const { all, clear, localClear } = handlers;
   const disabled = viewingSuggests;
   const buttons: Button[] = [
     {
@@ -55,7 +54,7 @@ export function NameFilterAside({ viewingSuggests, handlers }: AsideProp) {
     {
       name: "回到預設狀態",
       handleClick: () => {
-        clearLocalConstructor();
+        localClear();
         location.reload();
       },
     },

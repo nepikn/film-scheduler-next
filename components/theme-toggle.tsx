@@ -1,14 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
 import { Icons } from "@/components/icons";
 import { useTheme } from "next-themes";
 import clsx from "clsx";
-import {
-  localforageGet,
-  localforageRemove,
-  localforageSet,
-} from "@/lib/localforage";
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -17,16 +11,6 @@ export default function ThemeToggle() {
     { theme: "dark", icon: "moon" },
     { theme: "light", icon: "sun" },
   ] as { theme: string; icon: keyof typeof Icons }[];
-  const storeKey = "theme";
-
-  // useEffect(() => {
-  //   localforageGet<string>(storeKey).then((localTheme) => {
-  //     if (localTheme != null) {
-  //       setTheme(localTheme);
-  //     }
-  //   });
-  //   // localforageRemove(storeKey);
-  // }, []);
 
   return (
     <fieldset className="flex justify-items-center gap-1 rounded-full bg-stone-200 px-2 py-1 dark:bg-neutral-600">
@@ -43,7 +27,6 @@ export default function ThemeToggle() {
             )}
             onClick={() => {
               setTheme(buttonTheme);
-              // localforageSet(storeKey, buttonTheme);
             }}
           >
             <Icon />
