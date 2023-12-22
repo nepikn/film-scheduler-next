@@ -2,33 +2,36 @@ import localforage from "localforage";
 import type { LocalState, ViewState } from "./definitions";
 import { useEffect } from "react";
 
-export function useLocalEffect(
+const storeKey = "localConfig";
+export function useLocalView(
   state: ViewState,
-  localizer: (x: LocalState) => void,
+  handleLocalize: (x: LocalState) => void,
 ) {
   useEffect(() => {
-    getLocalConstructor().then((localState) => {
+    // localforage.clear();
+    localforageGet<LocalState>(storeKey).then((localState) => {
       if (localState) {
-        localizer(localState);
+        handleLocalize(localState);
       }
     });
-  }, [localizer]);
+  }, [handleLocalize]);
 
   useEffect(() => {
-    setLocalConstructor(state);
+    localforageSet(storeKey, state);
   }, [state]);
 }
 
-const key = "localConfig";
-async function getLocalConstructor() {
-  const val = await localforage.getItem<LocalState>(key);
+const store = localforage.createInstance({ name: location.pathname });
+export async function localforageGet<T>(key: string) {
+  const val = await store.getItem<T>(key);
   // console.log("get %o", val);
   return val;
 }
-async function setLocalConstructor(state: ViewState) {
-  await localforage.setItem(key, state);
-  // console.log("set %o", val);
+export async function localforageSet(key: string, val: any) {
+  await store.setItem(key, val);
+  // console.log("set %o", state);
 }
-export function clearLocalConstructor() {
-  localforage.removeItem(key);
+export function localforageRemove(key: string) {
+  store.removeItem(key);
 }
+export const clearLocalConstructor = localforageRemove.bind(null, storeKey);
