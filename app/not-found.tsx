@@ -14,7 +14,7 @@ export default function NotFound() {
             href="/golden-horse-taipei"
             className="pb-1 text-zinc-100 dark:text-zinc-800"
           >
-            Take me home!
+            Home
           </Link>{" "}
         </Button>
       </div>

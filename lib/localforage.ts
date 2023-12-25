@@ -1,34 +1,54 @@
 import localforage from "localforage";
 import type { LocalState, ViewState } from "./definitions";
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
-export function useLocalEffect(
+const storeKey = "localConfig";
+export function useLocalView(
   state: ViewState,
-  localizer: (x: LocalState) => void,
+  handleLocalize: (x: LocalState) => void,
 ) {
+  const store = localforage.createInstance({ name: usePathname() });
+
   useEffect(() => {
-    getLocalConstructor().then((localState) => {
+    // localforage.clear();
+    store.getItem<LocalState>(storeKey).then((localState) => {
+      // localforageGet<LocalState>(storeKey).then((localState) => {
       if (localState) {
-        localizer(localState);
+        handleLocalize(localState);
       }
     });
-  }, [localizer]);
+  }, []);
 
   useEffect(() => {
-    setLocalConstructor(state);
+    store.setItem(storeKey, state);
+    // localforageSet(storeKey, state);
   }, [state]);
+
+  return () => store.removeItem(storeKey);
 }
 
-const key = "localConfig";
-async function getLocalConstructor() {
-  const val = await localforage.getItem<LocalState>(key);
-  // console.log("get %o", val);
-  return val;
-}
-async function setLocalConstructor(state: ViewState) {
-  await localforage.setItem(key, state);
-  // console.log("set %o", val);
-}
-export function clearLocalConstructor() {
-  localforage.removeItem(key);
-}
+// const store = localforage.createInstance({ name: location.pathname });
+// const store = getStore();
+// export async function localforageGet<T>(key: string) {
+//   const val = await store.getItem<T>(key);
+//   // console.log("get %o", val);
+//   return val;
+// }
+// export async function localforageSet(key: string, val: any) {
+//   await store.setItem(key, val);
+//   // console.log("set %o", state);
+// }
+// export function localforageRemove(key: string) {
+//   store.removeItem(key);
+// }
+// export const clearLocalConstructor = localforageRemove.bind(null, storeKey);
+
+// function getStore() {
+//   "use client";
+//   // const pathname = __dirname == "/" ? location.pathname : __dirname;
+//   // console.log(pathname);
+
+//   // const pathname = usePathname();
+//   return localforage.createInstance({ name: location.pathname });
+// }

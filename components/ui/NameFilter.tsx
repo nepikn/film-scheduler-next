@@ -12,20 +12,20 @@ export default function NameFilter({ status, handleChange }: NameFilter) {
   return (
     <fieldset className="flex flex-wrap gap-x-2">
       {Array.from(Film.names).map((name) => {
-        const isCheck = !!status[name];
+        const checked = !!status[name];
         return (
           <label
             key={name}
-            className={`flex cursor-pointer gap-1 hover:text-gray-500 dark:hover:text-gray-300 ${
-              isCheck ? "font-medium" : "text-gray-400"
+            className={`flex cursor-pointer gap-1 text-xl hover:text-gray-500 dark:hover:text-gray-300 ${
+              checked ? "font-medium" : "text-gray-400"
             }`}
           >
             <input
               type="checkbox"
               name={"name"}
               defaultValue={name}
-              checked={isCheck}
-              className="cursor-pointer"
+              checked={checked}
+              className="accent-secondary cursor-pointer"
               onChange={(e) =>
                 handleChange({
                   type: "name",

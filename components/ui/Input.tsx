@@ -1,9 +1,7 @@
 import React from "react";
 import Film from "../../lib/film";
-import View from "../../lib/view";
-import { FilmPropKey } from "@/lib/definitions";
-import clsx from "clsx";
-import { FilmConfig } from "@/lib/definitions";
+import { FilmConfig, FilmPropKey } from "@/lib/definitions";
+import { cn } from "@/lib/utils";
 
 interface FilmInputProp {
   prop: FilmPropKey;
@@ -40,7 +38,10 @@ export default function FilmInput({
     defaultValue: prop != "join" && prop != "name" ? value : undefined,
     // value=name != "join" ? film[name] : undefined,
     name: prop,
-    className: clsx("cursor-pointer disabled:cursor-default", className),
+    className: cn(
+      "accent-secondary cursor-pointer disabled:cursor-default",
+      className,
+    ),
   };
 
   if (prop == "join") {

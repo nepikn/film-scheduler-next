@@ -6,7 +6,7 @@ import NameFilter from "@/components/ui/NameFilter";
 import ViewNav from "@/components/ui/ViewNav";
 import { DateFilterAside, NameFilterAside } from "@/components/ui/aside";
 import type { LocalState, StatusConfig, ViewConfig } from "@/lib/definitions";
-import { useLocalEffect } from "@/lib/localforage";
+import { useLocalView } from "@/lib/localforage";
 import View from "@/lib/view";
 import useViewReducer from "@/lib/viewReducer";
 import { useCallback } from "react";
@@ -27,7 +27,7 @@ export default function App() {
   const views = [...userViews, ...(suggestViews ?? [])];
   const view = View.find(views, viewId) ?? new View();
 
-  useLocalEffect(
+  const handleLocalClear = useLocalView(
     state,
     useCallback(
       (localState: LocalState) => dispatch({ type: "localize", localState }),
@@ -85,6 +85,7 @@ export default function App() {
         handlers={{
           all: () => dispatch({ type: "allNameFilter" }),
           clear: () => dispatch({ type: "clearNameFilter" }),
+          localClear: handleLocalClear,
         }}
       />
     </main>

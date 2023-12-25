@@ -52,7 +52,7 @@ export default function Calendar({
       {eachDayOfInterval({ start: sun, end: endOfWeek(sun) }).map((date) => (
         <div
           key={date.getTime()}
-          className="space-y-4 border-neutral-300 py-3 [&>*]:px-4"
+          className="space-y-4 border-neutral-300 dark:border-neutral-700 py-3 [&>*]:px-4"
         >
           {date.getMonth() == monthStart.getMonth() && (
             <>
@@ -149,9 +149,9 @@ function Agenda({
   return (
     <div className="max-h-48 space-y-2 overflow-auto pb-1 text-right">
       {films.map((film, i) => {
-        const pClass = clsx("leading-none");
+        const pStyle = "leading-none";
         const checked = filterStatus[i];
-        const overlapSiblingAndBothChecked = () =>
+        const warning =
           checked &&
           [-1, 1].some((offset) => {
             const targFilm = films[i + offset];
@@ -169,23 +169,25 @@ function Agenda({
               "grid cursor-pointer grid-cols-[1fr_auto] gap-x-2 gap-y-1 hover:text-gray-500 dark:hover:text-gray-300 [&:has(:disabled)]:cursor-default",
               film.soldout && "line-through decoration-4",
               (film.soldout || view.getSkipStatus(film)) && "text-gray-400",
-              overlapSiblingAndBothChecked() &&
-                "text-rose-400 dark:hover:text-rose-200",
+              warning && "text-orange-700 dark:text-red-300",
             )}
           >
-            <p className={clsx("font-medium", pClass)}>{film.name}</p>
+            <p className={clsx(pStyle, "text-xl font-medium")}>{film.name}</p>
             <FilmInput
               prop="join"
               // val={view.getChecked(film)}
               // value={film['join']}
               // view={view}
               checked={checked}
-              className={"row-span-2"}
+              className={clsx(
+                "row-span-2",
+                warning && "accent-orange-800 dark:accent-red-300",
+              )}
               handleChange={(filmConfig: FilmConfig) =>
                 handleJoinChange({ film, filmConfig })
               }
             />
-            <p className={pClass}>{"" + film.time}</p>
+            <p className={pStyle}>{"" + film.time}</p>
           </label>
         );
       })}
