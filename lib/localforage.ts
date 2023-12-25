@@ -18,7 +18,7 @@ export function useLocalView(
         handleLocalize(localState);
       }
     });
-  }, [handleLocalize]);
+  }, []);
 
   useEffect(() => {
     store.setItem(storeKey, state);

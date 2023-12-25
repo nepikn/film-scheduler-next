@@ -21,7 +21,7 @@ const config: Config = {
       colors: { secondary: "#78716c" },
       borderColor: {
         ...defaultTheme.borderColor,
-        DEFAULT: "rgb(115 115 115)",
+        DEFAULT: "#737373",
       },
       keyframes: {
         "accordion-down": {

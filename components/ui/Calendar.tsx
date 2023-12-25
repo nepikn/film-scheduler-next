@@ -52,7 +52,7 @@ export default function Calendar({
       {eachDayOfInterval({ start: sun, end: endOfWeek(sun) }).map((date) => (
         <div
           key={date.getTime()}
-          className="space-y-4 border-neutral-300 py-3 [&>*]:px-4"
+          className="space-y-4 border-neutral-300 dark:border-neutral-700 py-3 [&>*]:px-4"
         >
           {date.getMonth() == monthStart.getMonth() && (
             <>

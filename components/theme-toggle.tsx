@@ -22,8 +22,8 @@ export default function ThemeToggle() {
             key={buttonTheme}
             className={clsx(
               "px-2 py-1 text-stone-400",
-              (theme ?? "system") == buttonTheme &&
-                "text-secondary rounded-full bg-stone-50 shadow dark:bg-neutral-700 dark:text-neutral-200",
+              theme == buttonTheme &&
+                "rounded-full bg-stone-50 text-secondary shadow dark:bg-neutral-700 dark:text-neutral-200",
             )}
             onClick={() => {
               setTheme(buttonTheme);

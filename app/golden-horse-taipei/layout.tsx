@@ -18,7 +18,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="mx-16 min-w-[768px]">
       <div className="grid gap-8 py-10">
         <header className="flex justify-between">
-          <h1 className="text-4xl font-bold">影展排程</h1>
+          <h1 className={clsx(noto.className, "text-4xl font-bold")}>
+            影展排程
+          </h1>
           <ThemeToggle />
         </header>
         <h2 className={clsx("text-2xl")}>
