@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Provider } from "@/components/provider";
 
 export const metadata: Metadata = {
-  title: { template: "影展排程 - %s", default: "影展排程" },
+  title: { template: "觀影排程 - %s", default: "觀影排程" },
   generator: "Next.js",
   // applicationName: "Kaminari",
   referrer: "origin-when-cross-origin",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://nepikn.vercel.app"),
   alternates: {},
   // openGraph: {
-  //   title: "金馬國際影展排程",
+  //   title: "金馬國際觀影排程",
   //   description: "Next.js, TailwindCSS and shadcn-ui Starter Template",
   //   url: "https://kaminari.vercel.app",
   //   siteName: "Kaminari",
